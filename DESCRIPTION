@@ -10,7 +10,7 @@ Imports:
     grDevices,
     rlist
 Suggests:
-    beeswarm
+    beeswarm, IRanges
 License: GPL-2
 LazyData: true
 RoxygenNote: 5.0.1

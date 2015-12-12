@@ -89,7 +89,7 @@ plotgroups.beeswarm <- function(data, stats, colors, ylim, features, barwidth, p
     if (length(dots) > 0)
         pars <- list.merge(pars, dots)
     
-    do.call(beeswarm::beeswarm, list.merge(pars, list(x=data, corralWidth=barwidth, add=TRUE, col=rgb(t(col2rgb(colors)), alpha=palpha*255, maxColorValue=255), yaxs='i', xaxt='n')))
+    do.call(beeswarm::beeswarm, list.merge(pars, list(x=data, corralWidth=barwidth, add=TRUE, col=adjustcolor(colors, alpha.f=palpha), yaxs='i', xaxt='n')))
     
     bars <- threeparamsstats(stats, features)
     
@@ -128,7 +128,9 @@ plotgroups.barplot <- function(data, stats, colors, ylim, features, barwidth, wh
     }
 }
 
-#' Plot several groups of repeated observations, e.g. abundance/half-life of several
+#' Plot several groups of repeated observations.
+#'
+#' Plot serveral groups of repeated observations, e.g. abundance/half-life of several
 #' proteins each observed in several cell lines in several replicates. Observations can be grouped
 #' either by protein (in which case cell lines will be annotated as X axis labels
 #' and proteins above the plot) or by cell line.
@@ -139,6 +141,7 @@ plotgroups.barplot <- function(data, stats, colors, ylim, features, barwidth, wh
 #' @param legend.text Character vector of group names
 #' @param legend.col Colors for group annotations. Defaults to plotting colors
 #' @param legend.pars Parameters for group annotation. Will be passed to \code{\link[base]{text}}
+#' @param legend.lwd Line width for grouping annotations. Defaults to \code{par("lwd")}
 #' @param names.split Character by which to split the \code{names}. Only useful in combination with
 #'        \code{names.italicize} or \code{names.style='combinatorial'}
 #' @param names.italicize If a part of a \code{name} is to be written in italic text, the part is
@@ -159,7 +162,6 @@ plotgroups.barplot <- function(data, stats, colors, ylim, features, barwidth, wh
 #' @param names.margin Spacing between the bottom edge of the plot and the annotation, in inches
 #' @param names.rotate Only used when \code{names.style='plain'}. Degrees by which to rotate the
 #'        annotation strings.
-#' @param lwd.legend Line width for grouping annotations. Defaults to \code{par("lwd")}
 #' @param features Which features of the sample distributions to plot. Availability of features
 #'        depends on \code{plot.fun}
 #' @param cex.xlab Character expansion factor for X axis annotation
@@ -172,17 +174,53 @@ plotgroups.barplot <- function(data, stats, colors, ylim, features, barwidth, wh
 #' @param barwidth Width of the individual bars/boxes etc. as fraction of 1
 #' @param main Main title
 #' @param ylab Y axis label
+#' @param signif.test List of 2-element integer vectors giving the elements of \code{data} to be
+#'        tested for significant differences.
+#' @param signif.test.fun Function to perform the significance testing. Must accept 2 vectors and
+#'        return a list containing at least the element \code{p.value}
+#' @param signif.test.text Function accepting a p-value and returning a formatted string to be used
+#'        for plotting or \code{NULL} if this p-value is not to be plotted (e.g. if it is not
+#'        significant)
+#' @param signif.test.lwd Line width for p-value annotations.
+#' @param signif.test.pars Parameters for group annotation. Will be passed to \code{\link[base]{text}}
+#' @param extrafun Additional function to call after plotting, e.g. to add addtional elements
+#'        to the plot
 #' @param ... Additional parameters passed to \code{\link[base]{par}}
 #' @examples
 #' data <- list()
 #' for (i in 1:14) data[[i]] <- rnorm(50, i, 0.5)
-#' names <- rep(c('gene1', 'gene2', 'gene3', 'gene1 gene2', 'gene1 gene3', 'gene2 gene3', 'gene1 gene2 gene3'), times=2)
+#' names <- rep(c('gene1', 'gene2', 'gene3', 'gene1 gene2', 'gene1 gene3', 'gene2 gene3', 'gene1 gene2 gene3'),
+#'      times=2)
 #' colors <- rep(c("green", "blue"), each=7)
 #' legend.text <- c("protein1", "protein2")
-#' plotgroups(data, names, colors, legend.text, plot.fun=plotgroups.beeswarm, features=c('mean', 'sd'))
-#' plotgroups(data, names, colors, legend.text, plot.fun=plotgroups.beeswarm, features=c('mean', 'sd'), names.style='combinatorial', names.split=" ", names.pch='Δ', plot.fun.pars=list(palpha=0.5, bxpcols="black"))
-#'plotgroups(data, names, colors, legend.text, names.style='combinatorial', names.split=" ", names.pch='Δ')
-#' plotgroups(data, names, colors, legend.text, names.style='combinatorial', names.split=" ", names.pch=19, main="test", plot.fun=plotgroups.barplot, features=c("mean", "sd"), plot.fun.pars=list(whiskerswidth=0.6))
+#' plotgroups(data, names, colors, legend.text,
+#'            plot.fun=plotgroups.beeswarm, features=c('mean', 'sd'))
+#' plotgroups(data, names, colors, legend.text,
+#'            plot.fun=plotgroups.beeswarm, features=c('mean', 'sd'),
+#'            names.style='combinatorial', names.split=" ", names.pch='\u0394',
+#'            plot.fun.pars=list(palpha=0.5, bxpcols="black"))
+#' plotgroups(data, names, colors, legend.text,
+#'            names.style='combinatorial', names.split=" ", names.pch='\u0394')
+#' plotgroups(data, names, colors, legend.text,
+#'            names.style='combinatorial', names.split=" ", names.pch=19,
+#'            main="test", plot.fun=plotgroups.barplot, features=c("mean", "sd"),
+#'            plot.fun.pars=list(whiskerswidth=0.6))
+#' ## significance testing
+#' plotgroups(data, names, colors, legend.text,names.style='combinatorial',
+#'            names.split=" ", names.pch='\u0394',
+#'            signif.test=list(c(1,3), c(2,5), c(5,8), c(3,10)))
+#' plotgroups(data, names, colors, legend.text,names.style='combinatorial',
+#'            names.split=" ", names.pch='\u0394',
+#'            signif.test=list(c(1,3), c(2,5), c(5,8), c(3,10)), signif.test.text=function(p) {
+#'                      if (p < 0.001) {
+#'                          return('***')
+#'                      } else if (p < 0.01) {
+#'                          return('**')
+#'                      } else if (p < 0.05) {
+#'                          return('*')
+#'                      } else {
+#'                          return(NULL)
+#'                      }})
 #' @export
 #' @importFrom rlist list.merge
 plotgroups <- function(
@@ -192,6 +230,7 @@ plotgroups <- function(
                         legend.text=NULL,
                         legend.col=NULL,
                         legend.pars=list(font=2),
+                        legend.lwd=NULL,
                         names.split=NULL,
                         names.italicize=NULL,
                         names.style=c("plain", "combinatorial"),
@@ -200,7 +239,6 @@ plotgroups <- function(
                         names.pch.adj=0.5,
                         names.margin=0.5,
                         names.rotate=NULL,
-                        lwd.legend=NULL,
                         features=c("median", "box", "iqr", "mean", "sd", "sem"),
                         cex.xlab=1,
                         ylim=NULL,
@@ -209,7 +247,15 @@ plotgroups <- function(
                         plot.fun.pars=list(),
                         barwidth=0.8,
                         main=NULL,
-                        ylab=deparse(substitute(data)), ...)
+                        ylab=deparse(substitute(data)),
+                        signif.test=NULL,
+                        signif.test.fun=t.test,
+                        signif.test.text=function(p)paste0("p=", formatC(p, digits=3, format="g")),
+                        signif.test.col="black",
+                        signif.test.lwd=legend.lwd,
+                        signif.test.pars=legend.pars,
+                        extrafun=NULL,
+                        ...)
 {
     names.style <- match.arg(names.style)
     features <- match.arg(features, several.ok=TRUE)
@@ -255,8 +301,8 @@ plotgroups <- function(
     do.call(par, pars)
     plot.new()
     lwd.base <- par("lwd")
-    if (is.null(lwd.legend))
-        lwd.legend <- lwd.base
+    if (is.null(legend.lwd))
+        legend.lwd <- lwd.base
         
     if (names.style=="combinatorial") {
         if (is.null(names.rotate))
@@ -309,13 +355,60 @@ plotgroups <- function(
     if (is.null(colors))
         colors <- "grey"
 
+    # can't use grconvertY here because plot.window has not been called yet, have
+    # to do the conversion manually
+    legendmarginfactor <- (ylim[2] - ylim[1]) / par("pin")[2] * 1.8
+    lineheight <- strheight("\n", units="inches") * legendmarginfactor
     if (is.null(legendmargin)) {
-        legendmargin <- max(strheight(legend.text, units="inches"))
-        legendmargin <- legendmargin * (ylim[2] - ylim[1]) / par("pin")[2] * 1.8
+        legendmargin <- max(strheight(legend.text, units="inches")) * legendmarginfactor
+        legendbase <- ylim[2]
     }
-    plot.window(xlim=c(0.5, length(data) + 0.5), ylim=c(ylim[1], ylim[2] + legendmargin), xaxs='i', yaxs='i')
+    signifmargin <- 0
+    if (!is.null(signif.test)) {
+        if (!requireNamespace("IRanges", quietly = TRUE))
+            stop("Please install the IRanges package if significance testing is to be performed.")
+        intervals.start <- sapply(signif.test, function(x)x[1])
+        intervals.stop <- sapply(signif.test, function(x)x[2])
+        intervals.order <- order(intervals.start, intervals.stop)
+        signif.test <- signif.test[intervals.order]
+        query <- IRanges::IRanges(intervals.start[intervals.order], intervals.stop[intervals.order])
+        signifoverlaps <- S4Vectors::as.matrix(IRanges::findOverlaps(query, minoverlap=2))
+        signifoverlaps <- signifoverlaps[which(signifoverlaps[,1] != signifoverlaps[,2]),]
+        
+        signifoverlaps <- t(apply(signifoverlaps, 1, function(x)c(min(x),max(x))))
+        signifoverlaps <- signifoverlaps[!duplicated(signifoverlaps),]
+        
+        maxsignifoverlaps <- max(rle(signifoverlaps[,1])$length)
+        signifmargin <- maxsignifoverlaps * lineheight
+        signifbase <- legendbase
+        legendbase <- signifbase + signifmargin
+        
+        if (maxsignifoverlaps == 0) {
+            signiflines <- rep(0, length(signif.test))
+        } else {
+            signiflines <- rep(-1, length(signif.test))
+            currline <- 0
+            while (currline <= maxsignifoverlaps) {
+                i <- which(signiflines == -1)[1]
+                while (i <= length(signif.test)) {
+                    signiflines[i] <- currline
+                    overlaps <- which(signifoverlaps[,1] == i)
+                    if (length(overlaps) > 0) {
+                        i <- max(signifoverlaps[overlaps,]) + 1
+                    } else {
+                        i <- i + 1
+                    }
+                }
+                currline <- currline + 1
+            }
+        }
+    }
+    
+    plot.window(xlim=c(0.5, length(data) + 0.5), ylim=c(ylim[1], ylim[2] + legendmargin + signifmargin + 0.1 * lineheight), xaxs='i', yaxs='i')
     
     do.call(plot.fun, c(list(data=data, stats=stats, colors=colors, features=features, barwidth=barwidth), plot.fun.pars))
+    if (!is.null(extrafun))
+        extrafun(data, stats, colors, features, barwidth)
     axis(2, ...)
     title(main=main, ylab=ylab)
     box(lwd=par("lwd"))
@@ -329,10 +422,26 @@ plotgroups <- function(
         } else {
             cols <- legend.col
         }
-        segments(segs.begin, ylim[2], segs.end, ylim[2], lwd=lwd.legend * lwd.base, col=cols, lend="butt")
+        segments(segs.begin, legendbase, segs.end, legendbase, lwd=legend.lwd, col=cols, lend="butt")
 
         mids <- (segs.end - segs.begin) / 2 + segs.begin
-        do.call(text, c(list(x=mids, y=ylim[2] + 0.3 * legendmargin, labels=legend.text, adj=c(0.5, 0), col=cols), legend.pars))
+        do.call(text, c(list(x=mids, y=legendbase + 0.3 * legendmargin, labels=legend.text, adj=c(0.5, 0), col=cols), legend.pars))
+    }
+    
+    if (!is.null(signif.test)) {
+        for (i in 1:length(signif.test)) {
+            p <- signif.test.fun(data[[signif.test[[i]][1]]], data[[signif.test[[i]][2]]])$p.value
+            label <- signif.test.text(p)
+            if (!is.null(label)) {
+                begin <- signif.test[[i]][1] + (1 - barwidth) / 2
+                end <- signif.test[[i]][2] - (1 - barwidth) / 2
+                mid <- (end - begin) / 2 + begin
+                base <- signifbase + signiflines[i]
+                p <- signif.test.fun(data[[signif.test[[i]][1]]], data[[signif.test[[i]][2]]])$p.value
+                lines(c(begin, begin, end, end), c(base - 0.5 * legendmargin, base, base, base - 0.5 * legendmargin), lwd=signif.test.lwd, col=signif.test.col, lend="butt")
+                do.call(text, c(list(x=mid, y=base + 0.3 * legendmargin, labels=label, adj=c(0.5, 0), col=signif.test.col), signif.test.pars))
+            }
+        }
     }
 
     if (!is.null(labels) && names.style=="plain") {

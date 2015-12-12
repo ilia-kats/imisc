@@ -2,20 +2,21 @@
 % Please edit documentation in R/plotgroups.R
 \name{plotgroups}
 \alias{plotgroups}
-\title{Plot several groups of repeated observations, e.g. abundance/half-life of several
-proteins each observed in several cell lines in several replicates. Observations can be grouped
-either by protein (in which case cell lines will be annotated as X axis labels
-and proteins above the plot) or by cell line.}
+\title{Plot several groups of repeated observations.}
 \usage{
 plotgroups(data, names, colors = NULL, legend.text = NULL,
-  legend.col = NULL, legend.pars = list(font = 2), names.split = NULL,
-  names.italicize = NULL, names.style = c("plain", "combinatorial"),
-  names.pch = 19, names.pch.cex = 1, names.pch.adj = 0.5,
-  names.margin = 0.5, names.rotate = NULL, lwd.legend = NULL,
+  legend.col = NULL, legend.pars = list(font = 2), legend.lwd = NULL,
+  names.split = NULL, names.italicize = NULL, names.style = c("plain",
+  "combinatorial"), names.pch = 19, names.pch.cex = 1,
+  names.pch.adj = 0.5, names.margin = 0.5, names.rotate = NULL,
   features = c("median", "box", "iqr", "mean", "sd", "sem"), cex.xlab = 1,
   ylim = NULL, legendmargin = NULL, plot.fun = plotgroups.boxplot,
-  plot.fun.pars = list(), barwidth = 0.8,
-  ylab = deparse(substitute(data)), ...)
+  plot.fun.pars = list(), barwidth = 0.8, main = NULL,
+  ylab = deparse(substitute(data)), signif.test = NULL,
+  signif.test.fun = t.test, signif.test.text = function(p) paste0("p=",
+  formatC(p, digits = 3, format = "g")), signif.test.col = "black",
+  signif.test.lwd = legend.lwd, signif.test.pars = legend.pars,
+  extrafun = NULL, ...)
 }
 \arguments{
 \item{data}{List, each element is a vector of replicates for one combination of parameters}
@@ -30,6 +31,8 @@ occurrence of the same color}
 \item{legend.col}{Colors for group annotations. Defaults to plotting colors}
 
 \item{legend.pars}{Parameters for group annotation. Will be passed to \code{\link[base]{text}}}
+
+\item{legend.lwd}{Line width for grouping annotations. Defaults to \code{par("lwd")}}
 
 \item{names.split}{Character by which to split the \code{names}. Only useful in combination with
 \code{names.italicize} or \code{names.style='combinatorial'}}
@@ -59,8 +62,6 @@ fragment containing \code{names.italicize} is rendered in italics}
 \item{names.rotate}{Only used when \code{names.style='plain'}. Degrees by which to rotate the
 annotation strings.}
 
-\item{lwd.legend}{Line width for grouping annotations. Defaults to \code{par("lwd")}}
-
 \item{features}{Which features of the sample distributions to plot. Availability of features
 depends on \code{plot.fun}}
 
@@ -78,12 +79,31 @@ plot, required for group annotation. Will be determined automatically if \code{N
 
 \item{barwidth}{Width of the individual bars/boxes etc. as fraction of 1}
 
+\item{main}{Main title}
+
 \item{ylab}{Y axis label}
+
+\item{signif.test}{List of 2-element integer vectors giving the elements of \code{data} to be
+tested for significant differences.}
+
+\item{signif.test.fun}{Function to perform the significance testing. Must accept 2 vectors and
+return a list containing at least the element \code{p.value}}
+
+\item{signif.test.text}{Function accepting a p-value and returning a formatted string to be used
+for plotting or \code{NULL} if this p-value is not to be plotted (e.g. if it is not
+significant)}
+
+\item{signif.test.lwd}{Line width for p-value annotations.}
+
+\item{signif.test.pars}{Parameters for group annotation. Will be passed to \code{\link[base]{text}}}
+
+\item{extrafun}{Additional function to call after plotting, e.g. to add addtional elements
+to the plot}
 
 \item{...}{Additional parameters passed to \code{\link[base]{par}}}
 }
 \description{
-Plot several groups of repeated observations, e.g. abundance/half-life of several
+Plot serveral groups of repeated observations, e.g. abundance/half-life of several
 proteins each observed in several cell lines in several replicates. Observations can be grouped
 either by protein (in which case cell lines will be annotated as X axis labels
 and proteins above the plot) or by cell line.
@@ -91,11 +111,37 @@ and proteins above the plot) or by cell line.
 \examples{
 data <- list()
 for (i in 1:14) data[[i]] <- rnorm(50, i, 0.5)
-names <- rep(c('gene1', 'gene2', 'gene3', 'gene1 gene2', 'gene1 gene3', 'gene2 gene3', 'gene1 gene2 gene3'), times=2)
+names <- rep(c('gene1', 'gene2', 'gene3', 'gene1 gene2', 'gene1 gene3', 'gene2 gene3', 'gene1 gene2 gene3'),
+     times=2)
 colors <- rep(c("green", "blue"), each=7)
 legend.text <- c("protein1", "protein2")
-plotgroups(data, names, colors, legend.text, plot.fun=plotgroups.beeswarm, features=c('mean', 'sd'))
-plotgroups(data, names, colors, legend.text, plot.fun=plotgroups.beeswarm, features=c('mean', 'sd'), names.style='combinatorial', names.split=" ", names.pch='Δ', plot.fun.pars=list(palpha=0.5, bxpcols="black"))
-plotgroups(data, names, colors, legend.text, names.style='combinatorial', names.split=" ", names.pch='Δ')
+plotgroups(data, names, colors, legend.text,
+           plot.fun=plotgroups.beeswarm, features=c('mean', 'sd'))
+plotgroups(data, names, colors, legend.text,
+           plot.fun=plotgroups.beeswarm, features=c('mean', 'sd'),
+           names.style='combinatorial', names.split=" ", names.pch='\\u0394',
+           plot.fun.pars=list(palpha=0.5, bxpcols="black"))
+plotgroups(data, names, colors, legend.text,
+           names.style='combinatorial', names.split=" ", names.pch='\\u0394')
+plotgroups(data, names, colors, legend.text,
+           names.style='combinatorial', names.split=" ", names.pch=19,
+           main="test", plot.fun=plotgroups.barplot, features=c("mean", "sd"),
+           plot.fun.pars=list(whiskerswidth=0.6))
+## significance testing
+plotgroups(data, names, colors, legend.text,names.style='combinatorial',
+           names.split=" ", names.pch='\\u0394',
+           signif.test=list(c(1,3), c(2,5), c(5,8), c(3,10)))
+plotgroups(data, names, colors, legend.text,names.style='combinatorial',
+           names.split=" ", names.pch='\\u0394',
+           signif.test=list(c(1,3), c(2,5), c(5,8), c(3,10)), signif.test.text=function(p) {
+                     if (p < 0.001) {
+                         return('***')
+                     } else if (p < 0.01) {
+                         return('**')
+                     } else if (p < 0.05) {
+                         return('*')
+                     } else {
+                         return(NULL)
+                     }})
 }
 
