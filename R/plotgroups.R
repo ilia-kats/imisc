@@ -1,6 +1,6 @@
 #' @export
 #' @importFrom rlist list.merge
-plotgroups.boxplot <- function(data, stats, ylab, colors, ylim, features, barwidth, legendmargin, bxppars, ...)
+plotgroups.boxplot <- function(data, stats, colors, ylim, features, barwidth, bxppars, ...)
 {
     if (!missing(ylim))
         return(NULL)
@@ -35,8 +35,7 @@ plotgroups.boxplot <- function(data, stats, ylab, colors, ylim, features, barwid
     pars <- list(notch=TRUE, las=1, notch.frac=0.9, outpch=NA)
     if (length(dots) > 0)
         pars <- list.merge(pars, dots)
-    do.call(boxplot, list.merge(pars, list(x=data, ylab=ylab, xaxt="n", col=colors, yaxs="i", pars=bxppars, add=TRUE)))
-    axis(2, lwd=lwd.base)
+    do.call(boxplot, list.merge(pars, list(x=data, xaxt="n", col=colors, yaxt='n', pars=bxppars, add=TRUE)))
     if ("mean" %in% features)
         segments(1:length(data) - bxppars$boxwex / 2, stats$means, 1:length(data) + bxppars$boxwex / 2, stats$means, col="red", lwd=lwd.mean, lend='butt')
     if ("sem" %in% features) {
@@ -45,28 +44,8 @@ plotgroups.boxplot <- function(data, stats, ylab, colors, ylim, features, barwid
     }
 }
 
-#' @export
-#' @importFrom rlist list.merge
-plotgroups.beeswarm <- function(data, stats, ylab, colors, ylim, features, barwidth, legendmargin, palpha=1, bxplwd=par("lwd"), bxpcols=colors, ...)
+threeparamsstats <- function(stats, features)
 {
-    if (!requireNamespace("beeswarm", quietly = TRUE))
-        stop("Please install the beeswarm package for this plot.")
-    if ("mean" %in% features && "median" %in% features)
-        stop("both mean and median present in features, only one can be plotted")
-    if (as.integer("box" %in% features + "iqr" %in% features + "sd" %in% features + "sem" %in% features) > 1)
-        stop("only one of 'box', 'iqr', 'sd', 'sem' can be plotted, ajust features argument accordingly")
-    if (!missing(ylim))
-        return(c(0,max(sapply(data, max))))
-        
-    library(beeswarm)
-    dots <- list(...)
-    pars <- list(method="swarm", corral="random", priority="random", pch=16)
-    if (length(dots) > 0)
-        pars <- list.merge(pars, dots)
-    
-    lims <- par("usr")
-    do.call(beeswarm::beeswarm, list.merge(pars, list(x=data, corralWidth=barwidth, add=TRUE, ylab=ylab, col=rgb(t(col2rgb(colors)), alpha=palpha*255, maxColorValue=255), yaxs='i', xaxt='n')))
-    
     bars <- list(m=NULL, u=NULL, l=NULL)
     if ("mean" %in% features)
         bars$m <- stats$means
@@ -88,6 +67,31 @@ plotgroups.beeswarm <- function(data, stats, ylab, colors, ylim, features, barwi
         bars$u <- bars$m + stats$sems
         bars$l <- bars$m - stats$sems
     }
+    bars
+}
+
+#' @export
+#' @importFrom rlist list.merge
+plotgroups.beeswarm <- function(data, stats, colors, ylim, features, barwidth, palpha=1, bxplwd=par("lwd"), bxpcols=colors, ...)
+{
+    if (!requireNamespace("beeswarm", quietly = TRUE))
+        stop("Please install the beeswarm package for this plot.")
+    if ("mean" %in% features && "median" %in% features)
+        stop("both mean and median present in features, only one can be plotted")
+    if (as.integer("box" %in% features + "iqr" %in% features + "sd" %in% features + "sem" %in% features) > 1)
+        stop("only one of 'box', 'iqr', 'sd', 'sem' can be plotted, ajust features argument accordingly")
+    if (!missing(ylim))
+        return(c(0,max(sapply(data, max))))
+        
+    library(beeswarm)
+    dots <- list(...)
+    pars <- list(method="swarm", corral="random", priority="random", pch=16)
+    if (length(dots) > 0)
+        pars <- list.merge(pars, dots)
+    
+    do.call(beeswarm::beeswarm, list.merge(pars, list(x=data, corralWidth=barwidth, add=TRUE, col=rgb(t(col2rgb(colors)), alpha=palpha*255, maxColorValue=255), yaxs='i', xaxt='n')))
+    
+    bars <- threeparamsstats(stats, features)
     
     if (!is.null(bars$u) && !is.null(bars$l))
         segments(1:length(data), bars$l, 1:length(data), bars$u, col=bxpcols, lend='butt', lwd=bxplwd)
@@ -96,9 +100,32 @@ plotgroups.beeswarm <- function(data, stats, ylab, colors, ylim, features, barwi
         if (!is.null(b))
             segments(1:length(data) - barwidth / 2, b, 1:length(data) + barwidth / 2, b, col=bxpcols, lend='butt', lwd=bxplwd)
     }
-    axis(2, ...)
-    title(ylab=ylab)
-    box(lwd=par("lwd"))
+}
+
+#' @export
+#' @importFrom rlist list.merge
+plotgroups.barplot <- function(data, stats, colors, ylim, features, barwidth, whiskerswidth=barwidth, whiskerslwd=par("lwd"), whiskerscols="black", bordercols="black", ...)
+{
+    if ("mean" %in% features && "median" %in% features)
+        stop("both mean and median present in features, only one can be plotted")
+    if (as.integer("box" %in% features + "iqr" %in% features + "sd" %in% features + "sem" %in% features) > 1)
+        stop("only one of 'box', 'iqr', 'sd', 'sem' can be plotted, ajust features argument accordingly")
+    if (!missing(ylim))
+        return(NULL)
+    bars <- threeparamsstats(stats, features)
+    dots <- list(...)
+    pars <- list(names.arg=NULL)
+    if (length(dots) > 0)
+        pars <- list.merge(pars, dots)
+    rect(1:length(data) - barwidth/2, par("usr")[3], 1:length(data) + barwidth/2, bars$m, col=colors, border=bordercols)
+    
+    if (!is.null(bars$u) && !is.null(bars$l))
+        segments(1:length(data), bars$l, 1:length(data), bars$u, col=whiskerscols, lend='butt', lwd=whiskerslwd)
+    
+    for (b in bars[c("u", "l")]) {
+        if (!is.null(b))
+            segments(1:length(data) - whiskerswidth / 2, b, 1:length(data) + whiskerswidth / 2, b, col=whiskerscols, lend='butt', lwd=whiskerslwd)
+    }
 }
 
 #' Plot several groups of repeated observations, e.g. abundance/half-life of several
@@ -143,6 +170,7 @@ plotgroups.beeswarm <- function(data, stats, ylab, colors, ylim, features, barwi
 #'        \code{\link{plot.groups.beeswarm}}
 #' @param plot.fun.pars Additional parameters to pass to \code{plot.fun}
 #' @param barwidth Width of the individual bars/boxes etc. as fraction of 1
+#' @param main Main title
 #' @param ylab Y axis label
 #' @param ... Additional parameters passed to \code{\link[base]{par}}
 #' @examples
@@ -154,11 +182,37 @@ plotgroups.beeswarm <- function(data, stats, ylab, colors, ylim, features, barwi
 #' plotgroups(data, names, colors, legend.text, plot.fun=plotgroups.beeswarm, features=c('mean', 'sd'))
 #' plotgroups(data, names, colors, legend.text, plot.fun=plotgroups.beeswarm, features=c('mean', 'sd'), names.style='combinatorial', names.split=" ", names.pch='Δ', plot.fun.pars=list(palpha=0.5, bxpcols="black"))
 #'plotgroups(data, names, colors, legend.text, names.style='combinatorial', names.split=" ", names.pch='Δ')
+#' plotgroups(data, names, colors, legend.text, names.style='combinatorial', names.split=" ", names.pch=19, main="test", plot.fun=plotgroups.barplot, features=c("mean", "sd"), plot.fun.pars=list(whiskerswidth=0.6))
 #' @export
 #' @importFrom rlist list.merge
-plotgroups <- function(data, names, colors=NULL, legend.text=NULL, legend.col=NULL, legend.pars=list(font=2), names.split=NULL, names.italicize=NULL, names.style=c("plain", "combinatorial"), names.pch=19, names.pch.cex=1, names.pch.adj=0.5, names.margin=0.5, names.rotate=NULL, lwd.legend=NULL, features=c("median", "box", "iqr", "mean", "sd", "sem"), cex.xlab=1, ylim=NULL, legendmargin=NULL, plot.fun=plotgroups.boxplot, plot.fun.pars=list(), barwidth=0.8, ylab=deparse(substitute(data)), ...)
+plotgroups <- function(
+                        data,
+                        names,
+                        colors=NULL,
+                        legend.text=NULL,
+                        legend.col=NULL,
+                        legend.pars=list(font=2),
+                        names.split=NULL,
+                        names.italicize=NULL,
+                        names.style=c("plain", "combinatorial"),
+                        names.pch=19,
+                        names.pch.cex=1,
+                        names.pch.adj=0.5,
+                        names.margin=0.5,
+                        names.rotate=NULL,
+                        lwd.legend=NULL,
+                        features=c("median", "box", "iqr", "mean", "sd", "sem"),
+                        cex.xlab=1,
+                        ylim=NULL,
+                        legendmargin=NULL,
+                        plot.fun=plotgroups.boxplot,
+                        plot.fun.pars=list(),
+                        barwidth=0.8,
+                        main=NULL,
+                        ylab=deparse(substitute(data)), ...)
 {
-    names.style=match.arg(names.style)
+    names.style <- match.arg(names.style)
+    features <- match.arg(features, several.ok=TRUE)
     
     stats <- list(means=c(), sds=c(), sems=c(), medians=c(), boxmax=c(), iqrmax=c(), boxmin=c(), iqrmin=c())
     for (i in 1:length(data)) {
@@ -261,7 +315,10 @@ plotgroups <- function(data, names, colors=NULL, legend.text=NULL, legend.col=NU
     }
     plot.window(xlim=c(0.5, length(data) + 0.5), ylim=c(ylim[1], ylim[2] + legendmargin), xaxs='i', yaxs='i')
     
-    do.call(plot.fun, c(list(data=data, stats=stats, ylab=ylab, colors=colors, features=features, barwidth=barwidth, legendmargin=legendmargin), plot.fun.pars))
+    do.call(plot.fun, c(list(data=data, stats=stats, colors=colors, features=features, barwidth=barwidth), plot.fun.pars))
+    axis(2, ...)
+    title(main=main, ylab=ylab)
+    box(lwd=par("lwd"))
     
     if (!is.null(legend.text)) {
         rlength <- rle(colors)$lengths
@@ -302,6 +359,13 @@ plotgroups <- function(data, names, colors=NULL, legend.text=NULL, legend.col=NU
         cex <- rep(names.pch.cex, length.out=npoints)
         rotate <- rep(names.rotate, length.out=npoints)
         adj <- rep(names.pch.adj, length.out=npoints)
+        if (is.character(pch)) {
+            pfun <- text
+            parg <- "labels"
+        } else {
+            pfun <- points
+            parg <- "pch"
+        }
         currlength <- 0
         for (i in 1:length(names)) {
             if (nchar(names[i]) > 0) {
@@ -313,7 +377,9 @@ plotgroups <- function(data, names, colors=NULL, legend.text=NULL, legend.col=NU
                 newlength <- currlength + length(genes)
                 currgenes <- which(uniquegenes %in% genes)
                 for (j in 1:length(genes)) {
-                    text(x=i, y=currgenes[j], labels=pch[currlength + j], adj=adj[[currlength + j]], cex=cex.xlab * cex[currlength + j], srt=rotate[currlength + j], xpd=T)
+                    args <- list(x=i, y=currgenes[j], adj=adj[[currlength + j]], cex=cex.xlab * cex[currlength + j], srt=rotate[currlength + j], xpd=T)
+                    args[[parg]] <- pch[currlength + j]
+                    do.call(pfun, args)
                 }
                 currlength <- newlength
             }
