@@ -81,7 +81,7 @@ plotgroups.beeswarm <- function(data, stats, colors, ylim, features, barwidth, p
     if (as.integer("box" %in% features + "iqr" %in% features + "sd" %in% features + "sem" %in% features) > 1)
         stop("only one of 'box', 'iqr', 'sd', 'sem' can be plotted, ajust features argument accordingly")
     if (!missing(ylim))
-        return(c(0,max(sapply(data, max))))
+        return(range(unlist(data)))
 
     library(beeswarm)
     dots <- list(...)
@@ -117,7 +117,7 @@ plotgroups.barplot <- function(data, stats, colors, ylim, features, barwidth, wh
     pars <- list(names.arg=NULL)
     if (length(dots) > 0)
         pars <- list.merge(pars, dots)
-    rect(1:length(data) - barwidth/2, par("usr")[3], 1:length(data) + barwidth/2, bars$m, col=colors, border=bordercols)
+    do.call(rect, list.merge(pars, list(xleft=1:length(data) - barwidth/2, ybottom=par("usr")[3], xright=1:length(data) + barwidth/2, ytop=bars$m, col=colors, border=bordercols)))
 
     if (!is.null(bars$u) && !is.null(bars$l))
         segments(1:length(data), bars$l, 1:length(data), bars$u, col=whiskerscols, lend='butt', lwd=whiskerslwd)
@@ -126,6 +126,26 @@ plotgroups.barplot <- function(data, stats, colors, ylim, features, barwidth, wh
         if (!is.null(b))
             segments(1:length(data) - whiskerswidth / 2, b, 1:length(data) + whiskerswidth / 2, b, col=whiskerscols, lend='butt', lwd=whiskerslwd)
     }
+}
+
+#' @export
+#' @importFrom rlist list.merge
+plotgroups.vioplot <- function(data, stats, colors, ylim, features, barwidth, ...)
+{
+    if (!requireNamespace("vioplot", quietly = TRUE))
+        stop("Please install the vioplot package for this plot.")
+    if (!missing(ylim))
+        return(range(unlist(data)))
+    library("sm") # needed by vioplot
+    warning("features argument will be ignored. Vioplot package always plots median + iqr")
+    colors <- rep_len(colors, length(data))
+    dots <- list(...)
+    pars <- list(drawRect=TRUE)
+    if (length(dots) > 0)
+        pars <- list.merge(pars, dots)
+    mapply(function(data, color, i){
+            do.call(vioplot::vioplot, list.merge(pars, list(x=data, col=color, at=i, add=TRUE, wex=barwidth)))
+        }, data, colors, 1:length(data))
 }
 
 #' Plot several groups of repeated observations.
@@ -165,7 +185,8 @@ plotgroups.barplot <- function(data, stats, colors, ylim, features, barwidth, wh
 #' @param features Which features of the sample distributions to plot. Availability of features
 #'        depends on \code{plot.fun}
 #' @param cex.xlab Character expansion factor for X axis annotation
-#' @param ylim Y axis limits. Will be determined automatically if \code{NULL}
+#' @param ylim Y axis limits. Will be determined automatically if \code{NULL}. If not \code{NULL} but
+#'        only one limit is finite, the other will be determined automatically.
 #' @param legendmargin Spacing between the upper-most data point/feature and the upper edge of the
 #'        plot, required for group annotation. Will be determined automatically if \code{NULL}
 #' @param plot.fun Function to do the actual plotting. See \code{\link{plot.groups.boxplot}},
@@ -194,7 +215,7 @@ plotgroups.barplot <- function(data, stats, colors, ylim, features, barwidth, wh
 #' colors <- rep(c("green", "blue"), each=7)
 #' legend.text <- c("protein1", "protein2")
 #' plotgroups(data, names, colors, legend.text,
-#'            plot.fun=plotgroups.beeswarm, features=c('mean', 'sd'))
+#'            plot.fun=plotgroups.beeswarm, features=c('mean', 'sd'), ylim=c(0,Inf))
 #' plotgroups(data, names, colors, legend.text,
 #'            plot.fun=plotgroups.beeswarm, features=c('mean', 'sd'),
 #'            names.style='combinatorial', names.split=" ", names.pch='\u0394',
@@ -273,25 +294,49 @@ plotgroups <- function(
         stats$iqrmin[i] <- bstats[2]
     }
 
-    if (is.null(ylim)) {
-        ylim <- plot.fun(data=data, features=features, ylim=TRUE)
-        ylim[2] <- ylim[2] + 0.02 * ylim[2]
+    ylim.usr <- NULL
+    if (!is.finite(ylim[1]) || !is.finite(ylim[2])) {
+        ylim.usr <- ylim
+        ylim <- NULL
     }
     if (is.null(ylim)) {
-        ylim <- c(0, 0)
-        if ("median" %in% features)
+        ylim <- plot.fun(data=data, features=features, ylim=TRUE)
+        if (!is.null(ylim))
+            ylim <- extendrange(ylim, f=0.04)
+    }
+    if (is.null(ylim)) {
+        ylim <- c(Inf, 0)
+        if ("median" %in% features) {
+            ylim[1] <- min(ylim[1], stats$medians, na.rm=TRUE)
             ylim[2] <- max(ylim[2], stats$medians, na.rm=TRUE)
-        if ("box" %in% features)
+        }
+        if ("box" %in% features) {
+            ylim[1] <- min(ylim[1], stats$boxmin, na.rm=TRUE)
             ylim[2] <- max(ylim[2], stats$boxmax, na.rm=TRUE)
-        if ("iqr" %in% features)
+        }
+        if ("iqr" %in% features) {
+            ylim[1] <- min(ylim[1], stats$iqrmin, na.rm=TRUE)
             ylim[2] <- max(ylim[2], stats$iqrmax, na.rm=TRUE)
-        if ("mean" %in% features)
+        }
+        if ("mean" %in% features) {
+            ylim[1] <- min(ylim[1], stats$means, na.rm=TRUE)
             ylim[2] <- max(ylim[2], stats$means, na.rm=TRUE)
-        if ("sd" %in% features)
+        }
+        if ("sd" %in% features) {
+            ylim[1] <- min(ylim[1], stats$means - stats$sds, na.rm=TRUE)
             ylim[2] <- max(ylim[2], stats$means + stats$sds, na.rm=TRUE)
-        if ("sem" %in% features)
+        }
+        if ("sem" %in% features) {
+            ylim[1] <- min(ylim[1], stats$means - stats$sems, na.rm=TRUE)
             ylim[2] <- max(ylim[2], stats$means + stats$sems, na.rm=TRUE)
-        ylim[2] <- ylim[2] + 0.02 * ylim[2]
+        }
+        ylim <- extendrange(ylim, f=0.04)
+    }
+    if (!is.null(ylim.usr)) {
+        if (is.finite(ylim.usr[1]))
+            ylim[1] <- ylim.usr[1]
+        if (is.finite(ylim.usr[2]))
+            ylim[2] <- ylim.usr[2]
     }
 
     dots <- list(...)

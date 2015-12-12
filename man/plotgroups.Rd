@@ -38,7 +38,7 @@ occurrence of the same color}
 \code{names.italicize} or \code{names.style='combinatorial'}}
 
 \item{names.italicize}{If a part of a \code{name} is to be written in italic text, the part is
-identified by this character. I.e. The name is first split by \code{names.split}, each 
+identified by this character. I.e. The name is first split by \code{names.split}, each
 fragment containing \code{names.italicize} is rendered in italics}
 
 \item{names.style}{How the \code{names} are to be rendered.
@@ -67,7 +67,8 @@ depends on \code{plot.fun}}
 
 \item{cex.xlab}{Character expansion factor for X axis annotation}
 
-\item{ylim}{Y axis limits. Will be determined automatically if \code{NULL}}
+\item{ylim}{Y axis limits. Will be determined automatically if \code{NULL}. If not \code{NULL} but
+only one limit is finite, the other will be determined automatically.}
 
 \item{legendmargin}{Spacing between the upper-most data point/feature and the upper edge of the
 plot, required for group annotation. Will be determined automatically if \code{NULL}}
@@ -116,7 +117,7 @@ names <- rep(c('gene1', 'gene2', 'gene3', 'gene1 gene2', 'gene1 gene3', 'gene2 g
 colors <- rep(c("green", "blue"), each=7)
 legend.text <- c("protein1", "protein2")
 plotgroups(data, names, colors, legend.text,
-           plot.fun=plotgroups.beeswarm, features=c('mean', 'sd'))
+           plot.fun=plotgroups.beeswarm, features=c('mean', 'sd'), ylim=c(0,Inf))
 plotgroups(data, names, colors, legend.text,
            plot.fun=plotgroups.beeswarm, features=c('mean', 'sd'),
            names.style='combinatorial', names.split=" ", names.pch='\\u0394',
