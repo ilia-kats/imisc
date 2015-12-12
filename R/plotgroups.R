@@ -82,20 +82,20 @@ plotgroups.beeswarm <- function(data, stats, colors, ylim, features, barwidth, p
         stop("only one of 'box', 'iqr', 'sd', 'sem' can be plotted, ajust features argument accordingly")
     if (!missing(ylim))
         return(c(0,max(sapply(data, max))))
-        
+
     library(beeswarm)
     dots <- list(...)
     pars <- list(method="swarm", corral="random", priority="random", pch=16)
     if (length(dots) > 0)
         pars <- list.merge(pars, dots)
-    
+
     do.call(beeswarm::beeswarm, list.merge(pars, list(x=data, corralWidth=barwidth, add=TRUE, col=adjustcolor(colors, alpha.f=palpha), yaxs='i', xaxt='n')))
-    
+
     bars <- threeparamsstats(stats, features)
-    
+
     if (!is.null(bars$u) && !is.null(bars$l))
         segments(1:length(data), bars$l, 1:length(data), bars$u, col=bxpcols, lend='butt', lwd=bxplwd)
-    
+
     for (b in bars) {
         if (!is.null(b))
             segments(1:length(data) - barwidth / 2, b, 1:length(data) + barwidth / 2, b, col=bxpcols, lend='butt', lwd=bxplwd)
@@ -118,10 +118,10 @@ plotgroups.barplot <- function(data, stats, colors, ylim, features, barwidth, wh
     if (length(dots) > 0)
         pars <- list.merge(pars, dots)
     rect(1:length(data) - barwidth/2, par("usr")[3], 1:length(data) + barwidth/2, bars$m, col=colors, border=bordercols)
-    
+
     if (!is.null(bars$u) && !is.null(bars$l))
         segments(1:length(data), bars$l, 1:length(data), bars$u, col=whiskerscols, lend='butt', lwd=whiskerslwd)
-    
+
     for (b in bars[c("u", "l")]) {
         if (!is.null(b))
             segments(1:length(data) - whiskerswidth / 2, b, 1:length(data) + whiskerswidth / 2, b, col=whiskerscols, lend='butt', lwd=whiskerslwd)
@@ -145,7 +145,7 @@ plotgroups.barplot <- function(data, stats, colors, ylim, features, barwidth, wh
 #' @param names.split Character by which to split the \code{names}. Only useful in combination with
 #'        \code{names.italicize} or \code{names.style='combinatorial'}
 #' @param names.italicize If a part of a \code{name} is to be written in italic text, the part is
-#'        identified by this character. I.e. The name is first split by \code{names.split}, each 
+#'        identified by this character. I.e. The name is first split by \code{names.split}, each
 #'        fragment containing \code{names.italicize} is rendered in italics
 #' @param names.style How the \code{names} are to be rendered.
 #'        \describe{
@@ -259,7 +259,7 @@ plotgroups <- function(
 {
     names.style <- match.arg(names.style)
     features <- match.arg(features, several.ok=TRUE)
-    
+
     stats <- list(means=c(), sds=c(), sems=c(), medians=c(), boxmax=c(), iqrmax=c(), boxmin=c(), iqrmin=c())
     for (i in 1:length(data)) {
         stats$means[i] <- mean(data[[i]])
@@ -303,7 +303,7 @@ plotgroups <- function(
     lwd.base <- par("lwd")
     if (is.null(legend.lwd))
         legend.lwd <- lwd.base
-        
+
     if (names.style=="combinatorial") {
         if (is.null(names.rotate))
             names.rotate <- 0
@@ -351,16 +351,17 @@ plotgroups <- function(
         mai[1] <- legend.height + names.margin
         par(mai=mai)
     }
-    
+
     if (is.null(colors))
         colors <- "grey"
 
     # can't use grconvertY here because plot.window has not been called yet, have
     # to do the conversion manually
+    inchestouser <- (ylim[2] - ylim[1]) / par("pin")[2]
     legendmarginfactor <- (ylim[2] - ylim[1]) / par("pin")[2] * 1.8
-    lineheight <- strheight("\n", units="inches") * legendmarginfactor
+    lineheight <- strheight("\n", units="inches") * inchestouser
     if (is.null(legendmargin)) {
-        legendmargin <- max(strheight(legend.text, units="inches")) * legendmarginfactor
+        legendmargin <- max(max(strheight(legend.text, units="inches")) * inchestouser, lineheight)
         legendbase <- ylim[2]
     }
     signifmargin <- 0
@@ -374,15 +375,15 @@ plotgroups <- function(
         query <- IRanges::IRanges(intervals.start[intervals.order], intervals.stop[intervals.order])
         signifoverlaps <- S4Vectors::as.matrix(IRanges::findOverlaps(query, minoverlap=2))
         signifoverlaps <- signifoverlaps[which(signifoverlaps[,1] != signifoverlaps[,2]),]
-        
+
         signifoverlaps <- t(apply(signifoverlaps, 1, function(x)c(min(x),max(x))))
         signifoverlaps <- signifoverlaps[!duplicated(signifoverlaps),]
-        
+
         maxsignifoverlaps <- max(rle(signifoverlaps[,1])$length)
-        signifmargin <- maxsignifoverlaps * lineheight
+        signifmargin <- (maxsignifoverlaps + 1) * lineheight
         signifbase <- legendbase
         legendbase <- signifbase + signifmargin
-        
+
         if (maxsignifoverlaps == 0) {
             signiflines <- rep(0, length(signif.test))
         } else {
@@ -403,16 +404,16 @@ plotgroups <- function(
             }
         }
     }
-    
-    plot.window(xlim=c(0.5, length(data) + 0.5), ylim=c(ylim[1], ylim[2] + legendmargin + signifmargin + 0.1 * lineheight), xaxs='i', yaxs='i')
-    
+
+    plot.window(xlim=c(0.5, length(data) + 0.5), ylim=c(ylim[1], ylim[2] + legendmargin + signifmargin), xaxs='i', yaxs='i')
+
     do.call(plot.fun, c(list(data=data, stats=stats, colors=colors, features=features, barwidth=barwidth), plot.fun.pars))
     if (!is.null(extrafun))
         extrafun(data, stats, colors, features, barwidth)
     axis(2, ...)
     title(main=main, ylab=ylab)
     box(lwd=par("lwd"))
-    
+
     if (!is.null(legend.text)) {
         rlength <- rle(colors)$lengths
         segs.begin <- c(1, cumsum(rlength)[-length(rlength)] + 1) - barwidth / 2
@@ -427,7 +428,7 @@ plotgroups <- function(
         mids <- (segs.end - segs.begin) / 2 + segs.begin
         do.call(text, c(list(x=mids, y=legendbase + 0.3 * legendmargin, labels=legend.text, adj=c(0.5, 0), col=cols), legend.pars))
     }
-    
+
     if (!is.null(signif.test)) {
         for (i in 1:length(signif.test)) {
             p <- signif.test.fun(data[[signif.test[[i]][1]]], data[[signif.test[[i]][2]]])$p.value
@@ -436,10 +437,10 @@ plotgroups <- function(
                 begin <- signif.test[[i]][1] + (1 - barwidth) / 2
                 end <- signif.test[[i]][2] - (1 - barwidth) / 2
                 mid <- (end - begin) / 2 + begin
-                base <- signifbase + signiflines[i]
+                base <- signifbase + signiflines[i] * lineheight
                 p <- signif.test.fun(data[[signif.test[[i]][1]]], data[[signif.test[[i]][2]]])$p.value
-                lines(c(begin, begin, end, end), c(base - 0.5 * legendmargin, base, base, base - 0.5 * legendmargin), lwd=signif.test.lwd, col=signif.test.col, lend="butt")
-                do.call(text, c(list(x=mid, y=base + 0.3 * legendmargin, labels=label, adj=c(0.5, 0), col=signif.test.col), signif.test.pars))
+                lines(c(begin, begin, end, end), c(base - 0.3 * legendmargin, base, base, base - 0.3 * legendmargin), lwd=signif.test.lwd, col=signif.test.col, lend="butt")
+                do.call(text, c(list(x=mid, y=base + 0.2 * legendmargin, labels=label, adj=c(0.5, 0), col=signif.test.col), signif.test.pars))
             }
         }
     }
@@ -501,4 +502,4 @@ plotgroups <- function(
         sapply(seq(from=1.5, length.out=length(uniquegenes) - 1, by=1), function(x)abline(h=x, lwd=lwd.base))
     }
     invisible(NULL)
-} 
+}
