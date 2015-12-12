@@ -1,6 +1,6 @@
 #' @export
 #' @importFrom rlist list.merge
-plot.groups.boxplot <- function(data, stats, ylab, colors, ylim, features, barwidth, legendmargin, bxppars, ...)
+plotgroups.boxplot <- function(data, stats, ylab, colors, ylim, features, barwidth, legendmargin, bxppars, ...)
 {
     if (!missing(ylim))
         return(NULL)
@@ -47,7 +47,7 @@ plot.groups.boxplot <- function(data, stats, ylab, colors, ylim, features, barwi
 
 #' @export
 #' @importFrom rlist list.merge
-plot.groups.beeswarm <- function(data, stats, ylab, colors, ylim, features, barwidth, legendmargin, palpha=1, bxplwd=par("lwd"), bxpcols=colors, ...)
+plotgroups.beeswarm <- function(data, stats, ylab, colors, ylim, features, barwidth, legendmargin, palpha=1, bxplwd=par("lwd"), bxpcols=colors, ...)
 {
     if (!requireNamespace("beeswarm", quietly = TRUE))
         stop("Please install the beeswarm package for this plot.")
@@ -101,14 +101,65 @@ plot.groups.beeswarm <- function(data, stats, ylab, colors, ylim, features, barw
     box(lwd=par("lwd"))
 }
 
+#' Plot several groups of repeated observations, e.g. abundance/half-life of several
+#' proteins each observed in several cell lines in several replicates. Observations can be grouped
+#' either by protein (in which case cell lines will be annotated as X axis labels
+#' and proteins above the plot) or by cell line.
+#' @param data List, each element is a vector of replicates for one combination of parameters
+#' @param names Character vector of X axis labels
+#' @param colors Colors for plotting. Note that a group of observations is identified by consecutive
+#'        occurrence of the same color
+#' @param legend.text Character vector of group names
+#' @param legend.col Colors for group annotations. Defaults to plotting colors
+#' @param legend.pars Parameters for group annotation. Will be passed to \code{\link[base]{text}}
+#' @param names.split Character by which to split the \code{names}. Only useful in combination with
+#'        \code{names.italicize} or \code{names.style='combinatorial'}
+#' @param names.italicize If a part of a \code{name} is to be written in italic text, the part is
+#'        identified by this character. I.e. The name is first split by \code{names.split}, each 
+#'        fragment containing \code{names.italicize} is rendered in italics
+#' @param names.style How the \code{names} are to be rendered.
+#'        \describe{
+#'              \item{plain}{Each name will be written as-is below the plot}
+#'              \item{combinatorial}{Names will be split by \code{names.split}, unique strings will be
+#'                    printed at the bottom-left, and observations whose name contains the string will
+#'                    be identified by prining \code{names.pch} below the respective bar. Useful if e.g.
+#'                   assaying different combinations of single/double/triple knock-outs.}
+#'                   }
+#' @param names.pch Character to be used for annotation of observations when
+#'        \code{names.style='combinatorial'}
+#' @param names.pch.cex Character expansion factor for \code{names.pch}
+#' @param names.pch.adj Text adjustment for \code{names.pch}. See \code{\link[base]{text}}
+#' @param names.margin Spacing between the bottom edge of the plot and the annotation, in inches
+#' @param names.rotate Only used when \code{names.style='plain'}. Degrees by which to rotate the
+#'        annotation strings.
+#' @param lwd.legend Line width for grouping annotations. Defaults to \code{par("lwd")}
+#' @param features Which features of the sample distributions to plot. Availability of features
+#'        depends on \code{plot.fun}
+#' @param cex.xlab Character expansion factor for X axis annotation
+#' @param ylim Y axis limits. Will be determined automatically if \code{NULL}
+#' @param legendmargin Spacing between the upper-most data point/feature and the upper edge of the
+#'        plot, required for group annotation. Will be determined automatically if \code{NULL}
+#' @param plot.fun Function to do the actual plotting. See \code{\link{plot.groups.boxplot}},
+#'        \code{\link{plot.groups.beeswarm}}
+#' @param plot.fun.pars Additional parameters to pass to \code{plot.fun}
+#' @param barwidth Width of the individual bars/boxes etc. as fraction of 1
+#' @param ylab Y axis label
+#' @param ... Additional parameters passed to \code{\link[base]{par}}
+#' @examples
+#' data <- list()
+#' for (i in 1:14) data[[i]] <- rnorm(50, i, 0.5)
+#' names <- rep(c('gene1', 'gene2', 'gene3', 'gene1 gene2', 'gene1 gene3', 'gene2 gene3', 'gene1 gene2 gene3'), times=2)
+#' colors <- rep(c("green", "blue"), each=7)
+#' legend.text <- c("protein1", "protein2")
+#' plotgroups(data, names, colors, legend.text, plot.fun=plotgroups.beeswarm, features=c('mean', 'sd'))
+#' plotgroups(data, names, colors, legend.text, plot.fun=plotgroups.beeswarm, features=c('mean', 'sd'), names.style='combinatorial', names.split=" ", names.pch='Δ', plot.fun.pars=list(palpha=0.5, bxpcols="black"))
+#'plotgroups(data, names, colors, legend.text, names.style='combinatorial', names.split=" ", names.pch='Δ')
 #' @export
 #' @importFrom rlist list.merge
-plot.groups <- function(data, names, colors=NULL, legend.text=NULL, legend.col=NULL, legend.pars=list(font=2), names.split=NULL, names.italicize=NULL, names.style=c("plain", "combinatorial"), names.pch=19, names.pch.cex=1, names.pch.adj=0.5, names.margin=0.5, names.rotate=NULL, lwd.legend=2, features=c("median", "box", "iqr", "mean", "sd", "sem"), basename="", cex.xlab=1, ylim=NULL, legendmargin=NULL, plot.fun=plot.groups.boxplot, funpars=list(), barwidth=0.8, ylab=deparse(substitute(data)), ...)
+plotgroups <- function(data, names, colors=NULL, legend.text=NULL, legend.col=NULL, legend.pars=list(font=2), names.split=NULL, names.italicize=NULL, names.style=c("plain", "combinatorial"), names.pch=19, names.pch.cex=1, names.pch.adj=0.5, names.margin=0.5, names.rotate=NULL, lwd.legend=NULL, features=c("median", "box", "iqr", "mean", "sd", "sem"), cex.xlab=1, ylim=NULL, legendmargin=NULL, plot.fun=plotgroups.boxplot, plot.fun.pars=list(), barwidth=0.8, ylab=deparse(substitute(data)), ...)
 {
     names.style=match.arg(names.style)
-
-    default.pars <- list(oma=c(0,0,0,0), las=1, mgp=c(2, 0.5, 0), ljoin="mitre", lend="square", lwd=2, lheight=1.2)
-
+    
     stats <- list(means=c(), sds=c(), sems=c(), medians=c(), boxmax=c(), iqrmax=c(), boxmin=c(), iqrmin=c())
     for (i in 1:length(data)) {
         stats$means[i] <- mean(data[[i]])
@@ -143,10 +194,15 @@ plot.groups <- function(data, names, colors=NULL, legend.text=NULL, legend.col=N
         ylim[2] <- ylim[2] + 0.02 * ylim[2]
     }
 
-    pars <- list.merge(default.pars, list(...))
+    dots <- list(...)
+    pars <- list(oma=c(0,0,0,0), las=1, mgp=c(2, 0.5, 0), ljoin="mitre", lend="square", lwd=2, lheight=1.2)
+    if (length(dots) > 0)
+        pars <- list.merge(pars, dots)
     do.call(par, pars)
     plot.new()
     lwd.base <- par("lwd")
+    if (is.null(lwd.legend))
+        lwd.legend <- lwd.base
         
     if (names.style=="combinatorial") {
         if (is.null(names.rotate))
@@ -187,10 +243,11 @@ plot.groups <- function(data, names, colors=NULL, legend.text=NULL, legend.col=N
                         }, USE.NAMES=F), collapse='," ",'), ")"))
                 }, USE.NAMES=F)
         }
+        lineheight <- strheight("\n", units="inches", cex=cex.xlab)
+        names.margin <- names.margin * lineheight
         legend.width <- max(strwidth(labels, units="inches", cex=cex.xlab))
-        legend.height <- sin(names.rotate * pi / 180) * legend.width
+        legend.height <- sin(names.rotate * pi / 180) * legend.width + names.margin
         mai <- par("mai")
-        names.margin <- names.margin * strheight("\n", units="inches", cex=cex.xlab)
         mai[1] <- legend.height + names.margin
         par(mai=mai)
     }
@@ -204,7 +261,7 @@ plot.groups <- function(data, names, colors=NULL, legend.text=NULL, legend.col=N
     }
     plot.window(xlim=c(0.5, length(data) + 0.5), ylim=c(ylim[1], ylim[2] + legendmargin), xaxs='i', yaxs='i')
     
-    do.call(plot.fun, c(list(data=data, stats=stats, ylab=ylab, colors=colors, features=features, barwidth=barwidth, legendmargin=legendmargin), funpars))
+    do.call(plot.fun, c(list(data=data, stats=stats, ylab=ylab, colors=colors, features=features, barwidth=barwidth, legendmargin=legendmargin), plot.fun.pars))
     
     if (!is.null(legend.text)) {
         rlength <- rle(colors)$lengths
@@ -268,4 +325,5 @@ plot.groups <- function(data, names, colors=NULL, legend.text=NULL, legend.col=N
         do.call("clip", as.list(par("usr")))
         sapply(seq(from=1.5, length.out=length(uniquegenes) - 1, by=1), function(x)abline(h=x, lwd=lwd.base))
     }
+    invisible(NULL)
 } 
