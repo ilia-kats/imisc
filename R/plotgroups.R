@@ -9,13 +9,19 @@ plotgroups.boxplot <- function(data, stats, colors, ylim, features, barwidth, bx
     lwd.base <- par("lwd")
     if (is.null(bxppars$boxwex))
         bxppars$boxwex <- barwidth
+    dots <- list(...)
+    pars <- list(notch=TRUE, las=1, notch.frac=0.9, outpch=NA,
+                 meanlty=1, meanlwd=3*lwd.base, meancol="red", meanpch=NA, meancex=1,
+                 sdwhisklty=1, sdwhisklwd=lwd.base, sdwhiskcol="black",
+                 sdstaplelty=1, sdstaplelwd=lwd.base, sdstaplecol="black",
+                 semlty=1, semlwd=lwd.base, semcol="#EDA217", sempch=NA, semcex=1)
+    if (length(dots) > 0)
+        pars <- list.merge(pars, dots, list(pars=bxppars))
 
-    lwd.mean <- 3 * lwd.base
-    lwd.sem <- 1.5 * lwd.base
     if ("sd" %in% features) {
-        segments(1:length(data) - bxppars$boxwex / 4, stats$means + stats$sds, 1:length(data) + bxppars$boxwex / 4, stats$means + stats$sds, col="black", lwd=1 * lwd.base)
-        segments(1:length(data) - bxppars$boxwex / 4, stats$means - stats$sds, 1:length(data) + bxppars$boxwex / 4, stats$means - stats$sds, col="black", lwd=1 * lwd.base)
-        segments(1:length(data), stats$means + stats$sds, 1:length(data), stats$means - stats$sds, col="black", lwd=1 * lwd.base)
+        segments(1:length(data) - bxppars$boxwex / 4, stats$means + stats$sds, 1:length(data) + bxppars$boxwex / 4, stats$means + stats$sds, lend='butt', col=pars$sdstaplecol, lwd=pars$sdstaplelwd, lty=pars$sdstaplelty)
+        segments(1:length(data) - bxppars$boxwex / 4, stats$means - stats$sds, 1:length(data) + bxppars$boxwex / 4, stats$means - stats$sds, lend='butt', col=pars$sdstaplecol, lwd=pars$sdstaplelwd, lty=pars$sdstaplelty)
+        segments(1:length(data), stats$means + stats$sds, 1:length(data), stats$means - stats$sds, lend='butt', col=pars$sdwhiskcol, lty=pars$sdwhisklty, lwd=pars$sdwhisklwd)
     }
 
     if (!("median" %in% features)) {
@@ -33,16 +39,14 @@ plotgroups.boxplot <- function(data, stats, colors, ylim, features, barwidth, bx
         bxppars$whisklty <- "22"
         bxppars$staplelty <- "22"
     }
-    dots <- list(...)
-    pars <- list(notch=TRUE, las=1, notch.frac=0.9, outpch=NA)
-    if (length(dots) > 0)
-        pars <- list.merge(pars, dots, list(pars=bxppars))
-    do.call(boxplot, list.merge(pars, list(x=data, xaxt="n", col=colors, yaxt='n', add=TRUE))) # have to pass bxppars twice because bxp only takes some pars from ...
+
+    do.call(boxplot, list.merge(pars, list(x=data, xaxt="n", col=colors, yaxt='n', add=TRUE)))
     if ("mean" %in% features)
-        segments(1:length(data) - bxppars$boxwex / 2, stats$means, 1:length(data) + bxppars$boxwex / 2, stats$means, col="red", lwd=lwd.mean, lend='butt')
+        segments(1:length(data) - bxppars$boxwex / 2, stats$means, 1:length(data) + bxppars$boxwex / 2, stats$means, lend='butt', lty=pars$meanlty, lwd=pars$meanlwd, col=pars$meancol)
+        points(1:length(data), stats$means, pch=pars$meanpch, cex=pars$meancex, col=pars$meancol)
     if ("sem" %in% features) {
-        segments(1:length(data) - bxppars$boxwex / 2, stats$means + stats$sems, 1:length(data) + bxppars$boxwex / 2, stats$means +stats$sems, col="#EDA217", lwd=lwd.sem, lend='butt')
-        segments(1:length(data) - bxppars$boxwex / 2, stats$means - stats$sems, 1:length(data) + bxppars$boxwex / 2, stats$means -stats$sems, col="#EDA217", lwd=lwd.sem, lend='butt')
+        segments(1:length(data) - bxppars$boxwex / 2, stats$means + stats$sems, 1:length(data) + bxppars$boxwex / 2, stats$means +stats$sems, lend='butt', lty=pars$semlty, lwd=pars$semlwd, col=pars$semcol)
+        segments(1:length(data) - bxppars$boxwex / 2, stats$means - stats$sems, 1:length(data) + bxppars$boxwex / 2, stats$means -stats$sems, lend='butt', lty=pars$semlty, lwd=pars$semlwd, col=pars$semcol)
     }
 }
 
