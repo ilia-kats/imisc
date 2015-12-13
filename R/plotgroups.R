@@ -18,24 +18,26 @@ plotgroups.boxplot <- function(data, stats, colors, ylim, features, barwidth, bx
         segments(1:length(data), stats$means + stats$sds, 1:length(data), stats$means - stats$sds, col="black", lwd=1 * lwd.base)
     }
 
-    if (!("median" %in% features))
-        bxppars$medlty="blank"
+    if (!("median" %in% features)) {
+        bxppars$medlty <- "blank"
+        bxppars$medpch <- NA
+    }
     if (!("box" %in% features)) {
-        bxppars$boxlty="blank"
-        bxppars$boxfill="transparent"
+        bxppars$boxlty <- "blank"
+        bxppars$boxfill <- "transparent"
     }
     if (!("iqr" %in% features)) {
-        bxppars$whisklty="blank"
-        bxppars$staplelty="blank"
+        bxppars$whisklty <- "blank"
+        bxppars$staplelty <- "blank"
     } else {
-        bxppars$whisklty="22"
-        bxppars$staplelty="22"
+        bxppars$whisklty <- "22"
+        bxppars$staplelty <- "22"
     }
     dots <- list(...)
     pars <- list(notch=TRUE, las=1, notch.frac=0.9, outpch=NA)
     if (length(dots) > 0)
-        pars <- list.merge(pars, dots)
-    do.call(boxplot, list.merge(pars, list(x=data, xaxt="n", col=colors, yaxt='n', pars=bxppars, add=TRUE)))
+        pars <- list.merge(pars, dots, list(pars=bxppars))
+    do.call(boxplot, list.merge(pars, list(x=data, xaxt="n", col=colors, yaxt='n', add=TRUE))) # have to pass bxppars twice because bxp only takes some pars from ...
     if ("mean" %in% features)
         segments(1:length(data) - bxppars$boxwex / 2, stats$means, 1:length(data) + bxppars$boxwex / 2, stats$means, col="red", lwd=lwd.mean, lend='butt')
     if ("sem" %in% features) {
@@ -130,22 +132,26 @@ plotgroups.barplot <- function(data, stats, colors, ylim, features, barwidth, wh
 
 #' @export
 #' @importFrom rlist list.merge
-plotgroups.vioplot <- function(data, stats, colors, ylim, features, barwidth, ...)
+plotgroups.vioplot <- function(data, stats, colors, ylim, features, barwidth, boxpars, boxwidth=barwidth/4, ...)
 {
     if (!requireNamespace("vioplot", quietly = TRUE))
         stop("Please install the vioplot package for this plot.")
     if (!missing(ylim))
         return(range(unlist(data)))
     library("sm") # needed by vioplot
-    warning("features argument will be ignored. Vioplot package always plots median + iqr")
     colors <- rep_len(colors, length(data))
     dots <- list(...)
     pars <- list(drawRect=TRUE)
     if (length(dots) > 0)
         pars <- list.merge(pars, dots)
     mapply(function(data, color, i){
-            do.call(vioplot::vioplot, list.merge(pars, list(x=data, col=color, at=i, add=TRUE, wex=barwidth)))
+            do.call(vioplot::vioplot, list.merge(pars, list(x=data, col=color, at=i, add=TRUE, wex=barwidth, drawRect=FALSE)))
         }, data, colors, 1:length(data))
+    if (is.null(dots$drawRect) || dots$drawRect == TRUE) {
+        if (missing(boxpars))
+            boxpars <- list(notch=FALSE)
+        do.call(plotgroups.boxplot, list.merge(boxpars, list(data=data, stats=stats, colors=rep("white", length(data)), features=features, barwidth=boxwidth, notch=FALSE)))
+    }
 }
 
 #' Plot several groups of repeated observations.
@@ -279,7 +285,11 @@ plotgroups <- function(
                         ...)
 {
     names.style <- match.arg(names.style)
-    features <- match.arg(features, several.ok=TRUE)
+    if (!is.null(features) && length(features) > 0) {
+        features <- match.arg(features, several.ok=TRUE)
+    } else {
+        features <- character(0)
+    }
 
     stats <- list(means=c(), sds=c(), sems=c(), medians=c(), boxmax=c(), iqrmax=c(), boxmin=c(), iqrmin=c())
     for (i in 1:length(data)) {
@@ -455,7 +465,7 @@ plotgroups <- function(
     do.call(plot.fun, c(list(data=data, stats=stats, colors=colors, features=features, barwidth=barwidth), plot.fun.pars))
     if (!is.null(extrafun))
         extrafun(data, stats, colors, features, barwidth)
-    axis(2, ...)
+    axis(2, lwd=lwd.base, ...)
     title(main=main, ylab=ylab)
     box(lwd=par("lwd"))
 
