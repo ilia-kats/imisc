@@ -151,11 +151,11 @@ plotgroups.vioplot <- function(data, stats, colors, ylim, features, barwidth, bo
     mapply(function(data, color, i){
             do.call(vioplot::vioplot, list.merge(pars, list(x=data, col=color, at=i, add=TRUE, wex=barwidth, drawRect=FALSE)))
         }, data, colors, 1:length(data))
-    if (is.null(dots$drawRect) || dots$drawRect == TRUE) {
-        if (missing(boxpars))
-            boxpars <- list(notch=FALSE)
-        do.call(plotgroups.boxplot, list.merge(boxpars, list(data=data, stats=stats, colors=rep("white", length(data)), features=features, barwidth=boxwidth, notch=FALSE)))
-    }
+    if (missing(boxpars))
+        boxpars <- list()
+    if (is.null(boxpars$notch))
+        boxpars$notch <- FALSE
+    do.call(plotgroups.boxplot, list.merge(boxpars, list(data=data, stats=stats, colors=rep("white", length(data)), features=features, barwidth=boxwidth)))
 }
 
 #' Plot several groups of repeated observations.
