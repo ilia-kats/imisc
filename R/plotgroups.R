@@ -40,7 +40,7 @@ plotgroups.boxplot <- function(data, stats, colors, ylim, features, barwidth, bx
         bxppars$staplelty <- "22"
     }
 
-    do.call(boxplot, list.merge(pars, list(x=data, xaxt="n", col=colors, yaxt='n', add=TRUE)))
+    toreturn <- do.call(boxplot, list.merge(pars, list(x=data, xaxt="n", col=colors, yaxt='n', add=TRUE)))
     if ("mean" %in% features)
         segments(1:length(data) - bxppars$boxwex / 2, stats$means, 1:length(data) + bxppars$boxwex / 2, stats$means, lend='butt', lty=pars$meanlty, lwd=pars$meanlwd, col=pars$meancol)
         points(1:length(data), stats$means, pch=pars$meanpch, cex=pars$meancex, col=pars$meancol)
@@ -48,6 +48,7 @@ plotgroups.boxplot <- function(data, stats, colors, ylim, features, barwidth, bx
         segments(1:length(data) - bxppars$boxwex / 2, stats$means + stats$sems, 1:length(data) + bxppars$boxwex / 2, stats$means +stats$sems, lend='butt', lty=pars$semlty, lwd=pars$semlwd, col=pars$semcol)
         segments(1:length(data) - bxppars$boxwex / 2, stats$means - stats$sems, 1:length(data) + bxppars$boxwex / 2, stats$means -stats$sems, lend='butt', lty=pars$semlty, lwd=pars$semlwd, col=pars$semcol)
     }
+    invisible(toreturn)
 }
 
 threeparamsstats <- function(stats, features)
@@ -95,7 +96,7 @@ plotgroups.beeswarm <- function(data, stats, colors, ylim, features, barwidth, p
     if (length(dots) > 0)
         pars <- list.merge(pars, dots)
 
-    do.call(beeswarm::beeswarm, list.merge(pars, list(x=data, corralWidth=barwidth, add=TRUE, col=adjustcolor(colors, alpha.f=palpha), yaxs='i', xaxt='n')))
+    toreturn <- do.call(beeswarm::beeswarm, list.merge(pars, list(x=data, corralWidth=barwidth, add=TRUE, col=adjustcolor(colors, alpha.f=palpha), yaxs='i', xaxt='n')))
 
     bars <- threeparamsstats(stats, features)
 
@@ -106,6 +107,7 @@ plotgroups.beeswarm <- function(data, stats, colors, ylim, features, barwidth, p
         if (!is.null(b))
             segments(1:length(data) - barwidth / 2, b, 1:length(data) + barwidth / 2, b, col=bxpcols, lend='butt', lwd=bxplwd)
     }
+    invisible(toreturn)
 }
 
 #' @export
@@ -132,6 +134,7 @@ plotgroups.barplot <- function(data, stats, colors, ylim, features, barwidth, wh
         if (!is.null(b))
             segments(1:length(data) - whiskerswidth / 2, b, 1:length(data) + whiskerswidth / 2, b, col=whiskerscols, lend='butt', lwd=whiskerslwd)
     }
+    invisible(NULL)
 }
 
 #' @export
@@ -148,14 +151,18 @@ plotgroups.vioplot <- function(data, stats, colors, ylim, features, barwidth, bo
     pars <- list(drawRect=TRUE)
     if (length(dots) > 0)
         pars <- list.merge(pars, dots)
-    mapply(function(data, color, i){
-            do.call(vioplot::vioplot, list.merge(pars, list(x=data, col=color, at=i, add=TRUE, wex=barwidth, drawRect=FALSE)))
+    vioplot.results <- mapply(function(data, color, i){
+            vioplot.results <- do.call(vioplot::vioplot, list.merge(pars, list(x=data, col=color, at=i, add=TRUE, wex=barwidth, drawRect=FALSE)))
+            vioplot.results
         }, data, colors, 1:length(data))
+    vioplot.toreturn <- lapply(seq_len(nrow(vioplot.results)), function(i)unlist(vioplot.results[i,]))
+    names(vioplot.toreturn) <- rownames(vioplot.results)
     if (missing(boxpars))
         boxpars <- list()
     if (is.null(boxpars$notch))
         boxpars$notch <- FALSE
-    do.call(plotgroups.boxplot, list.merge(boxpars, list(data=data, stats=stats, colors=boxcol, features=features, barwidth=boxwidth)))
+    bxp.toreturn <- do.call(plotgroups.boxplot, list.merge(boxpars, list(data=data, stats=stats, colors=boxcol, features=features, barwidth=boxwidth)))
+    invisible(list(vioplot=vioplot.toreturn, boxplot=bxp.toreturn))
 }
 
 #' Plot several groups of repeated observations.
@@ -309,7 +316,7 @@ plotgroups <- function(
     }
 
     ylim.usr <- NULL
-    if (!is.finite(ylim[1]) || !is.finite(ylim[2])) {
+    if (!is.null(ylim) && (!is.finite(ylim[1]) || !is.finite(ylim[2]))) {
         ylim.usr <- ylim
         ylim <- NULL
     }
@@ -466,7 +473,7 @@ plotgroups <- function(
 
     plot.window(xlim=c(0.5, length(data) + 0.5), ylim=c(ylim[1], ylim[2] + legendmargin + signifmargin), xaxs='i', yaxs='i')
 
-    do.call(plot.fun, c(list(data=data, stats=stats, colors=colors, features=features, barwidth=barwidth), plot.fun.pars))
+    plotfunret <- do.call(plot.fun, c(list(data=data, stats=stats, colors=colors, features=features, barwidth=barwidth), plot.fun.pars))
     if (!is.null(extrafun))
         extrafun(data, stats, colors, features, barwidth)
     axis(2, lwd=lwd.base, ...)
@@ -489,18 +496,20 @@ plotgroups <- function(
     }
 
     if (!is.null(signif.test)) {
+            signif.test.ret <- vector("list", length(signif.test))
         for (i in 1:length(signif.test)) {
-            p <- signif.test.fun(data[[signif.test[[i]][1]]], data[[signif.test[[i]][2]]])$p.value
+            signif.test.ret[[i]]$test <- signif.test.fun(data[[signif.test[[i]][1]]], data[[signif.test[[i]][2]]])
+            p <- signif.test.ret[[i]]$test$p.value
             label <- signif.test.text(p)
             if (!is.null(label)) {
                 begin <- signif.test[[i]][1] + (1 - barwidth) / 2
                 end <- signif.test[[i]][2] - (1 - barwidth) / 2
                 mid <- (end - begin) / 2 + begin
                 base <- signifbase + signiflines[i] * lineheight
-                p <- signif.test.fun(data[[signif.test[[i]][1]]], data[[signif.test[[i]][2]]])$p.value
                 lines(c(begin, begin, end, end), c(base - 0.3 * legendmargin, base, base, base - 0.3 * legendmargin), lwd=signif.test.lwd, col=signif.test.col, lend="butt")
                 do.call(text, c(list(x=mid, y=base + 0.2 * legendmargin, labels=label, adj=c(0.5, 0), col=signif.test.col), signif.test.pars))
             }
+            signif.test.ret[[i]]$label <- label
         }
     }
 
@@ -560,5 +569,8 @@ plotgroups <- function(
         do.call("clip", as.list(par("usr")))
         sapply(seq(from=1.5, length.out=length(uniquegenes) - 1, by=1), function(x)abline(h=x, lwd=lwd.base))
     }
-    invisible(NULL)
+    toreturn <- list(stats=stats, plotfun=plotfunret)
+    if (length(signif.test.ret))
+        toreturn$signiftest <- signif.test.ret[order(intervals.order)]
+    invisible(toreturn)
 }
