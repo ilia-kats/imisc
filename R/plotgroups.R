@@ -136,7 +136,7 @@ plotgroups.barplot <- function(data, stats, colors, ylim, features, barwidth, wh
 
 #' @export
 #' @importFrom rlist list.merge
-plotgroups.vioplot <- function(data, stats, colors, ylim, features, barwidth, boxpars, boxwidth=barwidth/4, ...)
+plotgroups.vioplot <- function(data, stats, colors, ylim, features, barwidth, boxpars, boxcol="white", boxwidth=barwidth/4, ...)
 {
     if (!requireNamespace("vioplot", quietly = TRUE))
         stop("Please install the vioplot package for this plot.")
@@ -155,7 +155,7 @@ plotgroups.vioplot <- function(data, stats, colors, ylim, features, barwidth, bo
         boxpars <- list()
     if (is.null(boxpars$notch))
         boxpars$notch <- FALSE
-    do.call(plotgroups.boxplot, list.merge(boxpars, list(data=data, stats=stats, colors=rep("white", length(data)), features=features, barwidth=boxwidth)))
+    do.call(plotgroups.boxplot, list.merge(boxpars, list(data=data, stats=stats, colors=boxcol, features=features, barwidth=boxwidth)))
 }
 
 #' Plot several groups of repeated observations.
