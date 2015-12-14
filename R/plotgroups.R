@@ -173,9 +173,9 @@ plotgroups.vioplot <- function(data, stats, colors, ylim, features, barwidth, bo
 #' and proteins above the plot) or by cell line.
 #' @param data List, each element is a vector of replicates for one combination of parameters
 #' @param names Character vector of X axis labels
-#' @param colors Colors for plotting. Note that a group of observations is identified by consecutive
-#'        occurrence of the same color
-#' @param legend.text Character vector of group names
+#' @param colors Colors for plotting
+#' @param legend.text Character vector of the same length as \code{data} giving the group names.
+#'        A group of observations is identified by consecutive occurrence of the same name.
 #' @param legend.col Colors for group annotations. Defaults to plotting colors
 #' @param legend.pars Parameters for group annotation. Will be passed to \code{\link[base]{text}}
 #' @param legend.lwd Line width for grouping annotations. Defaults to \code{par("lwd")}
@@ -229,8 +229,8 @@ plotgroups.vioplot <- function(data, stats, colors, ylim, features, barwidth, bo
 #' for (i in 1:14) data[[i]] <- rnorm(50, i, 0.5)
 #' names <- rep(c('gene1', 'gene2', 'gene3', 'gene1 gene2', 'gene1 gene3', 'gene2 gene3', 'gene1 gene2 gene3'),
 #'      times=2)
-#' colors <- rep(c("green", "blue"), each=7)
-#' legend.text <- c("protein1", "protein2")
+#' colors <- c("green", "blue")
+#' legend.text <- rep(c("protein1", "protein2"), each=7)
 #' plotgroups(data, names, colors, legend.text,
 #'            plot.fun=plotgroups.beeswarm, features=c('mean', 'sd'), ylim=c(0,Inf))
 #' plotgroups(data, names, colors, legend.text,
@@ -426,9 +426,12 @@ plotgroups <- function(
     inchestouser <- (ylim[2] - ylim[1]) / par("pin")[2]
     legendmarginfactor <- (ylim[2] - ylim[1]) / par("pin")[2] * 1.8
     lineheight <- strheight("\n", units="inches") * inchestouser
-    if (is.null(legendmargin)) {
-        legendmargin <- max(max(strheight(legend.text, units="inches")) * inchestouser, lineheight)
-        legendbase <- ylim[2]
+    legendbase <- ylim[2]
+    if (!is.null(legend.text)) {
+        grouplength <- rle(legend.text)$lengths
+        colors <- rep(colors, times=grouplength)
+        if (is.null(legendmargin))
+            legendmargin <- max(max(strheight(legend.text, units="inches")) * inchestouser, lineheight)
     }
     signifmargin <- 0
     if (!is.null(signif.test)) {
@@ -481,9 +484,8 @@ plotgroups <- function(
     box(lwd=par("lwd"))
 
     if (!is.null(legend.text)) {
-        rlength <- rle(colors)$lengths
-        segs.begin <- c(1, cumsum(rlength)[-length(rlength)] + 1) - barwidth / 2
-        segs.end <- cumsum(rlength) + barwidth / 2
+        segs.begin <- c(1, cumsum(grouplength)[-length(grouplength)] + 1) - barwidth / 2
+        segs.end <- cumsum(grouplength) + barwidth / 2
         if (is.null(legend.col)) {
             cols <- unique(colors)
         } else {
@@ -492,7 +494,7 @@ plotgroups <- function(
         segments(segs.begin, legendbase, segs.end, legendbase, lwd=legend.lwd, col=cols, lend="butt")
 
         mids <- (segs.end - segs.begin) / 2 + segs.begin
-        do.call(text, c(list(x=mids, y=legendbase + 0.3 * legendmargin, labels=legend.text, adj=c(0.5, 0), col=cols), legend.pars))
+        do.call(text, c(list(x=mids, y=legendbase + 0.3 * legendmargin, labels=unique(legend.text), adj=c(0.5, 0), col=cols), legend.pars))
     }
 
     if (!is.null(signif.test)) {
