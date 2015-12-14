@@ -9,113 +9,165 @@ plotgroups(data, names, colors = NULL, legend.text = NULL,
   names.split = NULL, names.italicize = NULL, names.style = c("plain",
   "combinatorial"), names.pch = 19, names.pch.cex = 1,
   names.pch.adj = 0.5, names.margin = 0.5, names.rotate = NULL,
-  features = c("median", "box", "iqr", "mean", "sd", "sem"), cex.xlab = 1,
-  ylim = NULL, legendmargin = NULL, plot.fun = plotgroups.boxplot,
-  plot.fun.pars = list(), barwidth = 0.8, main = NULL,
-  ylab = deparse(substitute(data)), signif.test = NULL,
+  features = c("median", "box", "iqr", "mean", "sd", "sem"), range = 1.5,
+  cex.xlab = 1, ylim = NULL, legendmargin = NULL,
+  plot.fun = plotgroups.boxplot, plot.fun.pars = list(), barwidth = 0.8,
+  main = NULL, ylab = deparse(substitute(data)), signif.test = NULL,
   signif.test.fun = t.test, signif.test.text = function(p) paste0("p=",
   formatC(p, digits = 3, format = "g")), signif.test.col = "black",
   signif.test.lwd = legend.lwd, signif.test.pars = legend.pars,
-  extrafun = NULL, ...)
+  extrafun.before = NULL, extrafun.after = NULL, ...)
 }
 \arguments{
-\item{data}{List, each element is a vector of replicates for one combination of parameters}
+\item{data}{list, each element is a vector of replicates for one combination of parameters}
 
-\item{names}{Character vector of X axis labels}
+\item{names}{character vector of X axis labels}
 
-\item{colors}{Colors for plotting. Note that a group of observations is identified by consecutive
-occurrence of the same color}
+\item{colors}{colors for plotting}
 
-\item{legend.text}{Character vector of group names}
+\item{legend.text}{character vector of the same length as \code{data} giving the group names.
+A group of observations is identified by consecutive occurrence of the same name.}
 
-\item{legend.col}{Colors for group annotations. Defaults to plotting colors}
+\item{legend.col}{colors for group annotations. Defaults to plotting colors}
 
-\item{legend.pars}{Parameters for group annotation. Will be passed to \code{\link[base]{text}}}
+\item{legend.pars}{parameters for group annotation. Will be passed to \code{\link[base]{text}}}
 
-\item{legend.lwd}{Line width for grouping annotations. Defaults to \code{par("lwd")}}
+\item{legend.lwd}{line width for grouping annotations. Defaults to \code{par("lwd")}}
 
-\item{names.split}{Character by which to split the \code{names}. Only useful in combination with
+\item{names.split}{character by which to split the \code{names}. Only useful in combination with
 \code{names.italicize} or \code{names.style='combinatorial'}}
 
-\item{names.italicize}{If a part of a \code{name} is to be written in italic text, the part is
+\item{names.italicize}{if a part of a \code{name} is to be written in italic text, the part is
 identified by this character. I.e. The name is first split by \code{names.split}, each
 fragment containing \code{names.italicize} is rendered in italics}
 
-\item{names.style}{How the \code{names} are to be rendered.
+\item{names.style}{how the \code{names} are to be rendered.
 \describe{
-      \item{plain}{Each name will be written as-is below the plot}
-      \item{combinatorial}{Names will be split by \code{names.split}, unique strings will be
+      \item{plain}{each name will be written as-is below the plot}
+      \item{combinatorial}{names will be split by \code{names.split}, unique strings will be
             printed at the bottom-left, and observations whose name contains the string will
             be identified by prining \code{names.pch} below the respective bar. Useful if e.g.
            assaying different combinations of single/double/triple knock-outs.}
            }}
 
-\item{names.pch}{Character to be used for annotation of observations when
+\item{names.pch}{character to be used for annotation of observations when
 \code{names.style='combinatorial'}}
 
-\item{names.pch.cex}{Character expansion factor for \code{names.pch}}
+\item{names.pch.cex}{character expansion factor for \code{names.pch}}
 
-\item{names.pch.adj}{Text adjustment for \code{names.pch}. See \code{\link[base]{text}}}
+\item{names.pch.adj}{text adjustment for \code{names.pch}. See \code{\link[base]{text}}}
 
-\item{names.margin}{Spacing between the bottom edge of the plot and the annotation, in inches}
+\item{names.margin}{spacing between the bottom edge of the plot and the annotation, in inches}
 
-\item{names.rotate}{Only used when \code{names.style='plain'}. Degrees by which to rotate the
+\item{names.rotate}{only used when \code{names.style='plain'}. Degrees by which to rotate the
 annotation strings.}
 
-\item{features}{Which features of the sample distributions to plot. Availability of features
-depends on \code{plot.fun}}
+\item{features}{which features of the sample distributions to plot. Availability of features
+depends on \code{plot.fun} Can contain any combination of the following:
+\describe{
+          \item{median}{the median}
+          \item{box}{the first and third quartiles}
+          \item{iqr}{the most extreme data point no more than \code{range} times the
+                     interquartile range away from the \code{box}}
+          \item{mean}{the mean}
+          \item{sd}{mean \eqn{\pm} standard deviation}
+          \item{sem}{mean \eqn{\pm} standard error of the mean}}}
 
-\item{cex.xlab}{Character expansion factor for X axis annotation}
+\item{range}{determines how far the the \code{iqr} whiskers will extend out from the box,
+if they are to be plotted}
+
+\item{cex.xlab}{character expansion factor for X axis annotation}
 
 \item{ylim}{Y axis limits. Will be determined automatically if \code{NULL}. If not \code{NULL} but
 only one limit is finite, the other will be determined automatically.}
 
-\item{legendmargin}{Spacing between the upper-most data point/feature and the upper edge of the
+\item{legendmargin}{spacing between the upper-most data point/feature and the upper edge of the
 plot, required for group annotation. Will be determined automatically if \code{NULL}}
 
-\item{plot.fun}{Function to do the actual plotting. See \code{\link{plot.groups.boxplot}},
-\code{\link{plot.groups.beeswarm}}}
+\item{plot.fun}{function to do the actual plotting. See \code{\link{plotgroups.boxplot}},
+\code{\link{plotgroups.beeswarm}}, \code{\link{plotgroups.barplot}},
+\code{\link{plotgroups.vioplot}}}
 
-\item{plot.fun.pars}{Additional parameters to pass to \code{plot.fun}}
+\item{plot.fun.pars}{additional parameters to pass to \code{plot.fun}}
 
-\item{barwidth}{Width of the individual bars/boxes etc. as fraction of 1}
+\item{barwidth}{width of the individual bars/boxes etc. as fraction of 1}
 
-\item{main}{Main title}
+\item{main}{main title}
 
 \item{ylab}{Y axis label}
 
-\item{signif.test}{List of 2-element integer vectors giving the elements of \code{data} to be
+\item{signif.test}{list of 2-element integer vectors giving the elements of \code{data} to be
 tested for significant differences.}
 
-\item{signif.test.fun}{Function to perform the significance testing. Must accept 2 vectors and
+\item{signif.test.fun}{function to perform the significance testing. Must accept 2 vectors and
 return a list containing at least the element \code{p.value}}
 
-\item{signif.test.text}{Function accepting a p-value and returning a formatted string to be used
+\item{signif.test.text}{function accepting a p-value and returning a formatted string to be used
 for plotting or \code{NULL} if this p-value is not to be plotted (e.g. if it is not
 significant)}
 
-\item{signif.test.lwd}{Line width for p-value annotations.}
+\item{signif.test.lwd}{line width for p-value annotations.}
 
-\item{signif.test.pars}{Parameters for group annotation. Will be passed to \code{\link[base]{text}}}
+\item{signif.test.pars}{parameters for group annotation. Will be passed to \code{\link[base]{text}}}
 
-\item{extrafun}{Additional function to call after plotting, e.g. to add addtional elements
+\item{extrafun.before}{additional function to call after the coordinate system has been set up, but
+before plotting, e.g. to add a background grid to the plot}
+
+\item{extrafun.after}{additional function to call after plotting, e.g. to add additional elements
 to the plot}
 
-\item{...}{Additional parameters passed to \code{\link[base]{par}}}
+\item{...}{additional parameters passed to \code{\link[base]{par}}}
+}
+\value{
+list with the following components:
+        \item{stats}{summary statistics of the data.}
+        \item{plotfun}{Return value of \code{plot.fun}}
+        If significance testing was performed, also contains a component \code{signiftest}, which
+        is a list with elements ordered by \code{signif.test} with the following components:
+        \item{test}{return value of the testing function}
+        \item{label}{return value of \code{signif.test.text}}
 }
 \description{
-Plot serveral groups of repeated observations, e.g. abundance/half-life of several
+Plot several groups of repeated observations, e.g. abundance/half-life of several
 proteins each observed in several cell lines in several replicates. Observations can be grouped
 either by protein (in which case cell lines will be annotated as X axis labels
 and proteins above the plot) or by cell line.
+}
+\details{
+This is a wrapper function around \code{plot.fun}. It sets up the coordinate system, calls
+\code{extrafun.before} followed by \code{plot.fun}, which does the actual plotting, and
+\code{extrafun.after}. All three functions are passed the follwing arguments:
+\describe{
+          \item{data}{the \code{data} argument passed to \code{plotgroups}}
+          \item{stats}{summary statistics of the data. List with the following components:
+                       \describe{
+                              \item{means}{means}
+                              \item{sds}{standard deviations}
+                              \item{sems}{standard errors of the mean}
+                              \item{medians}{medians}
+                              \item{boxmax}{third quartile}
+                              \item{boxmin}{tirst quartile}
+                              \item{iqrmax}{the maximal data point within \code{range} times
+                                            the interquartile range of \code{boxmax}}
+                              \item{iqrmin}{the minimal data point within \code{range} times
+                                            the interquartile range of \code{boxmmin}}}}
+          \item{colors}{the \code{colors} argument passed to \code{plotgroups}}
+          \item{features}{the \code{features} argument passed to \code{plotgroups}}
+          \item{barwidth}{the \code{barwidth} argument passed to \code{plotgroups}}}
+\code{plot.fun} is additionally passed the arguments given by \code{plot.fun.pars}.
+
+Significance testing is performed by calling \code{signif.test.fun} with two vector arguments
+containing the samples to be compared. \code{signif.test.fun} must return a list containing
+a \code{p.value} element. The p value is passed as single argument to \code{signif.test.text}
+which returns a character vector (or anything usable by \code{\link[graphix]{text}}).
 }
 \examples{
 data <- list()
 for (i in 1:14) data[[i]] <- rnorm(50, i, 0.5)
 names <- rep(c('gene1', 'gene2', 'gene3', 'gene1 gene2', 'gene1 gene3', 'gene2 gene3', 'gene1 gene2 gene3'),
      times=2)
-colors <- rep(c("green", "blue"), each=7)
-legend.text <- c("protein1", "protein2")
+colors <- c("green", "blue")
+legend.text <- rep(c("protein1", "protein2"), each=7)
 plotgroups(data, names, colors, legend.text,
            plot.fun=plotgroups.beeswarm, features=c('mean', 'sd'), ylim=c(0,Inf))
 plotgroups(data, names, colors, legend.text,
@@ -134,7 +186,8 @@ plotgroups(data, names, colors, legend.text,names.style='combinatorial',
            signif.test=list(c(1,3), c(2,5), c(5,8), c(3,10)))
 plotgroups(data, names, colors, legend.text,names.style='combinatorial',
            names.split=" ", names.pch='\\u0394',
-           signif.test=list(c(1,3), c(2,5), c(5,8), c(3,10)), signif.test.text=function(p) {
+           signif.test=list(c(1,3), c(2,5), c(5,8), c(3,10)),
+           signif.test.text=function(p) {
                      if (p < 0.001) {
                          return('***')
                      } else if (p < 0.01) {

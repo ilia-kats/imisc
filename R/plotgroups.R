@@ -1,10 +1,33 @@
-#' @export
-#' @importFrom rlist list.merge
+#' @templateVar plottype boxplot (extended with mean, standard deviation, and standard error of the mean)
+#' @templateVar featuresdesc At the moment, either \code{mean} or \code{median} can be plotted. Also, only one of \code{box}, \code{iqr}, \code{sd}, \code{sem} can be plotted at the moment.
+#' @template plotgroups.-
+#' @param bxppars additional parameters passed to \code{\link[graphics]{boxplot}} as
+#'        sig\code{pars} parameter
+#' @param ... additional parameters passed to \code{\link[graphics]{boxplot}} as \code{...}. Can also
+#'        contain the following:
+#'        \describe{
+#'                  \item{meanlty, meanlwd, meancol, meanpch, meancex}{Mean line type, line width,
+#'                        color, point character, and point size expansion. The default
+#'                        \code{meanpch=NA} suppresses the point, and \code{meanlty="blank"}
+#'                        does so for the line. Note that \code{meanlwd} defaults to 3x the
+#'                        default lwd and \code{meancol} defaults to \code{"red"}}
+#'                  \item{sdwhisklty, sdwhisklwd, sdwhiskcol}{Whisker line type(default:
+#'                        \code{"solid"}), width, and color for standard deviation whiskers.}
+#'                  \item{sdstaplelty, sdstaplelwd, sdstaplecol}{Staple (end of whisker) line type,
+#'                        width, and color for standard deviation whiskers}
+#'                  \item{semwhisklty, semwhisklwd, semwhiskcol}{Whisker line type(default:
+#'                        \code{"solid"}), width, and color (default: \code{"#EDA217"})
+#'                        for standard error of the mean whiskers.}
+#'                  \item{semstaplelty, semstaplelwd, semstaplecol}{Staple (end of whisker) line type,
+#'                        width, and color (default: \code{"#EDA217"}) for standard error
+#'                        of the mean whiskers}}
+#' @return Same as \code{\link[graphics]{boxplot}}
+#' @seealso \code{\link[graphics]{boxplot}}
 plotgroups.boxplot <- function(data, stats, colors, ylim, features, barwidth, bxppars, ...)
 {
     if (!missing(ylim))
         return(NULL)
-    if (missing(bxppars))
+    if (missing(bxppars) || is.null(bxppars))
         bxppars <- list()
     lwd.base <- par("lwd")
     if (is.null(bxppars$boxwex))
@@ -14,15 +37,10 @@ plotgroups.boxplot <- function(data, stats, colors, ylim, features, barwidth, bx
                  meanlty=1, meanlwd=3*lwd.base, meancol="red", meanpch=NA, meancex=1,
                  sdwhisklty=1, sdwhisklwd=lwd.base, sdwhiskcol="black",
                  sdstaplelty=1, sdstaplelwd=lwd.base, sdstaplecol="black",
-                 semlty=1, semlwd=lwd.base, semcol="#EDA217", sempch=NA, semcex=1)
+                 semwhisklty=0, semwhisklwd=lwd.base, semwhiskcol="#EDA217",
+                 semstaplelty=1, semstaplelwd=lwd.base, semstaplecol="#EDA217")
     if (length(dots) > 0)
         pars <- list.merge(pars, dots, list(pars=bxppars))
-
-    if ("sd" %in% features) {
-        segments(1:length(data) - bxppars$boxwex / 4, stats$means + stats$sds, 1:length(data) + bxppars$boxwex / 4, stats$means + stats$sds, lend='butt', col=pars$sdstaplecol, lwd=pars$sdstaplelwd, lty=pars$sdstaplelty)
-        segments(1:length(data) - bxppars$boxwex / 4, stats$means - stats$sds, 1:length(data) + bxppars$boxwex / 4, stats$means - stats$sds, lend='butt', col=pars$sdstaplecol, lwd=pars$sdstaplelwd, lty=pars$sdstaplelty)
-        segments(1:length(data), stats$means + stats$sds, 1:length(data), stats$means - stats$sds, lend='butt', col=pars$sdwhiskcol, lty=pars$sdwhisklty, lwd=pars$sdwhisklwd)
-    }
 
     if (!("median" %in% features)) {
         bxppars$medlty <- "blank"
@@ -40,13 +58,32 @@ plotgroups.boxplot <- function(data, stats, colors, ylim, features, barwidth, bx
         bxppars$staplelty <- "22"
     }
 
+    plotsd <- function() {
+        if ("sd" %in% features) {
+            segments(1:length(data) - bxppars$boxwex / 4, stats$means + stats$sds, 1:length(data) + bxppars$boxwex / 4, stats$means + stats$sds, lend='butt', col=pars$sdstaplecol, lwd=pars$sdstaplelwd, lty=pars$sdstaplelty)
+            segments(1:length(data) - bxppars$boxwex / 4, stats$means - stats$sds, 1:length(data) + bxppars$boxwex / 4, stats$means - stats$sds, lend='butt', col=pars$sdstaplecol, lwd=pars$sdstaplelwd, lty=pars$sdstaplelty)
+            segments(1:length(data), stats$means + stats$sds, 1:length(data), stats$means - stats$sds, lend='butt', col=pars$sdwhiskcol, lty=pars$sdwhisklty, lwd=pars$sdwhisklwd)
+        }
+    }
+
+    havesd <- FALSE
+    if (max(stats$means + stats$sds) > max(stats$boxmax) && min(stats$means - stats$sds) < min(stats$boxmin)) {
+        plotsd()
+        havesd <- TRUE
+    }
     toreturn <- do.call(boxplot, list.merge(pars, list(x=data, xaxt="n", col=colors, yaxt='n', add=TRUE, range=stats$range)))
+    if (!havesd) {
+        plotsd()
+        havesd <- TRUE
+    }
+
     if ("mean" %in% features)
         segments(1:length(data) - bxppars$boxwex / 2, stats$means, 1:length(data) + bxppars$boxwex / 2, stats$means, lend='butt', lty=pars$meanlty, lwd=pars$meanlwd, col=pars$meancol)
         points(1:length(data), stats$means, pch=pars$meanpch, cex=pars$meancex, col=pars$meancol)
     if ("sem" %in% features) {
-        segments(1:length(data) - bxppars$boxwex / 2, stats$means + stats$sems, 1:length(data) + bxppars$boxwex / 2, stats$means +stats$sems, lend='butt', lty=pars$semlty, lwd=pars$semlwd, col=pars$semcol)
-        segments(1:length(data) - bxppars$boxwex / 2, stats$means - stats$sems, 1:length(data) + bxppars$boxwex / 2, stats$means -stats$sems, lend='butt', lty=pars$semlty, lwd=pars$semlwd, col=pars$semcol)
+        segments(1:length(data) - bxppars$boxwex / 2, stats$means + stats$sems, 1:length(data) + bxppars$boxwex / 2, stats$means +stats$sems, lend='butt', lty=pars$semstaplelty, lwd=pars$semstaplelwd, col=pars$semstaplecol)
+        segments(1:length(data) - bxppars$boxwex / 2, stats$means - stats$sems, 1:length(data) + bxppars$boxwex / 2, stats$means -stats$sems, lend='butt', lty=pars$semstaplelty, lwd=pars$semstaplelwd, col=pars$semstaplecol)
+        segments(1:length(data), stats$means +stats$sems, 1:length(data), stats$means - stats$sems, lend='butt', lty=pars$semwhisklty, lwd=pars$semwhisklwd, col=pars$semwhiskcol)
     }
     invisible(toreturn)
 }
@@ -77,8 +114,16 @@ threeparamsstats <- function(stats, features)
     bars
 }
 
-#' @export
-#' @importFrom rlist list.merge
+#' @templateVar plottype beeswarm plot
+#' @templateVar additionaldesc Requires the \code{beeswarm} package.
+#' @templateVar featuresdesc At the moment, either \code{mean} or \code{median} can be plotted. Also, only one of \code{box}, \code{iqr}, \code{sd}, \code{sem} can be plotted at the moment.
+#' @template plotgroups.-
+#' @param palpha opacity of the individual points
+#' @param bxplwd line width for the simplified boxplot
+#' @param bxpcols colors for the simplified boxplot
+#' @param ... additional parameters passed to \code{\link[beeswarm]{beeswarm}}
+#' @return Same as \code{\link[beeswarm]{beeswarm}}
+#' @seealso \code{\link[beeswarm]{beeswarm}}
 plotgroups.beeswarm <- function(data, stats, colors, ylim, features, barwidth, palpha=1, bxplwd=par("lwd"), bxpcols=colors, ...)
 {
     if (!requireNamespace("beeswarm", quietly = TRUE))
@@ -110,9 +155,15 @@ plotgroups.beeswarm <- function(data, stats, colors, ylim, features, barwidth, p
     invisible(toreturn)
 }
 
-#' @export
-#' @importFrom rlist list.merge
-plotgroups.barplot <- function(data, stats, colors, ylim, features, barwidth, whiskerswidth=barwidth, whiskerslwd=par("lwd"), whiskerscols="black", bordercols="black", ...)
+#' @templateVar plottype barplot
+#' @templateVar featuresdesc At the moment, either \code{mean} or \code{median} can be plotted. Also, only one of \code{box}, \code{iqr}, \code{sd}, \code{sem} can be plotted at the moment.
+#' @template plotgroups.-
+#' @param whiskerswidth width of the whiskers as fraction of 1
+#' @param whiskerslwd line width of the whiskers
+#' @param whiskerscol color of the whiskers
+#' @param bordercol color of the border
+#' @param ... additional parameters passed to \code{\link[graphics]{rect}}
+plotgroups.barplot <- function(data, stats, colors, ylim, features, barwidth, whiskerswidth=barwidth, whiskerslwd=par("lwd"), whiskerscol="black", bordercol="black", ...)
 {
     if ("mean" %in% features && "median" %in% features)
         stop("both mean and median present in features, only one can be plotted")
@@ -125,10 +176,10 @@ plotgroups.barplot <- function(data, stats, colors, ylim, features, barwidth, wh
     pars <- list(names.arg=NULL)
     if (length(dots) > 0)
         pars <- list.merge(pars, dots)
-    do.call(rect, list.merge(pars, list(xleft=1:length(data) - barwidth/2, ybottom=par("usr")[3], xright=1:length(data) + barwidth/2, ytop=bars$m, col=colors, border=bordercols)))
+    do.call(rect, list.merge(pars, list(xleft=1:length(data) - barwidth/2, ybottom=par("usr")[3], xright=1:length(data) + barwidth/2, ytop=bars$m, col=colors, border=bordercol)))
 
     if (!is.null(bars$u) && !is.null(bars$l))
-        segments(1:length(data), bars$l, 1:length(data), bars$u, col=whiskerscols, lend='butt', lwd=whiskerslwd)
+        segments(1:length(data), bars$l, 1:length(data), bars$u, col=whiskerscol, lend='butt', lwd=whiskerslwd)
 
     for (b in bars[c("u", "l")]) {
         if (!is.null(b))
@@ -137,8 +188,17 @@ plotgroups.barplot <- function(data, stats, colors, ylim, features, barwidth, wh
     invisible(NULL)
 }
 
-#' @export
-#' @importFrom rlist list.merge
+#' @templateVar plottype violin plot
+#' @templateVar additionaldesc Requires the \code{vioplot} package.
+#' @template plotgroups.-
+#' @param boxpars parameters passed to \code{\link{plotgroups.boxplot}}
+#' @param boxcol color of the boxes
+#' @param boxwidth width of the boxes
+#' @param ... addtional parameters passed to \code{\link[vioplot]{vioplot}}
+#' @return List with the following components:
+#'        \item{vioplot}{List containing the aggregated return values of \code{\link[vioplot]{vioplot}}}
+#'        \item{boxplot}{Return value of \code{\link{plotgroups.boxplot}}}
+#' @seealso \code{\link[vioplot]{vioplot}}
 plotgroups.vioplot <- function(data, stats, colors, ylim, features, barwidth, boxpars, boxcol="white", boxwidth=barwidth/4, ...)
 {
     if (!requireNamespace("vioplot", quietly = TRUE))
@@ -157,7 +217,7 @@ plotgroups.vioplot <- function(data, stats, colors, ylim, features, barwidth, bo
         }, data, colors, 1:length(data))
     vioplot.toreturn <- lapply(seq_len(nrow(vioplot.results)), function(i)unlist(vioplot.results[i,]))
     names(vioplot.toreturn) <- rownames(vioplot.results)
-    if (missing(boxpars))
+    if (missing(boxpars) || is.null(boxpars))
         boxpars <- list()
     if (is.null(boxpars$notch))
         boxpars$notch <- FALSE
@@ -167,65 +227,111 @@ plotgroups.vioplot <- function(data, stats, colors, ylim, features, barwidth, bo
 
 #' Plot several groups of repeated observations.
 #'
-#' Plot serveral groups of repeated observations, e.g. abundance/half-life of several
+#' Plot several groups of repeated observations, e.g. abundance/half-life of several
 #' proteins each observed in several cell lines in several replicates. Observations can be grouped
 #' either by protein (in which case cell lines will be annotated as X axis labels
 #' and proteins above the plot) or by cell line.
-#' @param data List, each element is a vector of replicates for one combination of parameters
-#' @param names Character vector of X axis labels
-#' @param colors Colors for plotting
-#' @param legend.text Character vector of the same length as \code{data} giving the group names.
+#'
+#' This is a wrapper function around \code{plot.fun}. It sets up the coordinate system, calls
+#' \code{extrafun.before} followed by \code{plot.fun}, which does the actual plotting, and
+#' \code{extrafun.after}. All three functions are passed the follwing arguments:
+#' \describe{
+#'           \item{data}{the \code{data} argument passed to \code{plotgroups}}
+#'           \item{stats}{summary statistics of the data. List with the following components:
+#'                        \describe{
+#'                               \item{means}{means}
+#'                               \item{sds}{standard deviations}
+#'                               \item{sems}{standard errors of the mean}
+#'                               \item{medians}{medians}
+#'                               \item{boxmax}{third quartile}
+#'                               \item{boxmin}{tirst quartile}
+#'                               \item{iqrmax}{the maximal data point within \code{range} times
+#'                                             the interquartile range of \code{boxmax}}
+#'                               \item{iqrmin}{the minimal data point within \code{range} times
+#'                                             the interquartile range of \code{boxmmin}}}}
+#'           \item{colors}{the \code{colors} argument passed to \code{plotgroups}}
+#'           \item{features}{the \code{features} argument passed to \code{plotgroups}}
+#'           \item{barwidth}{the \code{barwidth} argument passed to \code{plotgroups}}}
+#' \code{plot.fun} is additionally passed the arguments given by \code{plot.fun.pars}.
+#'
+#' Significance testing is performed by calling \code{signif.test.fun} with two vector arguments
+#' containing the samples to be compared. \code{signif.test.fun} must return a list containing
+#' a \code{p.value} element. The p value is passed as single argument to \code{signif.test.text}
+#' which returns a character vector (or anything usable by \code{\link[graphix]{text}}).
+#'
+#' @param data list, each element is a vector of replicates for one combination of parameters
+#' @param names character vector of X axis labels
+#' @param colors colors for plotting
+#' @param legend.text character vector of the same length as \code{data} giving the group names.
 #'        A group of observations is identified by consecutive occurrence of the same name.
-#' @param legend.col Colors for group annotations. Defaults to plotting colors
-#' @param legend.pars Parameters for group annotation. Will be passed to \code{\link[base]{text}}
-#' @param legend.lwd Line width for grouping annotations. Defaults to \code{par("lwd")}
-#' @param names.split Character by which to split the \code{names}. Only useful in combination with
+#' @param legend.col colors for group annotations. Defaults to plotting colors
+#' @param legend.pars parameters for group annotation. Will be passed to \code{\link[base]{text}}
+#' @param legend.lwd line width for grouping annotations. Defaults to \code{par("lwd")}
+#' @param names.split character by which to split the \code{names}. Only useful in combination with
 #'        \code{names.italicize} or \code{names.style='combinatorial'}
-#' @param names.italicize If a part of a \code{name} is to be written in italic text, the part is
+#' @param names.italicize if a part of a \code{name} is to be written in italic text, the part is
 #'        identified by this character. I.e. The name is first split by \code{names.split}, each
 #'        fragment containing \code{names.italicize} is rendered in italics
-#' @param names.style How the \code{names} are to be rendered.
+#' @param names.style how the \code{names} are to be rendered.
 #'        \describe{
-#'              \item{plain}{Each name will be written as-is below the plot}
-#'              \item{combinatorial}{Names will be split by \code{names.split}, unique strings will be
+#'              \item{plain}{each name will be written as-is below the plot}
+#'              \item{combinatorial}{names will be split by \code{names.split}, unique strings will be
 #'                    printed at the bottom-left, and observations whose name contains the string will
 #'                    be identified by prining \code{names.pch} below the respective bar. Useful if e.g.
 #'                   assaying different combinations of single/double/triple knock-outs.}
 #'                   }
-#' @param names.pch Character to be used for annotation of observations when
+#' @param names.pch character to be used for annotation of observations when
 #'        \code{names.style='combinatorial'}
-#' @param names.pch.cex Character expansion factor for \code{names.pch}
-#' @param names.pch.adj Text adjustment for \code{names.pch}. See \code{\link[base]{text}}
-#' @param names.margin Spacing between the bottom edge of the plot and the annotation, in inches
-#' @param names.rotate Only used when \code{names.style='plain'}. Degrees by which to rotate the
+#' @param names.pch.cex character expansion factor for \code{names.pch}
+#' @param names.pch.adj text adjustment for \code{names.pch}. See \code{\link[base]{text}}
+#' @param names.margin spacing between the bottom edge of the plot and the annotation, in inches
+#' @param names.rotate only used when \code{names.style='plain'}. Degrees by which to rotate the
 #'        annotation strings.
-#' @param features Which features of the sample distributions to plot. Availability of features
-#'        depends on \code{plot.fun}
-#' @param range Determines how far the the iqr whiskers will extend out from the box, if they are to
-#'        be plotted
-#' @param cex.xlab Character expansion factor for X axis annotation
+#' @param features which features of the sample distributions to plot. Availability of features
+#'        depends on \code{plot.fun} Can contain any combination of the following:
+#'        \describe{
+#'                  \item{median}{the median}
+#'                  \item{box}{the first and third quartiles}
+#'                  \item{iqr}{the most extreme data point no more than \code{range} times the
+#'                             interquartile range away from the \code{box}}
+#'                  \item{mean}{the mean}
+#'                  \item{sd}{mean \eqn{\pm} standard deviation}
+#'                  \item{sem}{mean \eqn{\pm} standard error of the mean}}
+#' @param range determines how far the the \code{iqr} whiskers will extend out from the box,
+#'        if they are to be plotted
+#' @param cex.xlab character expansion factor for X axis annotation
 #' @param ylim Y axis limits. Will be determined automatically if \code{NULL}. If not \code{NULL} but
 #'        only one limit is finite, the other will be determined automatically.
-#' @param legendmargin Spacing between the upper-most data point/feature and the upper edge of the
+#' @param legendmargin spacing between the upper-most data point/feature and the upper edge of the
 #'        plot, required for group annotation. Will be determined automatically if \code{NULL}
-#' @param plot.fun Function to do the actual plotting. See \code{\link{plot.groups.boxplot}},
-#'        \code{\link{plot.groups.beeswarm}}
-#' @param plot.fun.pars Additional parameters to pass to \code{plot.fun}
-#' @param barwidth Width of the individual bars/boxes etc. as fraction of 1
-#' @param main Main title
+#' @param plot.fun function to do the actual plotting. See \code{\link{plotgroups.boxplot}},
+#'        \code{\link{plotgroups.beeswarm}}, \code{\link{plotgroups.barplot}},
+#'        \code{\link{plotgroups.vioplot}}
+#' @param plot.fun.pars additional parameters to pass to \code{plot.fun}
+#' @param barwidth width of the individual bars/boxes etc. as fraction of 1
+#' @param main main title
 #' @param ylab Y axis label
-#' @param signif.test List of 2-element integer vectors giving the elements of \code{data} to be
+#' @param signif.test list of 2-element integer vectors giving the elements of \code{data} to be
 #'        tested for significant differences.
-#' @param signif.test.fun Function to perform the significance testing. Must accept 2 vectors and
+#' @param signif.test.fun function to perform the significance testing. Must accept 2 vectors and
 #'        return a list containing at least the element \code{p.value}
-#' @param signif.test.text Function accepting a p-value and returning a formatted string to be used
+#' @param signif.test.text function accepting a p-value and returning a formatted string to be used
 #'        for plotting or \code{NULL} if this p-value is not to be plotted (e.g. if it is not
 #'        significant)
-#' @param signif.test.lwd Line width for p-value annotations.
-#' @param signif.test.pars Parameters for group annotation. Will be passed to \code{\link[base]{text}}
-#' @param extrafun Additional function to call after plotting, e.g. to add addtional elements
+#' @param signif.test.lwd line width for p-value annotations.
+#' @param signif.test.pars parameters for group annotation. Will be passed to \code{\link[base]{text}}
+#' @param extrafun.before additional function to call after the coordinate system has been set up, but
+#'        before plotting, e.g. to add a background grid to the plot
+#' @param extrafun.after additional function to call after plotting, e.g. to add additional elements
 #'        to the plot
-#' @param ... Additional parameters passed to \code{\link[base]{par}}
+#' @param ... additional parameters passed to \code{\link[base]{par}}
+#' @return list with the following components:
+#'         \item{stats}{summary statistics of the data.}
+#'         \item{plotfun}{Return value of \code{plot.fun}}
+#'         If significance testing was performed, also contains a component \code{signiftest}, which
+#'         is a list with elements ordered by \code{signif.test} with the following components:
+#'         \item{test}{return value of the testing function}
+#'         \item{label}{return value of \code{signif.test.text}}
 #' @examples
 #' data <- list()
 #' for (i in 1:14) data[[i]] <- rnorm(50, i, 0.5)
@@ -251,7 +357,8 @@ plotgroups.vioplot <- function(data, stats, colors, ylim, features, barwidth, bo
 #'            signif.test=list(c(1,3), c(2,5), c(5,8), c(3,10)))
 #' plotgroups(data, names, colors, legend.text,names.style='combinatorial',
 #'            names.split=" ", names.pch='\u0394',
-#'            signif.test=list(c(1,3), c(2,5), c(5,8), c(3,10)), signif.test.text=function(p) {
+#'            signif.test=list(c(1,3), c(2,5), c(5,8), c(3,10)),
+#'            signif.test.text=function(p) {
 #'                      if (p < 0.001) {
 #'                          return('***')
 #'                      } else if (p < 0.01) {
@@ -295,7 +402,8 @@ plotgroups <- function(
                         signif.test.col="black",
                         signif.test.lwd=legend.lwd,
                         signif.test.pars=legend.pars,
-                        extrafun=NULL,
+                        extrafun.before=NULL,
+                        extrafun.after=NULL,
                         ...)
 {
     names.style <- match.arg(names.style)
@@ -479,12 +587,14 @@ plotgroups <- function(
 
     plot.window(xlim=c(0.5, length(data) + 0.5), ylim=c(ylim[1], ylim[2] + legendmargin + signifmargin), xaxs='i', yaxs='i')
 
+    if (!is.null(extrafun.before))
+        extrafun.before(data, stats, colors, features, barwidth)
     plotfunret <- do.call(plot.fun, c(list(data=data, stats=stats, colors=colors, features=features, barwidth=barwidth), plot.fun.pars))
-    if (!is.null(extrafun))
-        extrafun(data, stats, colors, features, barwidth)
-    axis(2, lwd=lwd.base, ...)
+    if (!is.null(extrafun.after))
+        extrafun.after(data, stats, colors, features, barwidth)
+    do.call(axis, list.merge(pars, list(side=2)))
     title(main=main, ylab=ylab)
-    box(lwd=par("lwd"))
+    do.call(box, pars)
 
     if (!is.null(legend.text)) {
         segs.begin <- c(1, cumsum(grouplength)[-length(grouplength)] + 1) - barwidth / 2
