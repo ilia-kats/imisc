@@ -40,7 +40,7 @@ plotgroups.boxplot <- function(data, stats, colors, ylim, features, barwidth, bx
         bxppars$staplelty <- "22"
     }
 
-    toreturn <- do.call(boxplot, list.merge(pars, list(x=data, xaxt="n", col=colors, yaxt='n', add=TRUE)))
+    toreturn <- do.call(boxplot, list.merge(pars, list(x=data, xaxt="n", col=colors, yaxt='n', add=TRUE, range=stats$range)))
     if ("mean" %in% features)
         segments(1:length(data) - bxppars$boxwex / 2, stats$means, 1:length(data) + bxppars$boxwex / 2, stats$means, lend='butt', lty=pars$meanlty, lwd=pars$meanlwd, col=pars$meancol)
         points(1:length(data), stats$means, pch=pars$meanpch, cex=pars$meancex, col=pars$meancol)
@@ -201,6 +201,8 @@ plotgroups.vioplot <- function(data, stats, colors, ylim, features, barwidth, bo
 #'        annotation strings.
 #' @param features Which features of the sample distributions to plot. Availability of features
 #'        depends on \code{plot.fun}
+#' @param range Determines how far the the iqr whiskers will extend out from the box, if they are to
+#'        be plotted
 #' @param cex.xlab Character expansion factor for X axis annotation
 #' @param ylim Y axis limits. Will be determined automatically if \code{NULL}. If not \code{NULL} but
 #'        only one limit is finite, the other will be determined automatically.
@@ -278,6 +280,7 @@ plotgroups <- function(
                         names.margin=0.5,
                         names.rotate=NULL,
                         features=c("median", "box", "iqr", "mean", "sd", "sem"),
+                        range=1.5,
                         cex.xlab=1,
                         ylim=NULL,
                         legendmargin=NULL,
@@ -302,12 +305,12 @@ plotgroups <- function(
         features <- character(0)
     }
 
-    stats <- list(means=c(), sds=c(), sems=c(), medians=c(), boxmax=c(), iqrmax=c(), boxmin=c(), iqrmin=c())
+    stats <- list(means=c(), sds=c(), sems=c(), medians=c(), boxmax=c(), iqrmax=c(), boxmin=c(), iqrmin=c(), range=range)
     for (i in 1:length(data)) {
         stats$means[i] <- mean(data[[i]])
         stats$sds[i] <- sd(data[[i]])
         stats$sems[i] <- stats$sds[i] / sqrt(length(data[[i]]))
-        bstats <- boxplot.stats(data[[i]], do.conf=F, do.out=F)$stats
+        bstats <- boxplot.stats(data[[i]], coef=range, do.conf=F, do.out=F)$stats
         stats$medians[i] <- bstats[3]
         stats$boxmax[i] <- bstats[4]
         stats$iqrmax[i] <- bstats[5]
