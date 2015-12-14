@@ -548,8 +548,8 @@ plotgroups <- function(
     if (!is.null(signif.test)) {
         if (!requireNamespace("IRanges", quietly = TRUE))
             stop("Please install the IRanges package if significance testing is to be performed.")
-        intervals.start <- sapply(signif.test, function(x)x[1])
-        intervals.stop <- sapply(signif.test, function(x)x[2])
+        intervals.start <- sapply(signif.test, function(x)min(x))
+        intervals.stop <- sapply(signif.test, function(x)max(x))
         intervals.order <- order(intervals.start, intervals.stop)
         signif.test <- signif.test[intervals.order]
         query <- IRanges::IRanges(intervals.start[intervals.order], intervals.stop[intervals.order])
