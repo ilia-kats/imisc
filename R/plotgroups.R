@@ -527,7 +527,7 @@ plotgroups <- function(
         legend.width <- max(strwidth(labels, units="inches", cex=cex.xlab))
         legend.height <- sin(names.rotate * pi / 180) * legend.width + names.margin
         mai <- par("mai")
-        mai[1] <- legend.height + names.margin
+        mai[1] <- legend.height + 0.5 * names.margin
         par(mai=mai)
     }
 
