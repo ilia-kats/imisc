@@ -472,7 +472,7 @@ plotgroups <- function(
     }
 
     dots <- list(...)
-    pars <- list(oma=c(0,0,0,0), las=1, mgp=c(2, 0.5, 0), ljoin="mitre", lend="square", lwd=2, lheight=1.2)
+    pars <- list(oma=c(0,0,0,0), las=1, mgp=c(2, 0.5, 0), ljoin="mitre", lend="square", lwd=2)
     if (length(dots) > 0)
         pars <- list.merge(pars, dots)
     do.call(par, pars)
@@ -535,7 +535,6 @@ plotgroups <- function(
     # can't use grconvertY here because plot.window has not been called yet, have
     # to do the conversion manually
     inchestouser <- (ylim[2] - ylim[1]) / par("pin")[2]
-    legendmarginfactor <- (ylim[2] - ylim[1]) / par("pin")[2] * 1.8
     lineheight <- strheight("\n", units="inches") * inchestouser
     legendbase <- ylim[2]
     if (!is.null(legend.text)) {
@@ -607,7 +606,7 @@ plotgroups <- function(
         segments(segs.begin, legendbase, segs.end, legendbase, lwd=legend.lwd, col=cols, lend="butt")
 
         mids <- (segs.end - segs.begin) / 2 + segs.begin
-        do.call(text, c(list(x=mids, y=legendbase + 0.3 * legendmargin, labels=unique(legend.text), adj=c(0.5, 0), col=cols), legend.pars))
+        do.call(text, c(list(x=mids, y=legendbase + 0.2 * legendmargin, labels=unique(legend.text), adj=c(0.5, 0), col=cols), legend.pars))
     }
 
     if (!is.null(signif.test)) {
@@ -685,7 +684,7 @@ plotgroups <- function(
         sapply(seq(from=1.5, length.out=length(uniquegenes) - 1, by=1), function(x)abline(h=x, lwd=lwd.base))
     }
     toreturn <- list(stats=stats, plotfun=plotfunret)
-    if (length(signif.test.ret))
+    if (!is.null(signif.test) && length(signif.test.ret))
         toreturn$signiftest <- signif.test.ret[order(intervals.order)]
     invisible(toreturn)
 }
