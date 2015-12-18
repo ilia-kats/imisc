@@ -489,6 +489,8 @@ plotgroups <- function(
         } else {
             uniquegenes <- unique(names)
         }
+        lheight <- par("lheight")
+        par(lheight=1.5)
         uniquegenes <- uniquegenes[nchar(uniquegenes) > 0]
         uniquegenes <- uniquegenes[order(uniquegenes, decreasing=TRUE)]
         legend.height <- strheight(paste0(uniquegenes, collapse="\n"), units="inches", cex=cex.xlab)
@@ -499,7 +501,7 @@ plotgroups <- function(
         mai <- par("mai")
         mai[1] <- legend.height + names.margin * legend.height / length(uniquegenes)
         mai[2] <- max(mai[2], legend.width)
-        par(mai=mai)
+        par(mai=mai, lheight=lheight)
     } else {
         if (is.null(names.rotate))
             names.rotate <- 45
