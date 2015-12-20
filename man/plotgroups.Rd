@@ -7,12 +7,12 @@
 plotgroups(data, names, colors = NULL, legend.text = NULL,
   legend.col = NULL, legend.pars = list(font = 2), legend.lwd = NULL,
   names.split = NULL, names.italicize = NULL, names.style = c("plain",
-  "combinatorial"), names.pch = 19, names.pch.cex = 1,
-  names.pch.adj = 0.5, names.margin = 0.5, names.rotate = NULL,
-  features = c("median", "box", "iqr", "mean", "sd", "sem"), range = 1.5,
-  cex.xlab = 1, ylim = NULL, legendmargin = NULL,
-  plot.fun = plotgroups.boxplot, plot.fun.pars = list(), barwidth = 0.8,
-  main = NULL, ylab = deparse(substitute(data)), signif.test = NULL,
+  "combinatorial"), names.pch.cex = 1, names.pch = 19, names.adj = NA,
+  names.margin = 0.5, names.rotate = NULL, features = c("median", "box",
+  "iqr", "mean", "sd", "sem"), range = 1.5, cex.xlab = 1, ylim = NULL,
+  legendmargin = NULL, plot.fun = plotgroups.boxplot,
+  plot.fun.pars = list(), barwidth = 0.8, main = NULL,
+  ylab = deparse(substitute(data)), signif.test = NULL,
   signif.test.fun = t.test, signif.test.text = function(p) paste0("p=",
   formatC(p, digits = 3, format = "g")), signif.test.col = "black",
   signif.test.lwd = legend.lwd, signif.test.pars = legend.pars,
@@ -50,12 +50,15 @@ fragment containing \code{names.italicize} is rendered in italics}
            assaying different combinations of single/double/triple knock-outs.}
            }}
 
+\item{names.pch.cex}{character expansion factor for \code{names.pch}}
+
 \item{names.pch}{character to be used for annotation of observations when
 \code{names.style='combinatorial'}}
 
-\item{names.pch.cex}{character expansion factor for \code{names.pch}}
-
-\item{names.pch.adj}{text adjustment for \code{names.pch}. See \code{\link[base]{text}}}
+\item{names.adj}{text adjustment for \code{names} or \code{names.pch}, depending on
+\code{names.style}.See \code{\link[base]{text}}. Defaults to 1 for
+\code{names.style = 'plain'}, unless \code{names.rotate = 0}, in which case it
+defaults to 0.5. Defaults to 0.5 for \code{names.style='combinatorial'}.}
 
 \item{names.margin}{spacing between the bottom edge of the plot and the annotation, in inches}
 
@@ -166,10 +169,13 @@ data <- list()
 for (i in 1:14) data[[i]] <- rnorm(50, i, 0.5)
 names <- rep(c('gene1', 'gene2', 'gene3', 'gene1 gene2', 'gene1 gene3', 'gene2 gene3', 'gene1 gene2 gene3'),
      times=2)
+names2 <- as.character(rep(1:7,times=2))
 colors <- c("green", "blue")
 legend.text <- rep(c("protein1", "protein2"), each=7)
 plotgroups(data, names, colors, legend.text,
            plot.fun=plotgroups.beeswarm, features=c('mean', 'sd'), ylim=c(0,Inf))
+plotgroups(data, testnames, colors, legend.text,plot.fun=plotgroups.vioplot, ylim=c(0,Inf),
+           names.rotate=0, names.adj=c(0.5, 1))
 plotgroups(data, names, colors, legend.text,
            plot.fun=plotgroups.beeswarm, features=c('mean', 'sd'),
            names.style='combinatorial', names.split=" ", names.pch='\\u0394',

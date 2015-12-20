@@ -280,10 +280,13 @@ plotgroups.vioplot <- function(data, stats, colors, ylim, features, barwidth, bo
 #'                    be identified by prining \code{names.pch} below the respective bar. Useful if e.g.
 #'                   assaying different combinations of single/double/triple knock-outs.}
 #'                   }
+#' @param names.adj text adjustment for \code{names} or \code{names.pch}, depending on
+#'                  \code{names.style}.See \code{\link[base]{text}}. Defaults to 1 for
+#'                  \code{names.style = 'plain'}, unless \code{names.rotate = 0}, in which case it
+#'                  defaults to 0.5. Defaults to 0.5 for \code{names.style='combinatorial'}.
 #' @param names.pch character to be used for annotation of observations when
 #'        \code{names.style='combinatorial'}
 #' @param names.pch.cex character expansion factor for \code{names.pch}
-#' @param names.pch.adj text adjustment for \code{names.pch}. See \code{\link[base]{text}}
 #' @param names.margin spacing between the bottom edge of the plot and the annotation, in inches
 #' @param names.rotate only used when \code{names.style='plain'}. Degrees by which to rotate the
 #'        annotation strings.
@@ -337,10 +340,13 @@ plotgroups.vioplot <- function(data, stats, colors, ylim, features, barwidth, bo
 #' for (i in 1:14) data[[i]] <- rnorm(50, i, 0.5)
 #' names <- rep(c('gene1', 'gene2', 'gene3', 'gene1 gene2', 'gene1 gene3', 'gene2 gene3', 'gene1 gene2 gene3'),
 #'      times=2)
+#' names2 <- as.character(rep(1:7,times=2))
 #' colors <- c("green", "blue")
 #' legend.text <- rep(c("protein1", "protein2"), each=7)
 #' plotgroups(data, names, colors, legend.text,
 #'            plot.fun=plotgroups.beeswarm, features=c('mean', 'sd'), ylim=c(0,Inf))
+#' plotgroups(data, testnames, colors, legend.text,plot.fun=plotgroups.vioplot, ylim=c(0,Inf),
+#'            names.rotate=0, names.adj=c(0.5, 1))
 #' plotgroups(data, names, colors, legend.text,
 #'            plot.fun=plotgroups.beeswarm, features=c('mean', 'sd'),
 #'            names.style='combinatorial', names.split=" ", names.pch='\u0394',
@@ -381,9 +387,9 @@ plotgroups <- function(
                         names.split=NULL,
                         names.italicize=NULL,
                         names.style=c("plain", "combinatorial"),
-                        names.pch=19,
                         names.pch.cex=1,
-                        names.pch.adj=0.5,
+                        names.pch=19,
+                        names.adj=NA,
                         names.margin=0.5,
                         names.rotate=NULL,
                         features=c("median", "box", "iqr", "mean", "sd", "sem"),
@@ -484,6 +490,8 @@ plotgroups <- function(
     if (names.style=="combinatorial") {
         if (is.null(names.rotate))
             names.rotate <- 0
+        if (is.na(names.adj) || is.null(names.adj))
+            names.adj <- 0.5
         if (!is.null(names.split)) {
             uniquegenes <- unique(unlist(strsplit(names, names.split, fixed=TRUE)))
         } else {
@@ -505,6 +513,13 @@ plotgroups <- function(
     } else {
         if (is.null(names.rotate))
             names.rotate <- 45
+        if (is.na(names.adj) || is.null(names.adj)) {
+            if (names.rotate == 0) {
+                names.adj <- 0.5
+            } else {
+                names.adj <- 1
+            }
+        }
         labels <- names
         if (!is.null(names.italicize)) {
             if (!is.null(names.split)) {
@@ -522,12 +537,17 @@ plotgroups <- function(
                         }, USE.NAMES=F), collapse='," ",'), ")"))
                 }, USE.NAMES=F)
         }
+        if (length(names.adj) == 2) {
+            vadj <- names.adj[2]
+        } else {
+            vadj <- names.adj
+        }
         lineheight <- strheight("\n", units="inches", cex=cex.xlab)
         names.margin <- names.margin * lineheight
         legend.width <- max(strwidth(labels, units="inches", cex=cex.xlab))
-        legend.height <- sin(names.rotate * pi / 180) * legend.width + names.margin
+        legend.height <- sin(names.rotate * pi / 180) * legend.width + names.margin + vadj * max(strheight(labels, units="inches", cex=cex.xlab)) * 1.2
         mai <- par("mai")
-        mai[1] <- legend.height + 0.5 * names.margin
+        mai[1] <- legend.height
         par(mai=mai)
     }
 
@@ -630,7 +650,7 @@ plotgroups <- function(
     }
 
     if (!is.null(labels) && names.style=="plain") {
-        text(1:length(data), grconvertY(grconvertY(par("usr")[3], from="user", to="inches") - names.margin, from="inches", to="user"), srt=names.rotate, adj=1, labels=labels, xpd=TRUE, cex=cex.xlab)
+        text(1:length(data), grconvertY(grconvertY(par("usr")[3], from="user", to="inches") - names.margin, from="inches", to="user"), srt=names.rotate, adj=names.adj, labels=labels, xpd=TRUE, cex=cex.xlab)
     } else if (!is.null(names)) {
         plt <- par("plt")
         par(plt=c(plt[1],plt[2],0, grconvertY(legend.height, from="inches", to="nfc")))
@@ -652,7 +672,7 @@ plotgroups <- function(
         pch <- rep(names.pch, length.out=npoints)
         cex <- rep(names.pch.cex, length.out=npoints)
         rotate <- rep(names.rotate, length.out=npoints)
-        adj <- rep(names.pch.adj, length.out=npoints)
+        adj <- rep(names.adj, length.out=npoints)
         if (is.character(pch)) {
             pfun <- text
             parg <- "labels"
