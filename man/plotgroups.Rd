@@ -170,11 +170,12 @@ for (i in 1:14) data[[i]] <- rnorm(50, i, 0.5)
 names <- rep(c('gene1', 'gene2', 'gene3', 'gene1 gene2', 'gene1 gene3', 'gene2 gene3', 'gene1 gene2 gene3'),
      times=2)
 names2 <- as.character(rep(1:7,times=2))
+names2[2] <- "abc\\nefg"
 colors <- c("green", "blue")
 legend.text <- rep(c("protein1", "protein2"), each=7)
 plotgroups(data, names, colors, legend.text,
            plot.fun=plotgroups.beeswarm, features=c('mean', 'sd'), ylim=c(0,Inf))
-plotgroups(data, testnames, colors, legend.text,plot.fun=plotgroups.vioplot, ylim=c(0,Inf),
+plotgroups(data, names2, colors, legend.text,plot.fun=plotgroups.vioplot, ylim=c(0,Inf),
            names.rotate=0, names.adj=c(0.5, 1))
 plotgroups(data, names, colors, legend.text,
            plot.fun=plotgroups.beeswarm, features=c('mean', 'sd'),
@@ -186,6 +187,15 @@ plotgroups(data, names, colors, legend.text,
            names.style='combinatorial', names.split=" ", names.pch=19,
            main="test", plot.fun=plotgroups.barplot, features=c("mean", "sd"),
            plot.fun.pars=list(whiskerswidth=0.6))
+
+names.pch <- rep('\\u0394', 24)
+names.adj <- rep(0.5, 24)
+names.rotate <- rep(0, 24)
+names.pch[2] <- 'S158T'
+names.adj[2] <- 0
+names.rotate[2] <- 90
+plotgroups(data, names, colors, legend.text,names.style='combinatorial', names.split=" ",
+           names.pch=names.pch, names.rotate=names.rotate, names.adj=names.adj)
 ## significance testing
 plotgroups(data, names, colors, legend.text,names.style='combinatorial',
            names.split=" ", names.pch='\\u0394',

@@ -341,11 +341,12 @@ plotgroups.vioplot <- function(data, stats, colors, ylim, features, barwidth, bo
 #' names <- rep(c('gene1', 'gene2', 'gene3', 'gene1 gene2', 'gene1 gene3', 'gene2 gene3', 'gene1 gene2 gene3'),
 #'      times=2)
 #' names2 <- as.character(rep(1:7,times=2))
+#' names2[2] <- "abc\nefg"
 #' colors <- c("green", "blue")
 #' legend.text <- rep(c("protein1", "protein2"), each=7)
 #' plotgroups(data, names, colors, legend.text,
 #'            plot.fun=plotgroups.beeswarm, features=c('mean', 'sd'), ylim=c(0,Inf))
-#' plotgroups(data, testnames, colors, legend.text,plot.fun=plotgroups.vioplot, ylim=c(0,Inf),
+#' plotgroups(data, names2, colors, legend.text,plot.fun=plotgroups.vioplot, ylim=c(0,Inf),
 #'            names.rotate=0, names.adj=c(0.5, 1))
 #' plotgroups(data, names, colors, legend.text,
 #'            plot.fun=plotgroups.beeswarm, features=c('mean', 'sd'),
@@ -357,6 +358,15 @@ plotgroups.vioplot <- function(data, stats, colors, ylim, features, barwidth, bo
 #'            names.style='combinatorial', names.split=" ", names.pch=19,
 #'            main="test", plot.fun=plotgroups.barplot, features=c("mean", "sd"),
 #'            plot.fun.pars=list(whiskerswidth=0.6))
+#'
+#' names.pch <- rep('\u0394', 24)
+#' names.adj <- rep(0.5, 24)
+#' names.rotate <- rep(0, 24)
+#' names.pch[2] <- 'S158T'
+#' names.adj[2] <- 0
+#' names.rotate[2] <- 90
+#' plotgroups(data, names, colors, legend.text,names.style='combinatorial', names.split=" ",
+#'            names.pch=names.pch, names.rotate=names.rotate, names.adj=names.adj)
 #' ## significance testing
 #' plotgroups(data, names, colors, legend.text,names.style='combinatorial',
 #'            names.split=" ", names.pch='\u0394',
@@ -482,11 +492,15 @@ plotgroups <- function(
     if (length(dots) > 0)
         pars <- list.merge(pars, dots)
     do.call(par, pars)
-    plot.new()
+    #plot.new()
     lwd.base <- par("lwd")
     if (is.null(legend.lwd))
         legend.lwd <- lwd.base
 
+    lheight <- par("lheight")
+    par(lheight=1)
+    lineheight <- strheight("\n", units="inches", cex=cex.xlab)
+    mai <- par("mai")
     if (names.style=="combinatorial") {
         if (is.null(names.rotate))
             names.rotate <- 0
@@ -497,19 +511,98 @@ plotgroups <- function(
         } else {
             uniquegenes <- unique(names)
         }
-        lheight <- par("lheight")
-        par(lheight=1.5)
+
         uniquegenes <- uniquegenes[nchar(uniquegenes) > 0]
         uniquegenes <- uniquegenes[order(uniquegenes, decreasing=TRUE)]
-        legend.height <- strheight(paste0(uniquegenes, collapse="\n"), units="inches", cex=cex.xlab)
+
+        if (!is.null(names.split)) {
+            npoints <- sum(sapply(strsplit(names, names.split, fixed=TRUE), function(x)length(x)))
+        } else {
+            npoints <- sum(length(names))
+        }
+        pch <- rep(names.pch, length.out=npoints)
+        cex <- rep(names.pch.cex, length.out=npoints) * cex.xlab
+        rotate <- rep(names.rotate, length.out=npoints)
+        adj <- rep(names.adj, length.out=npoints)
+
+        imat <- matrix(nrow=length(uniquegenes), ncol=length(names))
+        currlength <- 0
+        for (i in 1:length(names)) {
+            if (nchar(names[i]) > 0) {
+                if (!is.null(names.split)) {
+                    genes <- strsplit(names[i], names.split, fixed=TRUE)[[1]]
+                } else {
+                    genes <- names[i]
+                }
+                newlength <- currlength + length(genes)
+                currgenes <- which(uniquegenes %in% genes)
+                for (j in 1:length(genes)) {
+                    imat[currgenes[j],i] <- currlength + j
+                }
+                currlength <- newlength
+            }
+        }
+
+        if (!is.list(adj))
+           adj <- sapply(adj, function(x)c(x, 0), simplify=FALSE)
+        heights <- apply(imat, 1, function(x) {
+            x <- x[!is.na(x)]
+            max(mapply(function(pch, cex, rotate, adj) {
+                if (!is.character(pch)) {
+                    lineheight
+                } else {
+                    height <- sin(rotate * pi / 180) * strwidth(pch, units="inches", cex=cex) + 0.5 * lineheight
+                    if (rotate != 90)
+                        height <- height + adj[1] * strheight(pch, units="inches", cex=cex)
+                    height
+                }
+            }, pch[x], cex[x], rotate[x], adj[x], SIMPLIFY=TRUE), lineheight)
+        })
+        hfracs <- heights / sum(heights)
+        hfracscs <- c(0,cumsum(hfracs))[1:length(hfracs)]
+        ycoords <- hfracscs +  0.25 * min(hfracs)
+
+        legend.height <- max(sum(heights), strheight(paste0(uniquegenes, collapse="\n"), units="inches", cex=cex.xlab))
         legend.width <- max(strwidth(uniquegenes, units="inches"))
-        mar <- par("mar")
-        mar[1] <- 0
-        par(mar=mar)
-        mai <- par("mai")
-        mai[1] <- legend.height + names.margin * legend.height / length(uniquegenes)
+        layout(matrix(c(2,1), byrow=TRUE), heights=c(1, lcm(cm(legend.height))))
+
         mai[2] <- max(mai[2], legend.width)
-        par(mai=mai, lheight=lheight)
+        par(mai=c(0, mai[2], 0, mai[4]))
+        plot.new()
+        plot.window(xlim=c(0.5, length(data) + 0.5), ylim=c(0,1), xaxs='i', yaxs='i')
+
+        mapply(function(x, y) {
+            i <- imat[y,x]
+            if (!is.na(i)) {
+                if (is.character(pch[i])) {
+                    pfun <- text
+                    parg <- "labels"
+                } else {
+                    pfun <- points
+                    parg <- "pch"
+                }
+                args <- list(x=x, y=ycoords[y], adj=adj[[i]], cex=cex[i], srt=rotate[i], xpd=TRUE)
+                args[[parg]] <- pch[i]
+                do.call(pfun, args)
+            }
+        }, rep(1:length(names), times=length(uniquegenes)), rep(1:length(uniquegenes), each=length(names)))
+
+        labels <- uniquegenes
+        if (!is.null(names.italicize)) {
+            if (!is.na(names.italicize)) {
+                labels <- sapply(labels, function(x) {if (grepl(names.italicize, x, fixed=TRUE)) {x <- as.expression(substitute(italic(x), list(x=x)))}; x}, USE.NAMES=FALSE)
+            } else {
+                labels <- sapply(labels, function(x)as.expression(substitute(italic(x), list(x=x))), USE.NAMES=FALSE)
+            }
+        }
+        text(0.5, ycoords, labels=labels, adj=c(1, 0), cex=cex.xlab, xpd=NA)
+
+        plt <- par("plt")
+        plt[1] <- plt[1] - max(strwidth(uniquegenes, units="figure", cex=cex.xlab))
+        par(plt=plt)
+        plot.window(xlim=c(0,1), ylim=c(0,1), xaxs='i', yaxs='i')
+        do.call("clip", as.list(par("usr")))
+        sapply(hfracscs[2:length(hfracscs - 1)], function(x)abline(h=x, lwd=lwd.base))
     } else {
         if (is.null(names.rotate))
             names.rotate <- 45
@@ -542,14 +635,17 @@ plotgroups <- function(
         } else {
             vadj <- names.adj
         }
-        lineheight <- strheight("\n", units="inches", cex=cex.xlab)
-        names.margin <- names.margin * lineheight
         legend.width <- max(strwidth(labels, units="inches", cex=cex.xlab))
-        legend.height <- sin(names.rotate * pi / 180) * legend.width + names.margin + vadj * max(strheight(labels, units="inches", cex=cex.xlab)) * 1.2
-        mai <- par("mai")
-        mai[1] <- legend.height
-        par(mai=mai)
+        legend.height <- sin(names.rotate * pi / 180) * legend.width + vadj * max(strheight(labels, units="inches", cex=cex.xlab)) + 0.15 * lineheight
+        layout(matrix(c(2,1), byrow=TRUE), heights=c(1, lcm(cm(legend.height))))
+        par(mai=c(0, mai[2], 0, mai[4]))
+        plot.new()
+        plot.window(xlim=c(0.5, length(data) + 0.5), ylim=c(0,1), xaxs='i', yaxs='i')
+        text(1:length(data), 1, srt=names.rotate, adj=names.adj, labels=labels, xpd=NA, cex=cex.xlab)
     }
+    mai[1] <- names.margin * lineheight
+    par(mai=mai, lheight=lheight)
+    plot.new()
 
     if (is.null(colors))
         colors <- "grey"
@@ -649,62 +745,9 @@ plotgroups <- function(
         }
     }
 
-    if (!is.null(labels) && names.style=="plain") {
-        text(1:length(data), grconvertY(grconvertY(par("usr")[3], from="user", to="inches") - names.margin, from="inches", to="user"), srt=names.rotate, adj=names.adj, labels=labels, xpd=TRUE, cex=cex.xlab)
-    } else if (!is.null(names)) {
-        plt <- par("plt")
-        par(plt=c(plt[1],plt[2],0, grconvertY(legend.height, from="inches", to="nfc")))
-        plot.window(xlim=c(0.5, length(data) + 0.5), ylim=c(0.5, length(uniquegenes) + 0.5), xaxs='i', yaxs='i')
-        labels <- uniquegenes
-        if (!is.null(names.italicize)) {
-            if (!is.na(names.italicize)) {
-                labels <- sapply(labels, function(x) {if (grepl(names.italicize, x, fixed=TRUE)) {x <- as.expression(substitute(italic(x), list(x=x)))}; x}, USE.NAMES=FALSE)
-            } else {
-                labels <- sapply(labels, function(x)as.expression(substitute(italic(x), list(x=x))), USE.NAMES=FALSE)
-            }
-        }
-        text(0.5, 1:length(uniquegenes), labels=labels, adj=1, cex=cex.xlab, xpd=NA)
-        if (!is.null(names.split)) {
-            npoints <- sum(sapply(strsplit(names, names.split, fixed=TRUE), function(x)length(x)))
-        } else {
-            npoints <- sum(length(names))
-        }
-        pch <- rep(names.pch, length.out=npoints)
-        cex <- rep(names.pch.cex, length.out=npoints)
-        rotate <- rep(names.rotate, length.out=npoints)
-        adj <- rep(names.adj, length.out=npoints)
-        if (is.character(pch)) {
-            pfun <- text
-            parg <- "labels"
-        } else {
-            pfun <- points
-            parg <- "pch"
-        }
-        currlength <- 0
-        for (i in 1:length(names)) {
-            if (nchar(names[i]) > 0) {
-                if (!is.null(names.split)) {
-                    genes <- strsplit(names[i], names.split, fixed=TRUE)[[1]]
-                } else {
-                    genes <- names[i]
-                }
-                newlength <- currlength + length(genes)
-                currgenes <- which(uniquegenes %in% genes)
-                for (j in 1:length(genes)) {
-                    args <- list(x=i, y=currgenes[j], adj=adj[[currlength + j]], cex=cex.xlab * cex[currlength + j], srt=rotate[currlength + j], xpd=T)
-                    args[[parg]] <- pch[currlength + j]
-                    do.call(pfun, args)
-                }
-                currlength <- newlength
-            }
-        }
-        plt <- par("plt")
-        plt[1] <- plt[1] - max(strwidth(uniquegenes, units="figure", cex=cex.xlab))
-        par(plt=plt)
-        plot.window(xlim=c(0,1), ylim=c(0.5, length(uniquegenes) + 0.5), xaxs='i', yaxs='i')
-        do.call("clip", as.list(par("usr")))
-        sapply(seq(from=1.5, length.out=length(uniquegenes) - 1, by=1), function(x)abline(h=x, lwd=lwd.base))
-    }
+#     if (!is.null(labels) && names.style=="plain") {
+#         text(1:length(data), grconvertY(grconvertY(par("usr")[3], from="user", to="inches") - names.margin, from="inches", to="user"), srt=names.rotate, adj=names.adj, labels=labels, xpd=TRUE, cex=cex.xlab)
+#     }
     toreturn <- list(stats=stats, plotfun=plotfunret)
     if (!is.null(signif.test) && length(signif.test.ret))
         toreturn$signiftest <- signif.test.ret[order(intervals.order)]
