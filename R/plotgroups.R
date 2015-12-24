@@ -360,10 +360,10 @@ plotgroups.vioplot <- function(data, stats, colors, ylim, features, barwidth, bo
 #'            plot.fun.pars=list(whiskerswidth=0.6))
 #'
 #' names.pch <- rep('\u0394', 24)
-#' names.adj <- rep(0.5, 24)
+#' names.adj <- names.adj <- rep(list(c(0.5, 0)), 24)
 #' names.rotate <- rep(0, 24)
 #' names.pch[2] <- 'S158T'
-#' names.adj[2] <- 0
+#' names.adj[[2]] <- c(0, 0.5)
 #' names.rotate[2] <- 90
 #' plotgroups(data, names, colors, legend.text,names.style='combinatorial', names.split=" ",
 #'            names.pch=names.pch, names.rotate=names.rotate, names.adj=names.adj)
