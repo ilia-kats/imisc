@@ -8,18 +8,19 @@ plotgroups(data, names, colors = NULL, legend.text = NULL,
   legend.col = NULL, legend.pars = list(font = 2), legend.lwd = NULL,
   names.split = NULL, names.italicize = NULL, names.style = c("plain",
   "combinatorial"), names.pch.cex = 1, names.pch = 19, names.adj = NA,
-  names.margin = 0.5, names.rotate = NULL, features = c("median", "box",
-  "iqr", "mean", "sd", "sem"), range = 1.5, cex.xlab = 1, ylim = NULL,
-  legendmargin = NULL, plot.fun = plotgroups.boxplot,
-  plot.fun.pars = list(), barwidth = 0.8, main = NULL,
-  ylab = deparse(substitute(data)), signif.test = NULL,
+  names.margin = 0.5, names.rotate = NULL, features = NULL, range = 1.5,
+  cex.xlab = 1, ylim = NULL, legendmargin = NULL,
+  plot.fun = plotgroups.boxplot, plot.fun.pars = list(), barwidth = 0.8,
+  main = NULL, ylab = NULL, signif.test = NULL,
   signif.test.fun = t.test, signif.test.text = function(p) paste0("p=",
   formatC(p, digits = 3, format = "g")), signif.test.col = "black",
   signif.test.lwd = legend.lwd, signif.test.pars = legend.pars,
   extrafun.before = NULL, extrafun.after = NULL, ...)
 }
 \arguments{
-\item{data}{list, each element is a vector of replicates for one combination of parameters}
+\item{data}{list, each element is a vector of replicates for one combination of parameters, or
+each element is a list containing a vector of replicates, in which case the data sets
+will be plotted below each other in separate plots}
 
 \item{names}{character vector of X axis labels}
 
@@ -74,22 +75,28 @@ depends on \code{plot.fun} Can contain any combination of the following:
                      interquartile range away from the \code{box}}
           \item{mean}{the mean}
           \item{sd}{mean \eqn{\pm} standard deviation}
-          \item{sem}{mean \eqn{\pm} standard error of the mean}}}
+          \item{sem}{mean \eqn{\pm} standard error of the mean}}
+Can be a list containing character vectors, in which case the specified feature set will
+apply to the corresponding plot if multiple data sets are plotted (see examples). Will be
+recycled to the number of plots.}
 
 \item{range}{determines how far the the \code{iqr} whiskers will extend out from the box,
-if they are to be plotted}
+if they are to be plotted. Will be recycled to the number of plots.}
 
 \item{cex.xlab}{character expansion factor for X axis annotation}
 
 \item{ylim}{Y axis limits. Will be determined automatically if \code{NULL}. If not \code{NULL} but
-only one limit is finite, the other will be determined automatically.}
+only one limit is finite, the other will be determined automatically. Can be a list containing
+numeric vectors, in which case the limits will apply to the corresponding plot if multiple
+data sets are plotted. Will be recycled to the number of plots.}
 
 \item{legendmargin}{spacing between the upper-most data point/feature and the upper edge of the
 plot, required for group annotation. Will be determined automatically if \code{NULL}}
 
 \item{plot.fun}{function to do the actual plotting. See \code{\link{plotgroups.boxplot}},
 \code{\link{plotgroups.beeswarm}}, \code{\link{plotgroups.barplot}},
-\code{\link{plotgroups.vioplot}}}
+\code{\link{plotgroups.vioplot}}. Can be a list containing functions, in which case the
+functions will apply to the corresponding plot.}
 
 \item{plot.fun.pars}{additional parameters to pass to \code{plot.fun}}
 
@@ -97,27 +104,37 @@ plot, required for group annotation. Will be determined automatically if \code{N
 
 \item{main}{main title}
 
-\item{ylab}{Y axis label}
+\item{ylab}{Y axis label. Will be recycled to the number of plots.}
 
 \item{signif.test}{list of 2-element integer vectors giving the elements of \code{data} to be
-tested for significant differences.}
+tested for significant differences. Can be a list of lists, in which case each element
+will apply to the corresponding plot if multiple data sets are plotted.}
 
 \item{signif.test.fun}{function to perform the significance testing. Must accept 2 vectors and
-return a list containing at least the element \code{p.value}}
+return a list containing at least the element \code{p.value}. Can be a list of functions,
+in which case each element will apply to the corresponding plot if multiple data sets
+are plotted.}
 
 \item{signif.test.text}{function accepting a p-value and returning a formatted string to be used
 for plotting or \code{NULL} if this p-value is not to be plotted (e.g. if it is not
-significant)}
+significant). Can be a list of functions, in which case each element will apply to the
+corresponding plot if multiple data sets are plotted.}
 
-\item{signif.test.lwd}{line width for p-value annotations.}
+\item{signif.test.lwd}{line width for p-value annotations. Can be a list, in which case the lwd
+will apply to the corresponding plot if multiple data sets are plotted.}
 
-\item{signif.test.pars}{parameters for group annotation. Will be passed to \code{\link[base]{text}}}
+\item{signif.test.pars}{parameters for group annotation. Will be passed to \code{\link[base]{text}}.
+Can be a list of lists, in which case each element will apply to the corresponding
+plot if multiple data sets are plotted.}
 
 \item{extrafun.before}{additional function to call after the coordinate system has been set up, but
-before plotting, e.g. to add a background grid to the plot}
+before plotting, e.g. to add a background grid to the plot. Can be a list of functions, in
+which case each element will apply to the corresponding plot if multiple data sets are
+plotted.}
 
 \item{extrafun.after}{additional function to call after plotting, e.g. to add additional elements
-to the plot}
+to the plot. Can be a list of functions, in which case each element will apply to the
+corresponding plot if multiple data sets are plotted.}
 
 \item{...}{additional parameters passed to \code{\link[base]{par}}}
 }
@@ -134,7 +151,8 @@ list with the following components:
 Plot several groups of repeated observations, e.g. abundance/half-life of several
 proteins each observed in several cell lines in several replicates. Observations can be grouped
 either by protein (in which case cell lines will be annotated as X axis labels
-and proteins above the plot) or by cell line.
+and proteins above the plot) or by cell line. Related parameters can be plotted in separate plots
+below each other, sharing the groupings and annotations (see examples)
 }
 \details{
 This is a wrapper function around \code{plot.fun}. It sets up the coordinate system, calls
@@ -213,5 +231,11 @@ plotgroups(data, names, colors, legend.text,names.style='combinatorial',
                      } else {
                          return(NULL)
                      }})
+## multiple plots
+plotgroups(list(data, rev(data)), names, colors, legend.text,names.style='combinatorial',
+           names.split=" ",names.pch=names.pch, names.rotate=names.rotate, names.adj=names.adj,
+           ylim=c(0,Inf), ylab=c("data1", "data2"), main="test", features=list(NULL,
+           c("median", "box")), plot.fun=list(plotgroups.boxplot, plotgroups.beeswarm),
+           signif.test=list(NULL,list(c(1,3), c(2,5), c(5,8), c(3,10))))
 }
 

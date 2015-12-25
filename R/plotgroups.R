@@ -39,8 +39,6 @@ plotgroups.boxplot <- function(data, stats, colors, ylim, features, barwidth, bx
                  sdstaplelty=1, sdstaplelwd=lwd.base, sdstaplecol="black",
                  semwhisklty=0, semwhisklwd=lwd.base, semwhiskcol="#EDA217",
                  semstaplelty=1, semstaplelwd=lwd.base, semstaplecol="#EDA217")
-    if (length(dots) > 0)
-        pars <- list.merge(pars, dots, list(pars=bxppars))
 
     if (!("median" %in% features)) {
         bxppars$medlty <- "blank"
@@ -57,6 +55,10 @@ plotgroups.boxplot <- function(data, stats, colors, ylim, features, barwidth, bx
         bxppars$whisklty <- "22"
         bxppars$staplelty <- "22"
     }
+
+    pars$pars <- bxppars
+    if (length(dots) > 0)
+        pars <- list.merge(pars, dots)
 
     plotsd <- function() {
         if ("sd" %in% features) {
@@ -96,8 +98,8 @@ threeparamsstats <- function(stats, features)
     if ("median" %in% features)
         bars$m <- stats$medians
     if ("box" %in% features) {
-        bars$u <- stats$boxmin
-        bars$l <- stats$boxmax
+        bars$u <- stats$boxmax
+        bars$l <- stats$boxmin
     }
     if ("iqr" %in% features) {
         bars$u <- stats$iqrmax
@@ -113,6 +115,8 @@ threeparamsstats <- function(stats, features)
     }
     bars
 }
+
+allfeatures <- c("median", "box", "iqr", "mean", "sd", "sem")
 
 #' @templateVar plottype beeswarm plot
 #' @templateVar additionaldesc Requires the \code{beeswarm} package.
@@ -230,7 +234,8 @@ plotgroups.vioplot <- function(data, stats, colors, ylim, features, barwidth, bo
 #' Plot several groups of repeated observations, e.g. abundance/half-life of several
 #' proteins each observed in several cell lines in several replicates. Observations can be grouped
 #' either by protein (in which case cell lines will be annotated as X axis labels
-#' and proteins above the plot) or by cell line.
+#' and proteins above the plot) or by cell line. Related parameters can be plotted in separate plots
+#' below each other, sharing the groupings and annotations (see examples)
 #'
 #' This is a wrapper function around \code{plot.fun}. It sets up the coordinate system, calls
 #' \code{extrafun.before} followed by \code{plot.fun}, which does the actual plotting, and
@@ -259,7 +264,9 @@ plotgroups.vioplot <- function(data, stats, colors, ylim, features, barwidth, bo
 #' a \code{p.value} element. The p value is passed as single argument to \code{signif.test.text}
 #' which returns a character vector (or anything usable by \code{\link[graphix]{text}}).
 #'
-#' @param data list, each element is a vector of replicates for one combination of parameters
+#' @param data list, each element is a vector of replicates for one combination of parameters, or
+#'             each element is a list containing a vector of replicates, in which case the data sets
+#'             will be plotted below each other in separate plots
 #' @param names character vector of X axis labels
 #' @param colors colors for plotting
 #' @param legend.text character vector of the same length as \code{data} giving the group names.
@@ -300,33 +307,49 @@ plotgroups.vioplot <- function(data, stats, colors, ylim, features, barwidth, bo
 #'                  \item{mean}{the mean}
 #'                  \item{sd}{mean \eqn{\pm} standard deviation}
 #'                  \item{sem}{mean \eqn{\pm} standard error of the mean}}
+#'        Can be a list containing character vectors, in which case the specified feature set will
+#'        apply to the corresponding plot if multiple data sets are plotted (see examples). Will be
+#'        recycled to the number of plots.
 #' @param range determines how far the the \code{iqr} whiskers will extend out from the box,
-#'        if they are to be plotted
+#'        if they are to be plotted. Will be recycled to the number of plots.
 #' @param cex.xlab character expansion factor for X axis annotation
 #' @param ylim Y axis limits. Will be determined automatically if \code{NULL}. If not \code{NULL} but
-#'        only one limit is finite, the other will be determined automatically.
+#'        only one limit is finite, the other will be determined automatically. Can be a list containing
+#'        numeric vectors, in which case the limits will apply to the corresponding plot if multiple
+#'        data sets are plotted. Will be recycled to the number of plots.
 #' @param legendmargin spacing between the upper-most data point/feature and the upper edge of the
 #'        plot, required for group annotation. Will be determined automatically if \code{NULL}
 #' @param plot.fun function to do the actual plotting. See \code{\link{plotgroups.boxplot}},
 #'        \code{\link{plotgroups.beeswarm}}, \code{\link{plotgroups.barplot}},
-#'        \code{\link{plotgroups.vioplot}}
+#'        \code{\link{plotgroups.vioplot}}. Can be a list containing functions, in which case the
+#'        functions will apply to the corresponding plot.
 #' @param plot.fun.pars additional parameters to pass to \code{plot.fun}
 #' @param barwidth width of the individual bars/boxes etc. as fraction of 1
 #' @param main main title
-#' @param ylab Y axis label
+#' @param ylab Y axis label. Will be recycled to the number of plots.
 #' @param signif.test list of 2-element integer vectors giving the elements of \code{data} to be
-#'        tested for significant differences.
+#'        tested for significant differences. Can be a list of lists, in which case each element
+#'        will apply to the corresponding plot if multiple data sets are plotted.
 #' @param signif.test.fun function to perform the significance testing. Must accept 2 vectors and
-#'        return a list containing at least the element \code{p.value}
+#'        return a list containing at least the element \code{p.value}. Can be a list of functions,
+#'        in which case each element will apply to the corresponding plot if multiple data sets
+#'        are plotted.
 #' @param signif.test.text function accepting a p-value and returning a formatted string to be used
 #'        for plotting or \code{NULL} if this p-value is not to be plotted (e.g. if it is not
-#'        significant)
-#' @param signif.test.lwd line width for p-value annotations.
-#' @param signif.test.pars parameters for group annotation. Will be passed to \code{\link[base]{text}}
+#'        significant). Can be a list of functions, in which case each element will apply to the
+#'        corresponding plot if multiple data sets are plotted.
+#' @param signif.test.lwd line width for p-value annotations. Can be a list, in which case the lwd
+#'        will apply to the corresponding plot if multiple data sets are plotted.
+#' @param signif.test.pars parameters for group annotation. Will be passed to \code{\link[base]{text}}.
+#'        Can be a list of lists, in which case each element will apply to the corresponding
+#'        plot if multiple data sets are plotted.
 #' @param extrafun.before additional function to call after the coordinate system has been set up, but
-#'        before plotting, e.g. to add a background grid to the plot
+#'        before plotting, e.g. to add a background grid to the plot. Can be a list of functions, in
+#'        which case each element will apply to the corresponding plot if multiple data sets are
+#'        plotted.
 #' @param extrafun.after additional function to call after plotting, e.g. to add additional elements
-#'        to the plot
+#'        to the plot. Can be a list of functions, in which case each element will apply to the
+#'        corresponding plot if multiple data sets are plotted.
 #' @param ... additional parameters passed to \code{\link[base]{par}}
 #' @return list with the following components:
 #'         \item{stats}{summary statistics of the data.}
@@ -384,6 +407,12 @@ plotgroups.vioplot <- function(data, stats, colors, ylim, features, barwidth, bo
 #'                      } else {
 #'                          return(NULL)
 #'                      }})
+#' ## multiple plots
+#' plotgroups(list(data, rev(data)), names, colors, legend.text,names.style='combinatorial',
+#'            names.split=" ",names.pch=names.pch, names.rotate=names.rotate, names.adj=names.adj,
+#'            ylim=c(0,Inf), ylab=c("data1", "data2"), main="test", features=list(NULL,
+#'            c("median", "box")), plot.fun=list(plotgroups.boxplot, plotgroups.beeswarm),
+#'            signif.test=list(NULL,list(c(1,3), c(2,5), c(5,8), c(3,10))))
 #' @export
 #' @importFrom rlist list.merge
 plotgroups <- function(
@@ -402,7 +431,7 @@ plotgroups <- function(
                         names.adj=NA,
                         names.margin=0.5,
                         names.rotate=NULL,
-                        features=c("median", "box", "iqr", "mean", "sd", "sem"),
+                        features=NULL,
                         range=1.5,
                         cex.xlab=1,
                         ylim=NULL,
@@ -411,7 +440,7 @@ plotgroups <- function(
                         plot.fun.pars=list(),
                         barwidth=0.8,
                         main=NULL,
-                        ylab=deparse(substitute(data)),
+                        ylab=NULL,
                         signif.test=NULL,
                         signif.test.fun=t.test,
                         signif.test.text=function(p)paste0("p=", formatC(p, digits=3, format="g")),
@@ -423,81 +452,67 @@ plotgroups <- function(
                         ...)
 {
     names.style <- match.arg(names.style)
-    if (!is.null(features) && length(features) > 0) {
-        features <- match.arg(features, several.ok=TRUE)
-    } else {
-        features <- character(0)
-    }
-
-    stats <- list(means=c(), sds=c(), sems=c(), medians=c(), boxmax=c(), iqrmax=c(), boxmin=c(), iqrmin=c(), range=range)
-    for (i in 1:length(data)) {
-        stats$means[i] <- mean(data[[i]])
-        stats$sds[i] <- sd(data[[i]])
-        stats$sems[i] <- stats$sds[i] / sqrt(length(data[[i]]))
-        bstats <- boxplot.stats(data[[i]], coef=range, do.conf=F, do.out=F)$stats
-        stats$medians[i] <- bstats[3]
-        stats$boxmax[i] <- bstats[4]
-        stats$iqrmax[i] <- bstats[5]
-        stats$boxmin[i] <- bstats[1]
-        stats$iqrmin[i] <- bstats[2]
-    }
-
-    ylim.usr <- NULL
-    if (!is.null(ylim) && (!is.finite(ylim[1]) || !is.finite(ylim[2]))) {
-        ylim.usr <- ylim
-        ylim <- NULL
-    }
-    if (is.null(ylim)) {
-        ylim <- plot.fun(data=data, features=features, ylim=TRUE)
-        if (!is.null(ylim))
-            ylim <- extendrange(ylim, f=0.04)
-    }
-    if (is.null(ylim)) {
-        ylim <- c(Inf, 0)
-        if ("median" %in% features) {
-            ylim[1] <- min(ylim[1], stats$medians, na.rm=TRUE)
-            ylim[2] <- max(ylim[2], stats$medians, na.rm=TRUE)
-        }
-        if ("box" %in% features) {
-            ylim[1] <- min(ylim[1], stats$boxmin, na.rm=TRUE)
-            ylim[2] <- max(ylim[2], stats$boxmax, na.rm=TRUE)
-        }
-        if ("iqr" %in% features) {
-            ylim[1] <- min(ylim[1], stats$iqrmin, na.rm=TRUE)
-            ylim[2] <- max(ylim[2], stats$iqrmax, na.rm=TRUE)
-        }
-        if ("mean" %in% features) {
-            ylim[1] <- min(ylim[1], stats$means, na.rm=TRUE)
-            ylim[2] <- max(ylim[2], stats$means, na.rm=TRUE)
-        }
-        if ("sd" %in% features) {
-            ylim[1] <- min(ylim[1], stats$means - stats$sds, na.rm=TRUE)
-            ylim[2] <- max(ylim[2], stats$means + stats$sds, na.rm=TRUE)
-        }
-        if ("sem" %in% features) {
-            ylim[1] <- min(ylim[1], stats$means - stats$sems, na.rm=TRUE)
-            ylim[2] <- max(ylim[2], stats$means + stats$sems, na.rm=TRUE)
-        }
-        ylim <- extendrange(ylim, f=0.04)
-    }
-    if (!is.null(ylim.usr)) {
-        if (is.finite(ylim.usr[1]))
-            ylim[1] <- ylim.usr[1]
-        if (is.finite(ylim.usr[2]))
-            ylim[2] <- ylim.usr[2]
-    }
-
     dots <- list(...)
-    pars <- list(oma=c(0,0,0,0), las=1, mgp=c(2, 0.5, 0), ljoin="mitre", lend="square", lwd=2)
+
+    stopifnot(is.list(data))
+    stopifnot(is.list(plot.fun.pars))
+    if (length(data) != length(names)) {
+        if (all(sapply(data, is.list))) {
+            nplots <- length(data)
+            if (is.null(ylab)) {
+                if (!is.null(names(data))) {
+                    ylab <- names(data)
+                } else {
+                    ylab <- deparse(substitute(data))
+                }
+            }
+        } else {
+            stop("")
+        }
+    } else {
+        if (is.null(ylab))
+            ylab <- deparse(substitute(data))
+        data <- list(data)
+        nplots <- 1
+    }
+    ngroups <- length(names)
+    cenv <- environment()
+    for (arg in c("range", "ylab")) {
+        cenv[[arg]] <- rep(cenv[[arg]], length.out=nplots)
+    }
+    for (arg in c("features", "ylim", "plot.fun", "signif.test.fun", "signif.test.text", "signif.test.col", "signif.test.lwd", "extrafun.before", "extrafun.after")) {
+        if (!is.list(cenv[[arg]])) {
+            cenv[[arg]] <- rep(list(cenv[[arg]]), nplots)
+        } else {
+            cenv[[arg]] <- rep(cenv[[arg]], length.out=nplots)
+        }
+    }
+#     for (arg in names(dots)) {
+#         if (!is.list(arg)) {
+#             dots[[arg]] <- rep(list(arg), nplots)
+#         } else {
+#             dots[[arg]] <- rep(arg, length.out=nplots)
+#         }
+#     }
+    for (arg in c("plot.fun.pars", "signif.test.pars", "signif.test")) {
+        if (!is.null(cenv[[arg]]) && length(cenv[[arg]]) && !all(sapply(cenv[[arg]], function(x)is.list(x) || is.null(x)))) {
+            cenv[[arg]] <- rep(list(cenv[[arg]]), nplots)
+        } else if (!is.null(cenv[[arg]]) && length(cenv[[arg]]) != nplots) {
+            cenv[[arg]] <- rep(cenv[[arg]], length.out=nplots)
+        }
+    }
+    pars <- list(oma=c(0,0,0,0), mar=c(0, 2, 0.2, 0.2), las=1, mgp=c(1.5, 0.5, 0), ljoin="mitre", lend="square", lwd=2)
+    if (!is.null(main))
+        pars$oma <- c(0, 0, 2, 0)
     if (length(dots) > 0)
         pars <- list.merge(pars, dots)
     do.call(par, pars)
-    #plot.new()
     lwd.base <- par("lwd")
     if (is.null(legend.lwd))
         legend.lwd <- lwd.base
 
     lheight <- par("lheight")
+    origcex <- par("cex") #reset by layout()
     par(lheight=1)
     lineheight <- strheight("\n", units="inches", cex=cex.xlab)
     mai <- par("mai")
@@ -564,12 +579,14 @@ plotgroups <- function(
 
         legend.height <- max(sum(heights), strheight(paste0(uniquegenes, collapse="\n"), units="inches", cex=cex.xlab))
         legend.width <- max(strwidth(uniquegenes, units="inches"))
-        layout(matrix(c(2,1), byrow=TRUE), heights=c(1, lcm(cm(legend.height))))
+
+        layout(matrix(c(2:(nplots + 1), 1), byrow=TRUE), heights=c(rep(1, nplots), lcm(cm(legend.height))))
+        par(cex=origcex)
 
         mai[2] <- max(mai[2], legend.width)
         par(mai=c(0, mai[2], 0, mai[4]))
         plot.new()
-        plot.window(xlim=c(0.5, length(data) + 0.5), ylim=c(0,1), xaxs='i', yaxs='i')
+        plot.window(xlim=c(0.5, ngroups + 0.5), ylim=c(0,1), xaxs='i', yaxs='i')
 
         mapply(function(x, y) {
             i <- imat[y,x]
@@ -637,119 +654,200 @@ plotgroups <- function(
         }
         legend.width <- max(strwidth(labels, units="inches", cex=cex.xlab))
         legend.height <- sin(names.rotate * pi / 180) * legend.width + vadj * max(strheight(labels, units="inches", cex=cex.xlab)) + 0.15 * lineheight
-        layout(matrix(c(2,1), byrow=TRUE), heights=c(1, lcm(cm(legend.height))))
+        layout(matrix(c(2:(nplots + 1), 1), byrow=TRUE), heights=c(rep(1, nplots), lcm(cm(legend.height))))
+        par(cex=origcex)
         par(mai=c(0, mai[2], 0, mai[4]))
         plot.new()
-        plot.window(xlim=c(0.5, length(data) + 0.5), ylim=c(0,1), xaxs='i', yaxs='i')
-        text(1:length(data), 1, srt=names.rotate, adj=names.adj, labels=labels, xpd=NA, cex=cex.xlab)
+        plot.window(xlim=c(0.5, ngroups + 0.5), ylim=c(0,1), xaxs='i', yaxs='i')
+        text(1:ngroups, 1, srt=names.rotate, adj=names.adj, labels=labels, xpd=NA, cex=cex.xlab)
     }
     mai[1] <- names.margin * lineheight
-    par(mai=mai, lheight=lheight)
-    plot.new()
+    title(main=main, outer=TRUE)
 
-    if (is.null(colors))
-        colors <- "grey"
+    allstats <- list()
+    allplotfunrets <- list()
+    allsigniftestrets <- list()
 
-    # can't use grconvertY here because plot.window has not been called yet, have
-    # to do the conversion manually
-    inchestouser <- (ylim[2] - ylim[1]) / par("pin")[2]
-    lineheight <- strheight("\n", units="inches") * inchestouser
-    legendbase <- ylim[2]
-    if (!is.null(legend.text)) {
-        grouplength <- rle(legend.text)$lengths
-        colors <- rep(colors, times=grouplength)
-        if (is.null(legendmargin))
-            legendmargin <- max(max(strheight(legend.text, units="inches")) * inchestouser, lineheight)
-    }
-    signifmargin <- 0
-    if (!is.null(signif.test)) {
-        if (!requireNamespace("IRanges", quietly = TRUE))
-            stop("Please install the IRanges package if significance testing is to be performed.")
-        intervals.start <- sapply(signif.test, function(x)min(x))
-        intervals.stop <- sapply(signif.test, function(x)max(x))
-        intervals.order <- order(intervals.start, intervals.stop)
-        signif.test <- signif.test[intervals.order]
-        query <- IRanges::IRanges(intervals.start[intervals.order], intervals.stop[intervals.order])
-        signifoverlaps <- S4Vectors::as.matrix(IRanges::findOverlaps(query, minoverlap=2))
-        signifoverlaps <- signifoverlaps[which(signifoverlaps[,1] != signifoverlaps[,2]),]
-
-        signifoverlaps <- t(apply(signifoverlaps, 1, function(x)c(min(x),max(x))))
-        signifoverlaps <- signifoverlaps[!duplicated(signifoverlaps),]
-
-        maxsignifoverlaps <- max(rle(signifoverlaps[,1])$length)
-        signifmargin <- (maxsignifoverlaps + 1) * lineheight
-        signifbase <- legendbase
-        legendbase <- signifbase + signifmargin
-
-        if (maxsignifoverlaps == 0) {
-            signiflines <- rep(0, length(signif.test))
+    for (cplot in 1:nplots) {
+        if (!is.null(features[[cplot]]) && length(features[[cplot]]) > 0) {
+            features[[cplot]] <- match.arg(features[[cplot]], choices=c("median", "box", "iqr", "mean", "sd", "sem"), several.ok=TRUE)
         } else {
-            signiflines <- rep(-1, length(signif.test))
-            currline <- 0
-            while (currline <= maxsignifoverlaps) {
-                i <- which(signiflines == -1)[1]
-                while (i <= length(signif.test)) {
-                    signiflines[i] <- currline
-                    overlaps <- which(signifoverlaps[,1] == i)
-                    if (length(overlaps) > 0) {
-                        i <- max(signifoverlaps[overlaps,]) + 1
-                    } else {
-                        i <- i + 1
+            features[[cplot]] <- allfeatures
+        }
+
+        cmai <- mai
+        if (cplot > 1 && cplot < nplots) {
+            cmai[c(1,3)] <- 0
+        } else if (cplot == 1 && cplot < nplots) {
+            cmai[1] <- 0
+        } else if (cplot == nplots && cplot > 1) {
+            cmai[3] <- 0
+        }
+        par(mai=cmai)
+        plot.new()
+        stats <- list(means=c(), sds=c(), sems=c(), medians=c(), boxmax=c(), iqrmax=c(), boxmin=c(), iqrmin=c(), range=range[cplot])
+        for (i in 1:ngroups) {
+            stats$means[i] <- mean(data[[cplot]][[i]])
+            stats$sds[i] <- sd(data[[cplot]][[i]])
+            stats$sems[i] <- stats$sds[i] / sqrt(length(data[[cplot]][[i]]))
+            bstats <- boxplot.stats(data[[cplot]][[i]], coef=range[cplot], do.conf=F, do.out=F)$stats
+            stats$medians[i] <- bstats[3]
+            stats$boxmax[i] <- bstats[4]
+            stats$iqrmax[i] <- bstats[5]
+            stats$boxmin[i] <- bstats[2]
+            stats$iqrmin[i] <- bstats[1]
+        }
+        ylim.usr <- NULL
+        cylim <- ylim[[cplot]]
+        if (!is.null(cylim) && (!is.finite(cylim[1]) || !is.finite(cylim[2]))) {
+            ylim.usr <- cylim
+            cylim <- NULL
+        }
+        if (is.null(cylim)) {
+            cylim <- plot.fun[[cplot]](data=data, features=features[[cplot]], ylim=TRUE)
+            if (!is.null(cylim))
+                cylim <- extendrange(cylim, f=0.04)
+        }
+        if (is.null(cylim)) {
+            cylim <- c(Inf, 0)
+            if ("median" %in% features[[cplot]]) {
+                cylim[1] <- min(cylim[1], stats$medians, na.rm=TRUE)
+                cylim[2] <- max(cylim[2], stats$medians, na.rm=TRUE)
+            }
+            if ("box" %in% features[[cplot]]) {
+                cylim[1] <- min(cylim[1], stats$boxmin, na.rm=TRUE)
+                cylim[2] <- max(cylim[2], stats$boxmax, na.rm=TRUE)
+            }
+            if ("iqr" %in% features[[cplot]]) {
+                cylim[1] <- min(cylim[1], stats$iqrmin, na.rm=TRUE)
+                cylim[2] <- max(cylim[2], stats$iqrmax, na.rm=TRUE)
+            }
+            if ("mean" %in% features[[cplot]]) {
+                cylim[1] <- min(cylim[1], stats$means, na.rm=TRUE)
+                cylim[2] <- max(cylim[2], stats$means, na.rm=TRUE)
+            }
+            if ("sd" %in% features[[cplot]]) {
+                cylim[1] <- min(cylim[1], stats$means - stats$sds, na.rm=TRUE)
+                cylim[2] <- max(cylim[2], stats$means + stats$sds, na.rm=TRUE)
+            }
+            if ("sem" %in% features[[cplot]]) {
+                cylim[1] <- min(cylim[1], stats$means - stats$sems, na.rm=TRUE)
+                cylim[2] <- max(cylim[2], stats$means + stats$sems, na.rm=TRUE)
+            }
+            cylim <- extendrange(cylim, f=0.04)
+        }
+        if (!is.null(ylim.usr)) {
+            if (is.finite(ylim.usr[1]))
+                cylim[1] <- ylim.usr[1]
+            if (is.finite(ylim.usr[2]))
+                cylim[2] <- ylim.usr[2]
+        }
+
+        if (is.null(colors))
+            colors <- "grey"
+        # can't use grconvertY here because plot.window has not been called yet, have
+        # to do the conversion manually
+        inchestouser <- (cylim[2] - cylim[1]) / par("pin")[2]
+        lineheight <- strheight("\n", units="inches") * inchestouser
+        legendbase <- cylim[2]
+        if (cplot == 1 && !is.null(legend.text)) {
+            grouplength <- rle(legend.text)$lengths
+            colors <- rep(colors, times=grouplength)
+            if (is.null(legendmargin))
+                legendmargin <- max(max(strheight(legend.text, units="inches")) * inchestouser, lineheight)
+        } else {
+            legendmargin <- 0
+        }
+        signifmargin <- 0
+        if (!is.null(signif.test[[cplot]])) {
+            if (!requireNamespace("IRanges", quietly = TRUE))
+                stop("Please install the IRanges package if significance testing is to be performed.")
+            intervals.start <- sapply(signif.test[[cplot]], function(x)min(x))
+            intervals.stop <- sapply(signif.test[[cplot]], function(x)max(x))
+            intervals.order <- order(intervals.start, intervals.stop)
+            signif.test[[cplot]] <- signif.test[[cplot]][intervals.order]
+            query <- IRanges::IRanges(intervals.start[intervals.order], intervals.stop[intervals.order])
+            signifoverlaps <- S4Vectors::as.matrix(IRanges::findOverlaps(query, minoverlap=2))
+            signifoverlaps <- signifoverlaps[which(signifoverlaps[,1] != signifoverlaps[,2]),]
+
+            signifoverlaps <- t(apply(signifoverlaps, 1, function(x)c(min(x),max(x))))
+            signifoverlaps <- signifoverlaps[!duplicated(signifoverlaps),]
+
+            maxsignifoverlaps <- max(rle(signifoverlaps[,1])$length)
+            signifmargin <- (maxsignifoverlaps + 1) * lineheight
+            signifbase <- legendbase
+            legendbase <- signifbase + signifmargin
+
+            if (maxsignifoverlaps == 0) {
+                signiflines <- rep(0, length(signif.test[[cplot]]))
+            } else {
+                signiflines <- rep(-1, length(signif.test[[cplot]]))
+                currline <- 0
+                while (currline <= maxsignifoverlaps) {
+                    i <- which(signiflines == -1)[1]
+                    while (i <= length(signif.test[[cplot]])) {
+                        signiflines[i] <- currline
+                        overlaps <- which(signifoverlaps[,1] == i)
+                        if (length(overlaps) > 0) {
+                            i <- max(signifoverlaps[overlaps,]) + 1
+                        } else {
+                            i <- i + 1
+                        }
                     }
+                    currline <- currline + 1
                 }
-                currline <- currline + 1
             }
         }
-    }
 
-    plot.window(xlim=c(0.5, length(data) + 0.5), ylim=c(ylim[1], ylim[2] + legendmargin + signifmargin), xaxs='i', yaxs='i')
+        plot.window(xlim=c(0.5, ngroups + 0.5), ylim=c(cylim[1], cylim[2] + legendmargin + signifmargin), xaxs='i', yaxs='i')
 
-    if (!is.null(extrafun.before))
-        extrafun.before(data, stats, colors, features, barwidth)
-    plotfunret <- do.call(plot.fun, c(list(data=data, stats=stats, colors=colors, features=features, barwidth=barwidth), plot.fun.pars))
-    if (!is.null(extrafun.after))
-        extrafun.after(data, stats, colors, features, barwidth)
-    do.call(axis, list.merge(pars, list(side=2)))
-    title(main=main, ylab=ylab)
-    do.call(box, pars)
+        if (!is.null(extrafun.before[[cplot]]))
+            extrafun.before(data[[cplot]], stats, colors, features, barwidth)
+        plotfunret <- do.call(plot.fun[[cplot]], c(list(data=data[[cplot]], stats=stats, colors=colors, features=features[[cplot]], barwidth=barwidth), plot.fun.pars[[cplot]]))
+        if (!is.null(extrafun.after[[cplot]]))
+            extrafun.after(data[[cplot]], stats, colors, features, barwidth)
+        do.call(axis, list.merge(pars, list(side=2)))
+        title(ylab=ylab[cplot])
+        do.call(box, pars)
 
-    if (!is.null(legend.text)) {
-        segs.begin <- c(1, cumsum(grouplength)[-length(grouplength)] + 1) - barwidth / 2
-        segs.end <- cumsum(grouplength) + barwidth / 2
-        if (is.null(legend.col)) {
-            cols <- unique(colors)
-        } else {
-            cols <- legend.col
-        }
-        segments(segs.begin, legendbase, segs.end, legendbase, lwd=legend.lwd, col=cols, lend="butt")
-
-        mids <- (segs.end - segs.begin) / 2 + segs.begin
-        do.call(text, c(list(x=mids, y=legendbase + 0.2 * legendmargin, labels=unique(legend.text), adj=c(0.5, 0), col=cols), legend.pars))
-    }
-
-    if (!is.null(signif.test)) {
-            signif.test.ret <- vector("list", length(signif.test))
-        for (i in 1:length(signif.test)) {
-            signif.test.ret[[i]]$test <- signif.test.fun(data[[signif.test[[i]][1]]], data[[signif.test[[i]][2]]])
-            p <- signif.test.ret[[i]]$test$p.value
-            label <- signif.test.text(p)
-            if (!is.null(label)) {
-                begin <- signif.test[[i]][1] + (1 - barwidth) / 2
-                end <- signif.test[[i]][2] - (1 - barwidth) / 2
-                mid <- (end - begin) / 2 + begin
-                base <- signifbase + signiflines[i] * lineheight
-                lines(c(begin, begin, end, end), c(base - 0.3 * legendmargin, base, base, base - 0.3 * legendmargin), lwd=signif.test.lwd, col=signif.test.col, lend="butt")
-                do.call(text, c(list(x=mid, y=base + 0.2 * legendmargin, labels=label, adj=c(0.5, 0), col=signif.test.col), signif.test.pars))
+        if (cplot == 1 && !is.null(legend.text)) {
+            segs.begin <- c(1, cumsum(grouplength)[-length(grouplength)] + 1) - barwidth / 2
+            segs.end <- cumsum(grouplength) + barwidth / 2
+            if (is.null(legend.col)) {
+                cols <- unique(colors)
+            } else {
+                cols <- legend.col
             }
-            signif.test.ret[[i]]$label <- label
+            segments(segs.begin, legendbase, segs.end, legendbase, lwd=legend.lwd, col=cols, lend="butt")
+
+            mids <- (segs.end - segs.begin) / 2 + segs.begin
+            do.call(text, c(list(x=mids, y=legendbase + 0.2 * lineheight, labels=unique(legend.text), adj=c(0.5, 0), col=cols), legend.pars))
         }
+        if (!is.null(signif.test[[cplot]])) {
+            signif.test.ret <- vector("list", length(signif.test[[cplot]]))
+            for (i in 1:length(signif.test[[cplot]])) {
+                signif.test.ret[[i]]$test <- signif.test.fun[[cplot]](data[[cplot]][[signif.test[[cplot]][[i]][1]]], data[[cplot]][[signif.test[[cplot]][[i]][2]]])
+                p <- signif.test.ret[[i]]$test$p.value
+                label <- signif.test.text[[cplot]](p)
+                if (!is.null(label)) {
+                    begin <- signif.test[[cplot]][[i]][1] + (1 - barwidth) / 2
+                    end <- signif.test[[cplot]][[i]][2] - (1 - barwidth) / 2
+                    mid <- (end - begin) / 2 + begin
+                    base <- signifbase + signiflines[i] * lineheight
+                    lines(c(begin, begin, end, end), c(base - 0.3 * lineheight, base, base, base - 0.3 * lineheight), lwd=signif.test.lwd[[cplot]], col=signif.test.col[[cplot]], lend="butt")
+                    do.call(text, c(list(x=mid, y=base + 0.2 * lineheight, labels=label, adj=c(0.5, 0), col=signif.test.col[[cplot]]), signif.test.pars[[cplot]]))
+                }
+                signif.test.ret[[i]]$label <- label
+            }
+            allsigniftestrets[[cplot]] <- signif.test.ret
+        }
+        allstats[[cplot]] <- stats
+        allplotfunrets <- plotfunret
     }
 
 #     if (!is.null(labels) && names.style=="plain") {
 #         text(1:length(data), grconvertY(grconvertY(par("usr")[3], from="user", to="inches") - names.margin, from="inches", to="user"), srt=names.rotate, adj=names.adj, labels=labels, xpd=TRUE, cex=cex.xlab)
 #     }
-    toreturn <- list(stats=stats, plotfun=plotfunret)
-    if (!is.null(signif.test) && length(signif.test.ret))
-        toreturn$signiftest <- signif.test.ret[order(intervals.order)]
+    toreturn <- list(stats=allstats, plotfun=allplotfunrets, signiftest=allsigniftestrets)
     invisible(toreturn)
 }
