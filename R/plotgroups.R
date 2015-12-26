@@ -23,6 +23,8 @@
 #'                        of the mean whiskers}}
 #' @return Same as \code{\link[graphics]{boxplot}}
 #' @seealso \code{\link[graphics]{boxplot}}
+#' @export
+#' @importFrom rlist list.merge
 plotgroups.boxplot <- function(data, stats, colors, ylim, features, barwidth, bxppars, ...)
 {
     if (!missing(ylim))
@@ -128,6 +130,8 @@ allfeatures <- c("median", "box", "iqr", "mean", "sd", "sem")
 #' @param ... additional parameters passed to \code{\link[beeswarm]{beeswarm}}
 #' @return Same as \code{\link[beeswarm]{beeswarm}}
 #' @seealso \code{\link[beeswarm]{beeswarm}}
+#' @export
+#' @importFrom rlist list.merge
 plotgroups.beeswarm <- function(data, stats, colors, ylim, features, barwidth, palpha=1, bxplwd=par("lwd"), bxpcols=colors, ...)
 {
     if (!requireNamespace("beeswarm", quietly = TRUE))
@@ -167,6 +171,8 @@ plotgroups.beeswarm <- function(data, stats, colors, ylim, features, barwidth, p
 #' @param whiskerscol color of the whiskers
 #' @param bordercol color of the border
 #' @param ... additional parameters passed to \code{\link[graphics]{rect}}
+#' @export
+#' @importFrom rlist list.merge
 plotgroups.barplot <- function(data, stats, colors, ylim, features, barwidth, whiskerswidth=barwidth, whiskerslwd=par("lwd"), whiskerscol="black", bordercol="black", ...)
 {
     if ("mean" %in% features && "median" %in% features)
@@ -203,6 +209,8 @@ plotgroups.barplot <- function(data, stats, colors, ylim, features, barwidth, wh
 #'        \item{vioplot}{List containing the aggregated return values of \code{\link[vioplot]{vioplot}}}
 #'        \item{boxplot}{Return value of \code{\link{plotgroups.boxplot}}}
 #' @seealso \code{\link[vioplot]{vioplot}}
+#' @export
+#' @importFrom rlist list.merge
 plotgroups.vioplot <- function(data, stats, colors, ylim, features, barwidth, boxpars, boxcol="white", boxwidth=barwidth/4, ...)
 {
     if (!requireNamespace("vioplot", quietly = TRUE))
