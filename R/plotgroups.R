@@ -501,12 +501,13 @@ plotgroups <- function(
             cenv[[arg]] <- rep(cenv[[arg]], length.out=nplots)
         }
     }
-    pars <- list(oma=c(0,0,0,0), mar=c(0, 2, 0.2, 0.2), las=1, mgp=c(1.5, 0.5, 0), ljoin="mitre", lend="square", lwd=2)
+    pars <- list(oma=c(0,0,0,0), mar=c(0, 3, 0.2, 0.2), las=1, mgp=c(2, 0.5, 0), ljoin="mitre", lend="square", lwd=2)
     if (!is.null(main))
         pars$oma <- c(0, 0, 2, 0)
     if (length(dots) > 0)
         pars <- list.merge(pars, dots)
     do.call(par, pars)
+    plot.new() # have to do this here, otherwise strwidth on cairo devices will crash
     lwd.base <- par("lwd")
     if (is.null(legend.lwd))
         legend.lwd <- lwd.base
@@ -802,10 +803,10 @@ plotgroups <- function(
         plot.window(xlim=c(0.5, ngroups + 0.5), ylim=c(cylim[1], cylim[2] + legendmargin + signifmargin), xaxs='i', yaxs='i')
 
         if (!is.null(extrafun.before[[cplot]]))
-            extrafun.before(data[[cplot]], stats, colors, features, barwidth)
+            extrafun.before[[cplot]](data[[cplot]], stats, colors, features, barwidth)
         plotfunret <- do.call(plot.fun[[cplot]], c(list(data=data[[cplot]], stats=stats, colors=colors, features=features[[cplot]], barwidth=barwidth), plot.fun.pars[[cplot]]))
         if (!is.null(extrafun.after[[cplot]]))
-            extrafun.after(data[[cplot]], stats, colors, features, barwidth)
+            extrafun.after[[cplot]](data[[cplot]], stats, colors, features, barwidth)
         do.call(axis, list.merge(pars, list(side=2)))
         title(ylab=ylab[cplot])
         do.call(box, pars)
