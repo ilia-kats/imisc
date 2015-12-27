@@ -761,6 +761,7 @@ plotgroups <- function(
         legendbase <- cylim[2]
         if (cplot == 1 && !is.null(legend.text)) {
             grouplength <- rle(legend.text)$lengths
+            colors <- rep(colors, length.out=length(grouplength))
             colors <- rep(colors, times=grouplength)
             if (is.null(legendmargin))
                 legendmargin <- max(max(strheight(legend.text, units="inches")) * inchestouser, lineheight)
@@ -778,11 +779,14 @@ plotgroups <- function(
             query <- IRanges::IRanges(intervals.start[intervals.order], intervals.stop[intervals.order])
             signifoverlaps <- S4Vectors::as.matrix(IRanges::findOverlaps(query, minoverlap=2))
             signifoverlaps <- signifoverlaps[which(signifoverlaps[,1] != signifoverlaps[,2]),]
+            if (nrow(signifoverlaps)) {
+                signifoverlaps <- t(apply(signifoverlaps, 1, function(x)c(min(x),max(x))))
+                signifoverlaps <- signifoverlaps[!duplicated(signifoverlaps),]
 
-            signifoverlaps <- t(apply(signifoverlaps, 1, function(x)c(min(x),max(x))))
-            signifoverlaps <- signifoverlaps[!duplicated(signifoverlaps),]
-
-            maxsignifoverlaps <- max(rle(signifoverlaps[,1])$length)
+                maxsignifoverlaps <- max(rle(signifoverlaps[,1])$length)
+            } else {
+                maxsignifoverlaps <- 0
+            }
             signifmargin <- (maxsignifoverlaps + 1) * lineheight
             signifbase <- legendbase
             legendbase <- signifbase + signifmargin

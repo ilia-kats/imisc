@@ -2,8 +2,6 @@
 #'
 #' This is intended to be called from \code{\link{plotgroups}}. <%= if(exists("additionaldesc"))additionaldesc %>
 #'
-#' @export
-#' @importFrom rlist list.merge
 #' @family plotgroups plotting functions
 #' @seealso \code{\link{plotgroups}}
 #' @param data list, each element is a vector of replicates for one combination of parameters
