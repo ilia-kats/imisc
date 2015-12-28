@@ -758,6 +758,7 @@ plotgroups <- function(
         # to do the conversion manually
         inchestouser <- (cylim[2] - cylim[1]) / par("pin")[2]
         lineheight <- strheight("\n", units="inches") * inchestouser
+        signifheight <- 0.3 * lineheight
         legendbase <- cylim[2]
         if (cplot == 1 && !is.null(legend.text)) {
             grouplength <- rle(legend.text)$lengths
@@ -787,8 +788,8 @@ plotgroups <- function(
             } else {
                 maxsignifoverlaps <- 0
             }
-            signifmargin <- (maxsignifoverlaps + 1) * lineheight
-            signifbase <- legendbase
+            signifmargin <- (maxsignifoverlaps + 1) * lineheight + signifheight
+            signifbase <- legendbase + signifheight
             legendbase <- signifbase + signifmargin
 
             if (maxsignifoverlaps == 0) {
@@ -847,7 +848,7 @@ plotgroups <- function(
                     end <- signif.test[[cplot]][[i]][2] - (1 - barwidth) / 2
                     mid <- (end - begin) / 2 + begin
                     base <- signifbase + signiflines[i] * lineheight
-                    lines(c(begin, begin, end, end), c(base - 0.3 * lineheight, base, base, base - 0.3 * lineheight), lwd=signif.test.lwd[[cplot]], col=signif.test.col[[cplot]], lend="butt")
+                    lines(c(begin, begin, end, end), c(base - signifheight, base, base, base - signifheight), lwd=signif.test.lwd[[cplot]], col=signif.test.col[[cplot]], lend="butt")
                     do.call(text, c(list(x=mid, y=base + 0.2 * lineheight, labels=label, adj=c(0.5, 0), col=signif.test.col[[cplot]]), signif.test.pars[[cplot]]))
                 }
                 signif.test.ret[[i]]$label <- label
