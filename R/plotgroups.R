@@ -713,7 +713,7 @@ plotgroups <- function(
             cylim <- NULL
         }
         if (is.null(cylim)) {
-            cylim <- plot.fun[[cplot]](data=data, features=features[[cplot]], ylim=TRUE)
+            cylim <- plot.fun[[cplot]](data=data[[cplot]], features=features[[cplot]], ylim=TRUE)
             if (!is.null(cylim))
                 cylim <- extendrange(cylim, f=0.04)
         }
