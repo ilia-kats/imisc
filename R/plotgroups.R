@@ -869,7 +869,16 @@ plotgroups <- function(
         plotfunret <- do.call(plot.fun[[cplot]], c(list(data=data[[cplot]], stats=stats, colors=colors, features=features[[cplot]], barwidth=barwidth), plot.fun.pars[[cplot]]))
         if (!is.null(extrafun.after[[cplot]]))
             extrafun.after[[cplot]](data[[cplot]], stats, colors, features, barwidth)
-        do.call(axis, list.merge(pars, list(side=2)))
+
+        # try to avoid axis ticks to close to the upper edge
+        # probably need better logic here (what about the lower edge? current assumption is
+        # we ignore it because we have space due to names and names.margin. Just skipping the upper
+        # tick also works for multiple plots
+        ticks <- axTicks(side=2)
+        lticks <- length(ticks)
+        if (ticks[lticks] > cylim[2] - lineheight)
+            ticks <- ticks[-lticks]
+        do.call(axis, list.merge(pars, list(side=2, at=ticks)))
         title(ylab=ylab[cplot])
         do.call(box, pars)
 
