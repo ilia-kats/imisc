@@ -9,13 +9,14 @@ plotgroups(data, names, colors = NULL, legend.text = NULL,
   names.split = NULL, names.italicize = NULL, names.style = c("plain",
   "combinatorial"), names.pch.cex = 1, names.pch = 19, names.adj = NA,
   names.margin = 0.5, names.rotate = NULL, features = NULL, range = 1.5,
-  cex.xlab = 1, ylim = NULL, legendmargin = NULL,
-  plot.fun = plotgroups.boxplot, plot.fun.pars = list(), barwidth = 0.8,
-  main = NULL, ylab = NULL, signif.test = NULL,
-  signif.test.fun = t.test, signif.test.text = function(p) paste0("p=",
-  formatC(p, digits = 3, format = "g")), signif.test.col = "black",
-  signif.test.lwd = legend.lwd, signif.test.pars = legend.pars,
-  extrafun.before = NULL, extrafun.after = NULL, ...)
+  conf.level = 0.95, ci.fun = plotgroups.ci, cex.xlab = 1, ylim = NULL,
+  legendmargin = NULL, plot.fun = plotgroups.boxplot,
+  plot.fun.pars = list(), barwidth = 0.8, main = NULL, ylab = NULL,
+  signif.test = NULL, signif.test.fun = t.test,
+  signif.test.text = function(p) paste0("p=", formatC(p, digits = 3, format =
+  "g")), signif.test.col = "black", signif.test.lwd = legend.lwd,
+  signif.test.pars = legend.pars, extrafun.before = NULL,
+  extrafun.after = NULL, ...)
 }
 \arguments{
 \item{data}{list, each element is a vector of replicates for one combination of parameters, or
@@ -82,6 +83,22 @@ recycled to the number of plots.}
 
 \item{range}{determines how far the the \code{iqr} whiskers will extend out from the box,
 if they are to be plotted. Will be recycled to the number of plots.}
+
+\item{conf.level}{Confidence level for plotting of confidence intervals. Will be recycled to the
+number of plots}
+
+\item{ci.fun}{Function to compute confidence intervals. Will be recycled to the number of plots.
+Must accept five arguments:
+\describe{
+          \item{data}{Numeric vector containing data for one group}
+          \item{mean}{Precomputed mean of the sample}
+          \item{se}{Precomputed standard error of the mean of the sample}
+          \item{ndata}{Number of observations}
+          \item{conf.level}{Confidence level}}
+If \code{data} is given, \code{mean}, \code{se}, and \code{ndata} are not used,
+but calculated from the data. If \code{data} is omitted, all of \code{mean},
+\code{se}, and \code{ndata} must be given. Defaults to \code{plotgroups.ci}, which computes
+confidence intervals using the t statistics.}
 
 \item{cex.xlab}{character expansion factor for X axis annotation}
 

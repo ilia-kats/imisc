@@ -17,7 +17,7 @@ plotgroups.barplot(data, stats, colors, ylim, features, barwidth,
 
 \item{ylim}{whether to compute Y axis limits}
 
-\item{features}{the features to plot. At the moment, either \code{mean} or \code{median} can be plotted. Also, only one of \code{box}, \code{iqr}, \code{sd}, \code{sem} can be plotted at the moment.}
+\item{features}{the features to plot. At the moment, either \code{mean} or \code{median} can be plotted. Also, only one of \code{box}, \code{iqr}, \code{sd}, \code{sem}, \code{ci} can be plotted at the moment.}
 
 \item{barwidth}{width of the individual bars/boxes etc. as fraction of 1}
 

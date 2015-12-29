@@ -1,5 +1,4 @@
 #' @templateVar plottype boxplot (extended with mean, standard deviation, and standard error of the mean)
-#' @templateVar featuresdesc At the moment, either \code{mean} or \code{median} can be plotted. Also, only one of \code{box}, \code{iqr}, \code{sd}, \code{sem} can be plotted at the moment.
 #' @template plotgroups.-
 #' @param bxppars additional parameters passed to \code{\link[graphics]{boxplot}} as
 #'        sig\code{pars} parameter
@@ -20,7 +19,10 @@
 #'                        for standard error of the mean whiskers.}
 #'                  \item{semstaplelty, semstaplelwd, semstaplecol}{Staple (end of whisker) line type,
 #'                        width, and color (default: \code{"#EDA217"}) for standard error
-#'                        of the mean whiskers}}
+#'                        of the mean whiskers}
+#'                  \item{cistaplelty, cistaplelwd, cistaplecol}{Staple (end of whisker) line type,
+#'                        width, and color (default: \code{"#EDA217"}) for confidence interval
+#'                        whiskers}}
 #' @return Same as \code{\link[graphics]{boxplot}}
 #' @seealso \code{\link[graphics]{boxplot}}
 #' @export
@@ -40,7 +42,9 @@ plotgroups.boxplot <- function(data, stats, colors, ylim, features, barwidth, bx
                  sdwhisklty=1, sdwhisklwd=lwd.base, sdwhiskcol="black",
                  sdstaplelty=1, sdstaplelwd=lwd.base, sdstaplecol="black",
                  semwhisklty=0, semwhisklwd=lwd.base, semwhiskcol="#EDA217",
-                 semstaplelty=1, semstaplelwd=lwd.base, semstaplecol="#EDA217")
+                 semstaplelty=1, semstaplelwd=lwd.base, semstaplecol="#EDA217",
+                 ciwhisklty=0, ciwhisklwd=lwd.base, ciwhiskcol="#090E97",
+                 cistaplelty=1, cistaplelwd=lwd.base, cistaplecol="#090E97")
 
     if (!("median" %in% features)) {
         bxppars$medlty <- "blank"
@@ -89,6 +93,11 @@ plotgroups.boxplot <- function(data, stats, colors, ylim, features, barwidth, bx
         segments(1:length(data) - bxppars$boxwex / 2, stats$means - stats$sems, 1:length(data) + bxppars$boxwex / 2, stats$means -stats$sems, lend='butt', lty=pars$semstaplelty, lwd=pars$semstaplelwd, col=pars$semstaplecol)
         segments(1:length(data), stats$means +stats$sems, 1:length(data), stats$means - stats$sems, lend='butt', lty=pars$semwhisklty, lwd=pars$semwhisklwd, col=pars$semwhiskcol)
     }
+    if ("ci" %in% features) {
+        segments(1:length(data) - bxppars$boxwex / 2, stats$means + stats$ci, 1:length(data) + bxppars$boxwex / 2, stats$means +stats$ci, lend='butt', lty=pars$cistaplelty, lwd=pars$cistaplelwd, col=pars$cistaplecol)
+        segments(1:length(data) - bxppars$boxwex / 2, stats$means - stats$ci, 1:length(data) + bxppars$boxwex / 2, stats$means -stats$ci, lend='butt', lty=pars$cistaplelty, lwd=pars$cistaplelwd, col=pars$cistaplecol)
+        segments(1:length(data), stats$means +stats$ci, 1:length(data), stats$means - stats$ci, lend='butt', lty=pars$ciwhisklty, lwd=pars$ciwhisklwd, col=pars$ciwhiskcol)
+    }
     invisible(toreturn)
 }
 
@@ -115,14 +124,26 @@ threeparamsstats <- function(stats, features)
         bars$u <- bars$m + stats$sems
         bars$l <- bars$m - stats$sems
     }
+    if ("ci" %in% features) {
+        bars$u <- bars$m + stats$ci
+        bars$l <- bars$m - stats$ci
+    }
     bars
 }
 
-allfeatures <- c("median", "box", "iqr", "mean", "sd", "sem")
+threeparamcheck <- function(features)
+{
+    if ("mean" %in% features && "median" %in% features)
+        stop("both mean and median present in features, only one can be plotted")
+    if (as.integer("box" %in% features + "iqr" %in% features + "sd" %in% features + "sem" %in% features) > 1 + "ci" %in% features)
+        stop("only one of 'box', 'iqr', 'sd', 'sem', 'ci' can be plotted, ajust features argument accordingly")
+}
+
+allfeatures <- c("median", "box", "iqr", "mean", "sd", "sem", "ci")
 
 #' @templateVar plottype beeswarm plot
 #' @templateVar additionaldesc Requires the \code{beeswarm} package.
-#' @templateVar featuresdesc At the moment, either \code{mean} or \code{median} can be plotted. Also, only one of \code{box}, \code{iqr}, \code{sd}, \code{sem} can be plotted at the moment.
+#' @templateVar featuresdesc At the moment, either \code{mean} or \code{median} can be plotted. Also, only one of \code{box}, \code{iqr}, \code{sd}, \code{sem}, \code{ci} can be plotted at the moment.
 #' @template plotgroups.-
 #' @param palpha opacity of the individual points
 #' @param bxplwd line width for the simplified boxplot
@@ -136,10 +157,7 @@ plotgroups.beeswarm <- function(data, stats, colors, ylim, features, barwidth, p
 {
     if (!requireNamespace("beeswarm", quietly = TRUE))
         stop("Please install the beeswarm package for this plot.")
-    if ("mean" %in% features && "median" %in% features)
-        stop("both mean and median present in features, only one can be plotted")
-    if (as.integer("box" %in% features + "iqr" %in% features + "sd" %in% features + "sem" %in% features) > 1)
-        stop("only one of 'box', 'iqr', 'sd', 'sem' can be plotted, ajust features argument accordingly")
+    threeparamcheck(features)
     if (!missing(ylim))
         return(range(unlist(data)))
 
@@ -164,7 +182,7 @@ plotgroups.beeswarm <- function(data, stats, colors, ylim, features, barwidth, p
 }
 
 #' @templateVar plottype barplot
-#' @templateVar featuresdesc At the moment, either \code{mean} or \code{median} can be plotted. Also, only one of \code{box}, \code{iqr}, \code{sd}, \code{sem} can be plotted at the moment.
+#' @templateVar featuresdesc At the moment, either \code{mean} or \code{median} can be plotted. Also, only one of \code{box}, \code{iqr}, \code{sd}, \code{sem}, \code{ci} can be plotted at the moment.
 #' @template plotgroups.-
 #' @param whiskerswidth width of the whiskers as fraction of 1
 #' @param whiskerslwd line width of the whiskers
@@ -175,10 +193,7 @@ plotgroups.beeswarm <- function(data, stats, colors, ylim, features, barwidth, p
 #' @importFrom rlist list.merge
 plotgroups.barplot <- function(data, stats, colors, ylim, features, barwidth, whiskerswidth=barwidth, whiskerslwd=par("lwd"), whiskerscol="black", bordercol="black", ...)
 {
-    if ("mean" %in% features && "median" %in% features)
-        stop("both mean and median present in features, only one can be plotted")
-    if (as.integer("box" %in% features + "iqr" %in% features + "sd" %in% features + "sem" %in% features) > 1)
-        stop("only one of 'box', 'iqr', 'sd', 'sem' can be plotted, ajust features argument accordingly")
+    threeparamcheck(features)
     if (!missing(ylim))
         return(NULL)
     bars <- threeparamsstats(stats, features)
@@ -235,6 +250,18 @@ plotgroups.vioplot <- function(data, stats, colors, ylim, features, barwidth, bo
         boxpars$notch <- FALSE
     bxp.toreturn <- do.call(plotgroups.boxplot, list.merge(boxpars, list(data=data, stats=stats, colors=boxcol, features=features, barwidth=boxwidth)))
     invisible(list(vioplot=vioplot.toreturn, boxplot=bxp.toreturn))
+}
+
+plotgroups.ci <- function(data, mean, se, ndata, conf.level=0.95) {
+    if (missing(data) && (missing(mean) || missing(se) || missing(ndata)))
+        stop("need either the data set or mean and standard error estimates", call.=TRUE)
+    if (!missing(data)) {
+        mean <- mean(data)
+        ndata <- length(data)
+        se <- mean / sqrt(ndata)
+    }
+    Q <- qt(conf.level + (1 - conf.level) / 2, df=ndata - 1)
+    Q * se
 }
 
 #' Plot several groups of repeated observations.
@@ -320,6 +347,20 @@ plotgroups.vioplot <- function(data, stats, colors, ylim, features, barwidth, bo
 #'        recycled to the number of plots.
 #' @param range determines how far the the \code{iqr} whiskers will extend out from the box,
 #'        if they are to be plotted. Will be recycled to the number of plots.
+#' @param conf.level Confidence level for plotting of confidence intervals. Will be recycled to the
+#'        number of plots
+#' @param ci.fun Function to compute confidence intervals. Will be recycled to the number of plots.
+#'        Must accept five arguments:
+#'        \describe{
+#'                  \item{data}{Numeric vector containing data for one group}
+#'                  \item{mean}{Precomputed mean of the sample}
+#'                  \item{se}{Precomputed standard error of the mean of the sample}
+#'                  \item{ndata}{Number of observations}
+#'                  \item{conf.level}{Confidence level}}
+#'        If \code{data} is given, \code{mean}, \code{se}, and \code{ndata} are not used,
+#'        but calculated from the data. If \code{data} is omitted, all of \code{mean},
+#'        \code{se}, and \code{ndata} must be given. Defaults to \code{plotgroups.ci}, which computes
+#'        confidence intervals using the t statistics.
 #' @param cex.xlab character expansion factor for X axis annotation
 #' @param ylim Y axis limits. Will be determined automatically if \code{NULL}. If not \code{NULL} but
 #'        only one limit is finite, the other will be determined automatically. Can be a list containing
@@ -441,6 +482,8 @@ plotgroups <- function(
                         names.rotate=NULL,
                         features=NULL,
                         range=1.5,
+                        conf.level=0.95,
+                        ci.fun=plotgroups.ci,
                         cex.xlab=1,
                         ylim=NULL,
                         legendmargin=NULL,
@@ -485,10 +528,10 @@ plotgroups <- function(
     }
     ngroups <- length(names)
     cenv <- environment()
-    for (arg in c("range", "ylab")) {
+    for (arg in c("range", "conf.level", "ylab")) {
         cenv[[arg]] <- rep(cenv[[arg]], length.out=nplots)
     }
-    for (arg in c("features", "ylim", "plot.fun", "signif.test.fun", "signif.test.text", "signif.test.col", "signif.test.lwd", "extrafun.before", "extrafun.after")) {
+    for (arg in c("features", "ylim", "plot.fun", "signif.test.fun", "ci.fun", "signif.test.text", "signif.test.col", "signif.test.lwd", "extrafun.before", "extrafun.after")) {
         if (!is.list(cenv[[arg]])) {
             cenv[[arg]] <- rep(list(cenv[[arg]]), nplots)
         } else {
@@ -679,9 +722,9 @@ plotgroups <- function(
 
     for (cplot in 1:nplots) {
         if (!is.null(features[[cplot]]) && length(features[[cplot]]) > 0) {
-            features[[cplot]] <- match.arg(features[[cplot]], choices=c("median", "box", "iqr", "mean", "sd", "sem"), several.ok=TRUE)
+            features[[cplot]] <- match.arg(features[[cplot]], choices=allfeatures, several.ok=TRUE)
         } else {
-            features[[cplot]] <- allfeatures
+            features[[cplot]] <- c("median", "box", "iqr", "mean", "sd", "ci")
         }
 
         cmai <- mai
@@ -696,9 +739,11 @@ plotgroups <- function(
         plot.new()
         stats <- list(means=c(), sds=c(), sems=c(), medians=c(), boxmax=c(), iqrmax=c(), boxmin=c(), iqrmin=c(), range=range[cplot])
         for (i in 1:ngroups) {
+            ndata <- length(data[[cplot]][[i]])
             stats$means[i] <- mean(data[[cplot]][[i]])
             stats$sds[i] <- sd(data[[cplot]][[i]])
-            stats$sems[i] <- stats$sds[i] / sqrt(length(data[[cplot]][[i]]))
+            stats$sems[i] <- stats$sds[i] / sqrt(ndata)
+            stats$ci[i] <- ci.fun[[cplot]](mean=stats$means[i], se=stats$se[i], ndata=ndata, conf.level=conf.level[cplot])
             bstats <- boxplot.stats(data[[cplot]][[i]], coef=range[cplot], do.conf=F, do.out=F)$stats
             stats$medians[i] <- bstats[3]
             stats$boxmax[i] <- bstats[4]
@@ -742,6 +787,10 @@ plotgroups <- function(
             if ("sem" %in% features[[cplot]]) {
                 cylim[1] <- min(cylim[1], stats$means - stats$sems, na.rm=TRUE)
                 cylim[2] <- max(cylim[2], stats$means + stats$sems, na.rm=TRUE)
+            }
+            if ("ci" %in% features[[cplot]]) {
+                cylim[1] <- min(cylim[1], stats$means - stats$ci, na.rm=TRUE)
+                cylim[2] <- max(cylim[2], stats$means + stats$ci, na.rm=TRUE)
             }
             cylim <- extendrange(cylim, f=0.04)
         }

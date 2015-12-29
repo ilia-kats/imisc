@@ -15,7 +15,7 @@ plotgroups.boxplot(data, stats, colors, ylim, features, barwidth, bxppars, ...)
 
 \item{ylim}{whether to compute Y axis limits}
 
-\item{features}{the features to plot. At the moment, either \code{mean} or \code{median} can be plotted. Also, only one of \code{box}, \code{iqr}, \code{sd}, \code{sem} can be plotted at the moment.}
+\item{features}{the features to plot.}
 
 \item{barwidth}{width of the individual bars/boxes etc. as fraction of 1}
 
@@ -39,7 +39,10 @@ contain the following:
                 for standard error of the mean whiskers.}
           \item{semstaplelty, semstaplelwd, semstaplecol}{Staple (end of whisker) line type,
                 width, and color (default: \code{"#EDA217"}) for standard error
-                of the mean whiskers}}}
+                of the mean whiskers}
+          \item{cistaplelty, cistaplelwd, cistaplecol}{Staple (end of whisker) line type,
+                width, and color (default: \code{"#EDA217"}) for confidence interval
+                whiskers}}}
 }
 \value{
 Same as \code{\link[graphics]{boxplot}}
