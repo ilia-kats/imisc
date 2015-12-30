@@ -38,7 +38,7 @@ contain the following:
                 \code{"solid"}), width, and color (default: \code{"#EDA217"})
                 for standard error of the mean whiskers.}
           \item{semstaplelty, semstaplelwd, semstaplecol}{Staple (end of whisker) line type,
-                width, and color (default: \code{"#EDA217"}) for standard error
+                width, and color (default: \code{"#090E97"}) for standard error
                 of the mean whiskers}
           \item{cistaplelty, cistaplelwd, cistaplecol}{Staple (end of whisker) line type,
                 width, and color (default: \code{"#EDA217"}) for confidence interval

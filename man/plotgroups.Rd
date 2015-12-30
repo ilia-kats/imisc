@@ -98,7 +98,8 @@ Must accept five arguments:
 If \code{data} is given, \code{mean}, \code{se}, and \code{ndata} are not used,
 but calculated from the data. If \code{data} is omitted, all of \code{mean},
 \code{se}, and \code{ndata} must be given. Defaults to \code{plotgroups.ci}, which computes
-confidence intervals using the t statistics.}
+confidence intervals using the t statistics. Must return a numeric vector of length 2,
+containing the lower and upper confidence bounds.}
 
 \item{cex.xlab}{character expansion factor for X axis annotation}
 
@@ -188,7 +189,15 @@ This is a wrapper function around \code{plot.fun}. It sets up the coordinate sys
                               \item{iqrmax}{the maximal data point within \code{range} times
                                             the interquartile range of \code{boxmax}}
                               \item{iqrmin}{the minimal data point within \code{range} times
-                                            the interquartile range of \code{boxmmin}}}}
+                                            the interquartile range of \code{boxmin}}
+                              \item{cimax}{the upper confidence bound, computed by \code{ci.fun}
+                                           according to \code{conf.level}}
+                              \item{cimin}{the lower confidence bound, computed by \code{ci.fun}
+                                           according to \code{conf.level}}
+                              \item{range}{the range of the extreme data points within
+                                           [\code{iqrmin}, \code{iqrmax}]}
+                              \item{conf.level}{the confidence level at which \code{cimax},
+                                                \code{cimin} apply}}}
           \item{colors}{the \code{colors} argument passed to \code{plotgroups}}
           \item{features}{the \code{features} argument passed to \code{plotgroups}}
           \item{barwidth}{the \code{barwidth} argument passed to \code{plotgroups}}}
