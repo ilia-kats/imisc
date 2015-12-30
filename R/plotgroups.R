@@ -208,7 +208,7 @@ plotgroups.barplot <- function(data, stats, colors, ylim, features, barwidth, wh
 
     for (b in bars[c("u", "l")]) {
         if (!is.null(b))
-            segments(1:length(data) - whiskerswidth / 2, b, 1:length(data) + whiskerswidth / 2, b, col=whiskerscols, lend='butt', lwd=whiskerslwd)
+            segments(1:length(data) - whiskerswidth / 2, b, 1:length(data) + whiskerswidth / 2, b, col=whiskerscol, lend='butt', lwd=whiskerslwd)
     }
     invisible(NULL)
 }
@@ -655,11 +655,13 @@ plotgroups <- function(
                 if (is.character(pch[i])) {
                     pfun <- text
                     parg <- "labels"
+                    cadj <- adj[[i]]
                 } else {
                     pfun <- points
                     parg <- "pch"
+                    cadj <- adj[[i]][1]
                 }
-                args <- list(x=x, y=ycoords[y], adj=adj[[i]], cex=cex[i], srt=rotate[i], xpd=TRUE)
+                args <- list(x=x, y=ycoords[y], adj=cadj, cex=cex[i], srt=rotate[i], xpd=TRUE)
                 args[[parg]] <- pch[i]
                 do.call(pfun, args)
             }
@@ -771,8 +773,6 @@ plotgroups <- function(
         }
         if (is.null(cylim)) {
             cylim <- plot.fun[[cplot]](data=data[[cplot]], features=features[[cplot]], ylim=TRUE)
-            if (!is.null(cylim))
-                cylim <- extendrange(cylim, f=0.04)
         }
         if (is.null(cylim)) {
             cylim <- c(Inf, 0)
@@ -804,8 +804,8 @@ plotgroups <- function(
                 cylim[1] <- min(cylim[1], stats$means - stats$ci, na.rm=TRUE)
                 cylim[2] <- max(cylim[2], stats$means + stats$ci, na.rm=TRUE)
             }
-            cylim <- extendrange(cylim, f=0.04)
         }
+        cylim <- extendrange(cylim, f=0.04)
         if (!is.null(ylim.usr)) {
             if (is.finite(ylim.usr[1]))
                 cylim[1] <- ylim.usr[1]
