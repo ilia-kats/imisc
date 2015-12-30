@@ -5,7 +5,7 @@
 \title{Plot several groups of repeated observations.}
 \usage{
 plotgroups(data, names, colors = NULL, legend.text = NULL,
-  legend.col = NULL, legend.pars = list(font = 2), legend.lwd = NULL,
+  legend.col = NULL, legend.pars = list(), legend.lwd = NULL,
   names.split = NULL, names.italicize = NULL, names.style = c("plain",
   "combinatorial"), names.pch.cex = 1, names.pch = 19, names.adj = NA,
   names.margin = 0.5, names.rotate = NULL, features = NULL, range = 1.5,

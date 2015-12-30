@@ -479,7 +479,7 @@ plotgroups <- function(
                         colors=NULL,
                         legend.text=NULL,
                         legend.col=NULL,
-                        legend.pars=list(font=2),
+                        legend.pars=list(),
                         legend.lwd=NULL,
                         names.split=NULL,
                         names.italicize=NULL,
