@@ -823,8 +823,10 @@ plotgroups <- function(
         legendbase <- cylim[2]
         if (cplot == 1 && !is.null(legend.text)) {
             grouplength <- rle(legend.text)$lengths
-            colors <- rep(colors, length.out=length(grouplength))
-            colors <- rep(colors, times=grouplength)
+            if (length(colors) != ngroups) {
+                colors <- rep(colors, length.out=length(grouplength))
+                colors <- rep(colors, times=grouplength)
+            }
             if (is.null(legendmargin))
                 legendmargin <- max(max(strheight(legend.text, units="inches")) * inchestouser, lineheight)
         } else {
