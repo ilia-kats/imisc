@@ -773,6 +773,8 @@ plotgroups <- function(
         }
         if (is.null(cylim)) {
             cylim <- plot.fun[[cplot]](data=data[[cplot]], features=features[[cplot]], ylim=TRUE)
+            if (!is.null(cylim) && all(is.finite(cylim)))
+                cylim <- extendrange(cylim, f=0.04)
         }
         if (is.null(cylim)) {
             cylim <- c(Inf, 0)
@@ -804,8 +806,10 @@ plotgroups <- function(
                 cylim[1] <- min(cylim[1], stats$means - stats$ci, na.rm=TRUE)
                 cylim[2] <- max(cylim[2], stats$means + stats$ci, na.rm=TRUE)
             }
+            if (!is.null(cylim) && all(is.finite(cylim)))
+                cylim <- extendrange(cylim, f=0.04)
         }
-        cylim <- extendrange(cylim, f=0.04)
+
         if (!is.null(ylim.usr)) {
             if (is.finite(ylim.usr[1]))
                 cylim[1] <- ylim.usr[1]
