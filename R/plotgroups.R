@@ -855,9 +855,10 @@ plotgroups <- function(
             } else {
                 maxsignifoverlaps <- 0
             }
-            signifmargin <- (maxsignifoverlaps + 1) * lineheight + signifheight
+            signifmargin <- (maxsignifoverlaps + 1) * lineheight
             signifbase <- legendbase + signifheight
             legendbase <- signifbase + signifmargin
+            signifmargin <- signifmargin + signifheight
 
             if (maxsignifoverlaps == 0) {
                 signiflines <- rep(0, length(signif.test[[cplot]]))
