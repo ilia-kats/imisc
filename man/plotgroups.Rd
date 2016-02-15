@@ -8,8 +8,9 @@ plotgroups(data, names, colors = NULL, legend.text = NULL,
   legend.col = NULL, legend.pars = list(), legend.lwd = NULL,
   names.split = NULL, names.italicize = NULL, names.style = c("plain",
   "combinatorial"), names.pch.cex = 1, names.pch = 19, names.adj = NA,
-  names.margin = 0.5, names.rotate = NULL, features = NULL, range = 1.5,
-  conf.level = 0.95, ci.fun = plotgroups.ci, cex.xlab = 1, ylim = NULL,
+  names.map.fun = NULL, names.margin = 0.5, names.rotate = NULL,
+  features = NULL, range = 1.5, conf.level = 0.95,
+  ci.fun = plotgroups.ci, cex.xlab = 1, ylim = NULL,
   legendmargin = NULL, plot.fun = plotgroups.boxplot,
   plot.fun.pars = list(), barwidth = 0.8, main = NULL, ylab = NULL,
   signif.test = NULL, signif.test.fun = t.test,
@@ -61,6 +62,21 @@ fragment containing \code{names.italicize} is rendered in italics}
 \code{names.style}.See \code{\link[base]{text}}. Defaults to 1 for
 \code{names.style = 'plain'}, unless \code{names.rotate = 0}, in which case it
 defaults to 0.5. Defaults to 0.5 for \code{names.style='combinatorial'}.}
+
+\item{names.map.fun}{Function mapping between names string and pch/cex/adj/rotate for the respective
+combination. Useful for more complicated experimental layouts where different names.pch
+must be used for different genes, see examples. Must accept six arguments:
+\describe{
+          \item{n}{String with the names combination to process}
+          \item{split}{Default pattern to split by, as given by \code{names.split}}
+          \item{pch}{Default pch, as given by \code{names.pch}}
+          \item{cex}{Default cex, as given by \code{names.pch.cex}}
+          \item{rotate}{Default rotate, as given by \code{names.rotate}}
+          \item{adj}{Default adj, as given by \code{names.adj}}}
+Must return a named list, with the names being the split genes that should be used to
+label the rows, each element being itself a named list containing the plotting
+parameters for that particular annotation, i.e. \code{pch}, \code{cex}, \code{rotate},
+\code{adj}.}
 
 \item{names.margin}{spacing between the bottom edge of the plot and the annotation, in inches}
 
@@ -232,14 +248,20 @@ plotgroups(data, names, colors, legend.text,
            main="test", plot.fun=plotgroups.barplot, features=c("mean", "sd"),
            plot.fun.pars=list(whiskerswidth=0.6))
 
-names.pch <- rep('\\u0394', 24)
-names.adj <- names.adj <- rep(list(c(0.5, 0)), 24)
-names.rotate <- rep(0, 24)
-names.pch[2] <- 'S158T'
-names.adj[[2]] <- c(0, 0.5)
-names.rotate[2] <- 90
+map.fun <- function(n, split, pch, cex, rotate, adj) {
+               n <- strsplit(n, split, fixed=TRUE)[[1]]
+               nlist <- lapply(n, function(x){
+                                      if (x != "gene2") {
+                                          list(pch=pch, cex=cex, rotate=rotate, adj=adj)
+                                       } else {
+                                           list(pch='S158T', cex=cex, rotate=90, adj=c(0,0.5))
+                                       }
+                                    })
+                names(nlist) <- n
+                nlist
+}
 plotgroups(data, names, colors, legend.text,names.style='combinatorial', names.split=" ",
-           names.pch=names.pch, names.rotate=names.rotate, names.adj=names.adj)
+           names.pch='\\u0394', names.map.fun=map.fun)
 ## significance testing
 plotgroups(data, names, colors, legend.text,names.style='combinatorial',
            names.split=" ", names.pch='\\u0394',
@@ -259,7 +281,7 @@ plotgroups(data, names, colors, legend.text,names.style='combinatorial',
                      }})
 ## multiple plots
 plotgroups(list(data, rev(data)), names, colors, legend.text,names.style='combinatorial',
-           names.split=" ",names.pch=names.pch, names.rotate=names.rotate, names.adj=names.adj,
+           names.split=" ",names.pch='\\u0394', names.map.fun=map.fun,
            ylim=c(0,Inf), ylab=c("data1", "data2"), main="test", features=list(NULL,
            c("median", "box")), plot.fun=list(plotgroups.boxplot, plotgroups.beeswarm),
            signif.test=list(NULL,list(c(1,3), c(2,5), c(5,8), c(3,10))))
