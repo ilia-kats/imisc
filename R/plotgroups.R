@@ -887,8 +887,8 @@ plotgroups <- function(
                 }
             }
         }
-        ylim <- c(cylim[1], cylim[2] + legendmargin + signifmargin)
-        plot.window(xlim=c(0.5, ngroups + 0.5), ylim=ylim, xaxs='i', yaxs='i')
+        cylim <- c(cylim[1], cylim[2] + legendmargin + signifmargin)
+        plot.window(xlim=c(0.5, ngroups + 0.5), ylim=cylim, xaxs='i', yaxs='i')
 
         if (!is.null(extrafun.before[[cplot]]))
             extrafun.before[[cplot]](data[[cplot]], stats, colors, features, barwidth)
@@ -902,7 +902,7 @@ plotgroups <- function(
         # tick also works for multiple plots
         ticks <- axTicks(side=2)
         lticks <- length(ticks)
-        if (ticks[lticks] > ylim[2] - lineheight)
+        if (ticks[lticks] > cylim[2] - lineheight)
             ticks <- ticks[-lticks]
         do.call(axis, list.merge(pars, list(side=2, at=ticks)))
         title(ylab=ylab[cplot])
