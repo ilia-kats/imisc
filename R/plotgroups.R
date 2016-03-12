@@ -367,6 +367,7 @@ plotgroups.ci <- function(data, mean, se, ndata, conf.level=0.95) {
 #'        Can be a list containing character vectors, in which case the specified feature set will
 #'        apply to the corresponding plot if multiple data sets are plotted (see examples). Will be
 #'        recycled to the number of plots.
+#' @param log Whether to plot the Y axis on log scale
 #' @param range determines how far the the \code{iqr} whiskers will extend out from the box,
 #'        if they are to be plotted. Will be recycled to the number of plots.
 #' @param conf.level Confidence level for plotting of confidence intervals. Will be recycled to the
@@ -443,7 +444,7 @@ plotgroups.ci <- function(data, mean, se, ndata, conf.level=0.95) {
 #'            plot.fun=plotgroups.beeswarm, features=c('mean', 'sd'), ylim=c(0,Inf))
 #' plotgroups(data, names2, colors, legend.text,plot.fun=plotgroups.vioplot, ylim=c(0,Inf),
 #'            names.rotate=0, names.adj=c(0.5, 1))
-#' plotgroups(data, names, colors, legend.text,
+#' plotgroups(data, names, colors, legend.text, log=TRUE,
 #'            plot.fun=plotgroups.beeswarm, features=c('mean', 'sd'),
 #'            names.style='combinatorial', names.split=" ", names.pch='\u0394',
 #'            plot.fun.pars=list(palpha=0.5, bxpcols="black"))
@@ -493,6 +494,7 @@ plotgroups.ci <- function(data, mean, se, ndata, conf.level=0.95) {
 #'            signif.test=list(NULL,list(c(1,3), c(2,5), c(5,8), c(3,10))))
 #' @export
 #' @importFrom rlist list.merge
+#' @importFrom magicaxis magaxis
 plotgroups <- function(
                         data,
                         names,
@@ -511,6 +513,7 @@ plotgroups <- function(
                         names.margin=0.5,
                         names.rotate=NULL,
                         features=NULL,
+                        log=FALSE,
                         range=1.5,
                         conf.level=0.95,
                         ci.fun=plotgroups.ci,
@@ -558,7 +561,7 @@ plotgroups <- function(
     }
     ngroups <- length(names)
     cenv <- environment()
-    for (arg in c("range", "conf.level", "ylab")) {
+    for (arg in c("log", "range", "conf.level", "ylab")) {
         cenv[[arg]] <- rep(cenv[[arg]], length.out=nplots)
     }
     for (arg in c("features", "ylim", "plot.fun", "signif.test.fun", "ci.fun", "signif.test.text", "signif.test.col", "signif.test.lwd", "extrafun.before", "extrafun.after")) {
@@ -772,16 +775,33 @@ plotgroups <- function(
             stats$boxmin[i] <- bstats[2]
             stats$iqrmin[i] <- bstats[1]
         }
+        allstats[[cplot]] <- stats
+        stats$sdsmax <- stats$means + stats$sds
+        stats$sdsmin <- stats$means - stats$sds
+        stats$semsmax <- stats$means + stats$sems
+        stats$semsmin <- stats$means - stats$sems
+        if (log[cplot]) {
+            for (f in c("means", "cimin", "cimax", "medians", "boxmax", "iqrmax", "boxmin", "iqrmin", "sdsmax", "sdsmin", "semsmax", "semsmin")) {
+                stats[[f]] <- log10(stats[[f]])
+            }
+        }
         ylim.usr <- NULL
         cylim <- ylim[[cplot]]
         if (!is.null(cylim) && (!is.finite(cylim[1]) || !is.finite(cylim[2]))) {
+            if (log[cplot])
+                cylim <- log10(cylim)
             ylim.usr <- cylim
             cylim <- NULL
         }
         if (is.null(cylim)) {
             cylim <- plot.fun[[cplot]](data=data[[cplot]], features=features[[cplot]], ylim=TRUE)
-            if (!is.null(cylim) && all(is.finite(cylim)))
+            if (!is.null(cylim) && all(is.finite(cylim))) {
+                if (log[cplot]) {
+                    cylim <- log10(cylim)
+                    cylim[is.na(cylim)] <- 0
+                }
                 cylim <- extendrange(cylim, f=0.04)
+            }
         }
         if (is.null(cylim)) {
             cylim <- c(Inf, 0)
@@ -802,16 +822,16 @@ plotgroups <- function(
                 cylim[2] <- max(cylim[2], stats$means, na.rm=TRUE)
             }
             if ("sd" %in% features[[cplot]]) {
-                cylim[1] <- min(cylim[1], stats$means - stats$sds, na.rm=TRUE)
-                cylim[2] <- max(cylim[2], stats$means + stats$sds, na.rm=TRUE)
+                cylim[1] <- min(cylim[1], stats$sdsmin, na.rm=TRUE)
+                cylim[2] <- max(cylim[2], stats$sdsmax, na.rm=TRUE)
             }
             if ("sem" %in% features[[cplot]]) {
-                cylim[1] <- min(cylim[1], stats$means - stats$sems, na.rm=TRUE)
-                cylim[2] <- max(cylim[2], stats$means + stats$sems, na.rm=TRUE)
+                cylim[1] <- min(cylim[1], stats$semsmin, na.rm=TRUE)
+                cylim[2] <- max(cylim[2], stats$semsmax, na.rm=TRUE)
             }
             if ("ci" %in% features[[cplot]]) {
-                cylim[1] <- min(cylim[1], stats$means - stats$ci, na.rm=TRUE)
-                cylim[2] <- max(cylim[2], stats$means + stats$ci, na.rm=TRUE)
+                cylim[1] <- min(cylim[1], stats$cimin, na.rm=TRUE)
+                cylim[2] <- max(cylim[2], stats$cimax, na.rm=TRUE)
             }
             if (!is.null(cylim) && all(is.finite(cylim)))
                 cylim <- extendrange(cylim, f=0.04)
@@ -888,26 +908,41 @@ plotgroups <- function(
             }
         }
         cylim <- c(cylim[1], cylim[2] + legendmargin + signifmargin)
-        plot.window(xlim=c(0.5, ngroups + 0.5), ylim=cylim, xaxs='i', yaxs='i')
+        xlim <- c(0.5, ngroups + 0.5)
+
+        if (log[cplot]) {
+            plot.window(xlim=xlim, ylim=10^cylim, xaxs='i', yaxs='i', log='y')
+        } else {
+            plot.window(xlim=xlim, ylim=cylim, xaxs='i', yaxs='i')
+        }
 
         if (!is.null(extrafun.before[[cplot]]))
             extrafun.before[[cplot]](data[[cplot]], stats, colors, features, barwidth)
-        plotfunret <- do.call(plot.fun[[cplot]], c(list(data=data[[cplot]], stats=stats, colors=colors, features=features[[cplot]], barwidth=barwidth), plot.fun.pars[[cplot]]))
+        plotfunret <- do.call(plot.fun[[cplot]], c(list(data=data[[cplot]], stats=allstats[[cplot]], colors=colors, features=features[[cplot]], barwidth=barwidth), plot.fun.pars[[cplot]]))
         if (!is.null(extrafun.after[[cplot]]))
             extrafun.after[[cplot]](data[[cplot]], stats, colors, features, barwidth)
 
-        # try to avoid axis ticks to close to the upper edge
-        # probably need better logic here (what about the lower edge? current assumption is
-        # we ignore it because we have space due to names and names.margin. Just skipping the upper
-        # tick also works for multiple plots
-        ticks <- axTicks(side=2)
-        lticks <- length(ticks)
-        if (ticks[lticks] > cylim[2] - lineheight)
-            ticks <- ticks[-lticks]
-        do.call(axis, list.merge(pars, list(side=2, at=ticks)))
+        if (log[cplot]) {
+            do.call(magaxis, list.merge(pars, list(side=2, usepar=TRUE, minorn=10, majorn=abs(round(diff(cylim))))))
+        } else {
+            # try to avoid axis ticks to close to the upper edge
+            # probably need better logic here (what about the lower edge? current assumption is
+            # we ignore it because we have space due to names and names.margin. Just skipping the upper
+            # tick also works for multiple plots
+            ticks <- axTicks(side=2)
+            lticks <- length(ticks)
+            if (ticks[lticks] > cylim[2] - lineheight)
+                ticks <- ticks[-lticks]
+            do.call(axis, list.merge(pars, list(side=2, at=ticks)))
+        }
+
         title(ylab=ylab[cplot])
         do.call(box, pars)
 
+        if (log[cplot]) {
+            par(ylog=FALSE)
+            plot.window(xlim=xlim, ylim=cylim, xaxs='i', yaxs='i')
+        }
         if (cplot == 1 && !is.null(legend.text)) {
             segs.begin <- c(1, cumsum(grouplength)[-length(grouplength)] + 1) - barwidth / 2
             segs.end <- cumsum(grouplength) + barwidth / 2
@@ -939,7 +974,6 @@ plotgroups <- function(
             }
             allsigniftestrets[[cplot]] <- signif.test.ret
         }
-        allstats[[cplot]] <- stats
         allplotfunrets <- plotfunret
     }
 

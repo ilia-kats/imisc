@@ -9,7 +9,7 @@ plotgroups(data, names, colors = NULL, legend.text = NULL,
   names.split = NULL, names.italicize = NULL, names.style = c("plain",
   "combinatorial"), names.pch.cex = 1, names.pch = 19, names.adj = NA,
   names.map.fun = NULL, names.margin = 0.5, names.rotate = NULL,
-  features = NULL, range = 1.5, conf.level = 0.95,
+  features = NULL, log = FALSE, range = 1.5, conf.level = 0.95,
   ci.fun = plotgroups.ci, cex.xlab = 1, ylim = NULL,
   legendmargin = NULL, plot.fun = plotgroups.boxplot,
   plot.fun.pars = list(), barwidth = 0.8, main = NULL, ylab = NULL,
@@ -96,6 +96,8 @@ depends on \code{plot.fun} Can contain any combination of the following:
 Can be a list containing character vectors, in which case the specified feature set will
 apply to the corresponding plot if multiple data sets are plotted (see examples). Will be
 recycled to the number of plots.}
+
+\item{log}{Whether to plot the Y axis on log scale}
 
 \item{range}{determines how far the the \code{iqr} whiskers will extend out from the box,
 if they are to be plotted. Will be recycled to the number of plots.}
@@ -237,7 +239,7 @@ plotgroups(data, names, colors, legend.text,
            plot.fun=plotgroups.beeswarm, features=c('mean', 'sd'), ylim=c(0,Inf))
 plotgroups(data, names2, colors, legend.text,plot.fun=plotgroups.vioplot, ylim=c(0,Inf),
            names.rotate=0, names.adj=c(0.5, 1))
-plotgroups(data, names, colors, legend.text,
+plotgroups(data, names, colors, legend.text, log=TRUE,
            plot.fun=plotgroups.beeswarm, features=c('mean', 'sd'),
            names.style='combinatorial', names.split=" ", names.pch='\\u0394',
            plot.fun.pars=list(palpha=0.5, bxpcols="black"))
