@@ -274,7 +274,7 @@ plotgroups.ci <- function(data, mean, se, ndata, conf.level=0.95) {
 #'
 #' This is a wrapper function around \code{plot.fun}. It sets up the coordinate system, calls
 #' \code{extrafun.before} followed by \code{plot.fun}, which does the actual plotting, and
-#' \code{extrafun.after}. All three functions are passed the follwing arguments:
+#' \code{extrafun.after}. All three functions are passed the following arguments:
 #' \describe{
 #'           \item{data}{the \code{data} argument passed to \code{plotgroups}}
 #'           \item{stats}{summary statistics of the data. List with the following components:
@@ -585,6 +585,8 @@ plotgroups <- function(
             cenv[[arg]] <- rep(cenv[[arg]], length.out=nplots)
         }
     }
+    haveMagicAxis <- requireNamespace("magicaxis", quietly = TRUE)
+
     pars <- list(oma=c(0,0,0,0), mar=c(0, 3, 0.2, 0.2), las=1, mgp=c(2, 0.5, 0), ljoin="mitre", lend="square", lwd=2)
     if (!is.null(main))
         pars$oma <- c(0, 0, 2, 0)
@@ -922,8 +924,17 @@ plotgroups <- function(
         if (!is.null(extrafun.after[[cplot]]))
             extrafun.after[[cplot]](data[[cplot]], stats, colors, features, barwidth)
 
-        if (log[cplot]) {
-            do.call(magaxis, list.merge(pars, list(side=2, usepar=TRUE, minorn=10, majorn=abs(round(diff(cylim))))))
+        if (log[cplot] && haveMagicAxis) {
+            maglab.old <- magicaxis::maglab
+            if (substr(names(dev.cur()), 1, 4) == "tikz") {
+                assignInNamespace("maglab", function(...) {
+                    ret <- maglab.old(...)
+                    ret$exp <- lapply(ret$exp, function(x)paste0('$',sub('\\s+', ' ', sub('*', '\\cdot ', paste0(deparse(x, control=NULL), collapse=""), fixed=TRUE)), '$'))
+                    ret
+                }, "magicaxis")
+            }
+            do.call(magicaxis::magaxis, list.merge(pars, list(side=2, usepar=TRUE, minorn=10, majorn=abs(round(diff(cylim))))))
+            assignInNamespace("maglab", maglab.old, "magicaxis")
         } else {
             # try to avoid axis ticks to close to the upper edge
             # probably need better logic here (what about the lower edge? current assumption is

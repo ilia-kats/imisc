@@ -8,10 +8,9 @@ Depends:
 Imports:
     graphics,
     grDevices,
-    rlist,
-    magicaxis
+    rlist
 Suggests:
-    beeswarm, IRanges, vioplot
+    beeswarm, IRanges, vioplot, magicaxis
 License: GPL-2
 LazyData: true
 RoxygenNote: 5.0.1
