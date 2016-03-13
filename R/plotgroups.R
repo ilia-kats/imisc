@@ -494,7 +494,6 @@ plotgroups.ci <- function(data, mean, se, ndata, conf.level=0.95) {
 #'            signif.test=list(NULL,list(c(1,3), c(2,5), c(5,8), c(3,10))))
 #' @export
 #' @importFrom rlist list.merge
-#' @importFrom magicaxis magaxis
 plotgroups <- function(
                         data,
                         names,
@@ -778,33 +777,14 @@ plotgroups <- function(
             stats$iqrmin[i] <- bstats[1]
         }
         allstats[[cplot]] <- stats
-        stats$sdsmax <- stats$means + stats$sds
-        stats$sdsmin <- stats$means - stats$sds
-        stats$semsmax <- stats$means + stats$sems
-        stats$semsmin <- stats$means - stats$sems
-        if (log[cplot]) {
-            for (f in c("means", "cimin", "cimax", "medians", "boxmax", "iqrmax", "boxmin", "iqrmin", "sdsmax", "sdsmin", "semsmax", "semsmin")) {
-                stats[[f]] <- log10(stats[[f]])
-            }
-        }
         ylim.usr <- NULL
         cylim <- ylim[[cplot]]
         if (!is.null(cylim) && (!is.finite(cylim[1]) || !is.finite(cylim[2]))) {
-            if (log[cplot])
-                cylim <- log10(cylim)
             ylim.usr <- cylim
             cylim <- NULL
         }
-        if (is.null(cylim)) {
+        if (is.null(cylim))
             cylim <- plot.fun[[cplot]](data=data[[cplot]], features=features[[cplot]], ylim=TRUE)
-            if (!is.null(cylim) && all(is.finite(cylim))) {
-                if (log[cplot]) {
-                    cylim <- log10(cylim)
-                    cylim[is.na(cylim)] <- 0
-                }
-                cylim <- extendrange(cylim, f=0.04)
-            }
-        }
         if (is.null(cylim)) {
             cylim <- c(Inf, 0)
             if ("median" %in% features[[cplot]]) {
@@ -824,27 +804,44 @@ plotgroups <- function(
                 cylim[2] <- max(cylim[2], stats$means, na.rm=TRUE)
             }
             if ("sd" %in% features[[cplot]]) {
-                cylim[1] <- min(cylim[1], stats$sdsmin, na.rm=TRUE)
-                cylim[2] <- max(cylim[2], stats$sdsmax, na.rm=TRUE)
+                cylim[1] <- min(cylim[1], stats$means - stats$sds, na.rm=TRUE)
+                cylim[2] <- max(cylim[2], stats$means + stats$sds, na.rm=TRUE)
             }
             if ("sem" %in% features[[cplot]]) {
-                cylim[1] <- min(cylim[1], stats$semsmin, na.rm=TRUE)
-                cylim[2] <- max(cylim[2], stats$semsmax, na.rm=TRUE)
+                cylim[1] <- min(cylim[1], stats$means - stats$sems, na.rm=TRUE)
+                cylim[2] <- max(cylim[2], stats$means + stats$sems, na.rm=TRUE)
             }
             if ("ci" %in% features[[cplot]]) {
                 cylim[1] <- min(cylim[1], stats$cimin, na.rm=TRUE)
                 cylim[2] <- max(cylim[2], stats$cimax, na.rm=TRUE)
             }
-            if (!is.null(cylim) && all(is.finite(cylim)))
-                cylim <- extendrange(cylim, f=0.04)
+
         }
 
-        if (!is.null(ylim.usr)) {
-            if (is.finite(ylim.usr[1]))
-                cylim[1] <- ylim.usr[1]
-            if (is.finite(ylim.usr[2]))
-                cylim[2] <- ylim.usr[2]
+        if (log[cplot]) {
+            cylim <- log10(cylim)
+            cylim[is.na(cylim)] <- 0
         }
+        if (!is.null(cylim) && all(is.finite(cylim)))
+                cylim <- extendrange(cylim, f=0.04)
+
+        if (!is.null(ylim.usr)) {
+            if (is.finite(ylim.usr[1])) {
+                if (log[cplot]) {
+                    cylim[1] <- log10(ylim.usr[1])
+                } else {
+                    cylim[1] <- ylim.usr[1]
+                }
+            }
+            if (is.finite(ylim.usr[2])) {
+                if (log[cplot]) {
+                    cylim[2] <- log10(ylim.usr[2])
+                } else {
+                    cylim[2] <- ylim.usr[2]
+                }
+            }
+        }
+
 
         if (is.null(colors))
             colors <- "grey"
