@@ -161,7 +161,6 @@ plotgroups.beeswarm <- function(data, stats, colors, ylim, features, barwidth, p
     if (!missing(ylim))
         return(range(unlist(data)))
 
-    library(beeswarm)
     dots <- list(...)
     pars <- list(method="swarm", corral="random", priority="random", pch=16)
     if (length(dots) > 0)
@@ -570,15 +569,15 @@ plotgroups <- function(
             cenv[[arg]] <- rep(cenv[[arg]], length.out=nplots)
         }
     }
-#     for (arg in names(dots)) {
-#         if (!is.list(arg)) {
-#             dots[[arg]] <- rep(list(arg), nplots)
-#         } else {
-#             dots[[arg]] <- rep(arg, length.out=nplots)
-#         }
-#     }
+
     for (arg in c("plot.fun.pars", "signif.test.pars", "signif.test")) {
-        if (!is.null(cenv[[arg]]) && length(cenv[[arg]]) && !all(sapply(cenv[[arg]], function(x)is.list(x) || is.null(x)))) {
+        if (!is.null(cenv[[arg]])
+            &&length(cenv[[arg]])
+            &&!all(sapply(cenv[[arg]], function(x)is.list(x) || is.null(x)))
+            # we need to deal with parameter lists containing lists if there is only one plot, i.e.
+            # something like plot.fun.pars=list(test=list(a=1,c=2))
+            # assume that top-level lists for multiple plots are unnamed
+            || !is.null(names(cenv[[arg]]))) {
             cenv[[arg]] <- rep(list(cenv[[arg]]), nplots)
         } else if (!is.null(cenv[[arg]]) && length(cenv[[arg]]) != nplots) {
             cenv[[arg]] <- rep(cenv[[arg]], length.out=nplots)
