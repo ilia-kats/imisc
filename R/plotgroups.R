@@ -821,8 +821,7 @@ plotgroups <- function(
             cylim <- log10(cylim)
             cylim[is.na(cylim)] <- 0
         }
-        if (!is.null(cylim) && all(is.finite(cylim)))
-                cylim <- extendrange(cylim, f=0.04)
+
 
         if (!is.null(ylim.usr)) {
             if (is.finite(ylim.usr[1])) {
@@ -839,6 +838,15 @@ plotgroups <- function(
                     cylim[2] <- ylim.usr[2]
                 }
             }
+            # this needs to be after the full range has been set up
+            datarange <- diff(cylim)
+            if (!is.finite(ylim.usr[1]))
+                cylim[1] <- cylim[1] - 0.04 * datarange
+            if (!is.finite(ylim.usr[2]))
+                cylim[2] <- cylim[2] + 0.04 * datarange
+        } else {
+            if (!is.null(cylim) && all(is.finite(cylim)))
+                cylim <- extendrange(cylim, f=0.04)
         }
 
 
