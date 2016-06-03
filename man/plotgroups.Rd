@@ -193,7 +193,7 @@ below each other, sharing the groupings and annotations (see examples)
 \details{
 This is a wrapper function around \code{plot.fun}. It sets up the coordinate system, calls
 \code{extrafun.before} followed by \code{plot.fun}, which does the actual plotting, and
-\code{extrafun.after}. All three functions are passed the follwing arguments:
+\code{extrafun.after}. All three functions are passed the following arguments:
 \describe{
           \item{data}{the \code{data} argument passed to \code{plotgroups}}
           \item{stats}{summary statistics of the data. List with the following components:
