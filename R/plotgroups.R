@@ -326,7 +326,7 @@ plotgroups.ci <- function(data, mean, se, ndata, conf.level=0.95) {
 #'              \item{plain}{each name will be written as-is below the plot}
 #'              \item{combinatorial}{names will be split by \code{names.split}, unique strings will be
 #'                    printed at the bottom-left, and observations whose name contains the string will
-#'                    be identified by prining \code{names.pch} below the respective bar. Useful if e.g.
+#'                    be identified by printing \code{names.pch} below the respective bar. Useful if e.g.
 #'                   assaying different combinations of single/double/triple knock-outs.}
 #'                   }
 #' @param names.adj text adjustment for \code{names} or \code{names.pch}, depending on
@@ -337,8 +337,9 @@ plotgroups.ci <- function(data, mean, se, ndata, conf.level=0.95) {
 #'        \code{names.style='combinatorial'}
 #' @param names.pch.cex character expansion factor for \code{names.pch}
 #' @param names.margin spacing between the bottom edge of the plot and the annotation, in inches
-#' @param names.rotate only used when \code{names.style='plain'}. Degrees by which to rotate the
-#'        annotation strings.
+#' @param names.rotate Degrees by which to rotate the annotation strings.
+#' @param names.placeholder Only used when \code{names.style='combinatorial'}. Placeholder character
+#'        to use when no annotation is present for the current sample and row. See examples.
 #' @param names.map.fun Function mapping between names string and pch/cex/adj/rotate for the respective
 #'        combination. Useful for more complicated experimental layouts where different names.pch
 #'        must be used for different genes, see examples. Must accept six arguments:
@@ -448,7 +449,8 @@ plotgroups.ci <- function(data, mean, se, ndata, conf.level=0.95) {
 #'            names.style='combinatorial', names.split=" ", names.pch='\u0394',
 #'            plot.fun.pars=list(palpha=0.5, bxpcols="black"))
 #' plotgroups(data, names, colors, legend.text,
-#'            names.style='combinatorial', names.split=" ", names.pch='\u0394')
+#'            names.style='combinatorial', names.split=" ", names.pch='\u0394',
+#'            names.placeholder='+')
 #' plotgroups(data, names, colors, legend.text,
 #'            names.style='combinatorial', names.split=" ", names.pch=19,
 #'            main="test", plot.fun=plotgroups.barplot, features=c("mean", "sd"),
@@ -510,6 +512,7 @@ plotgroups <- function(
                         names.map.fun=NULL,
                         names.margin=0.5,
                         names.rotate=NULL,
+                        names.placeholder=NA,
                         features=NULL,
                         log=FALSE,
                         range=1.5,
@@ -616,17 +619,25 @@ plotgroups <- function(
                 names(nlist) <- n
                 nlist
             }
+
+        fixmappednamesadj <- function(y) {if (length(y$adj) != 2) {y$adj <- c(y$adj[1], 0)}; y}
         names.mapped <- lapply(lapply(names, names.map.fun, names.split, names.pch, names.pch.cex, names.rotate, names.adj), function(x) {
             x <- x[nchar(names(x))>0]
-            x <- lapply(x, function(y) {if (length(y$adj) != 2) {y$adj <- c(y$adj[1], 0)}; y})
+            x <- lapply(x, fixmappednamesadj)
             x
         });
         uniquegenes <- unique(unlist(lapply(names.mapped, function(x)names(x))))
         uniquegenes <- uniquegenes[order(uniquegenes, decreasing=TRUE)]
 
+        if (!is.na(names.placeholder) && !is.null(names.placeholder)) {
+            names.placeholder <- fixmappednamesadj(list(pch=names.placeholder, cex=names.pch.cex, rotate=names.rotate, adj=names.adj))
+        }
         heights <- sapply(uniquegenes, function(gene) {
             max(sapply(names.mapped, function(nm) {
                 x <- nm[[gene]]
+                if (is.null(x) && !is.na(names.placeholder) && !is.null(names.placeholder)) {
+                    x <- names.placeholder
+                }
                 if (!is.null(x)) {
                     if (!is.character(x$pch)) {
                         lineheight
@@ -660,19 +671,22 @@ plotgroups <- function(
         mapply(function(nm, x) {
             lapply(uniquegenes, function(g, x, nm) {
                 n <- nm[[g]]
+                if (is.null(n) && !is.na(names.placeholder) && !is.null(names.placeholder)) {
+                    n <- names.placeholder
+                }
                 if (!is.null(n)) {
                     if (is.character(n$pch)) {
-                    pfun <- text
-                    parg <- "labels"
-                    cadj <- n$adj
-                } else {
-                    pfun <- points
-                    parg <- "pch"
-                    cadj <- n$adj[1]
-                }
-                args <- list(x=x, y=ycoords[g], adj=cadj, cex=n$cex, srt=n$rotate, xpd=TRUE)
-                args[[parg]] <- n$pch
-                do.call(pfun, args)
+                        pfun <- text
+                        parg <- "labels"
+                        cadj <- n$adj
+                    } else {
+                        pfun <- points
+                        parg <- "pch"
+                        cadj <- n$adj[1]
+                    }
+                    args <- list(x=x, y=ycoords[g], adj=cadj, cex=n$cex, srt=n$rotate, xpd=TRUE)
+                    args[[parg]] <- n$pch
+                    do.call(pfun, args)
                 }
             }, x, nm)
         }, names.mapped, 1:length(names.mapped))
@@ -991,10 +1005,6 @@ plotgroups <- function(
         }
         allplotfunrets <- plotfunret
     }
-
-#     if (!is.null(labels) && names.style=="plain") {
-#         text(1:length(data), grconvertY(grconvertY(par("usr")[3], from="user", to="inches") - names.margin, from="inches", to="user"), srt=names.rotate, adj=names.adj, labels=labels, xpd=TRUE, cex=cex.xlab)
-#     }
     toreturn <- list(stats=allstats, plotfun=allplotfunrets, signiftest=allsigniftestrets)
     invisible(toreturn)
 }

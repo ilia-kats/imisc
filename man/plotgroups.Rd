@@ -9,8 +9,8 @@ plotgroups(data, names, colors = NULL, legend.text = NULL,
   names.split = NULL, names.italicize = NULL, names.style = c("plain",
   "combinatorial"), names.pch.cex = 1, names.pch = 19, names.adj = NA,
   names.map.fun = NULL, names.margin = 0.5, names.rotate = NULL,
-  features = NULL, log = FALSE, range = 1.5, conf.level = 0.95,
-  ci.fun = plotgroups.ci, cex.xlab = 1, ylim = NULL,
+  names.placeholder = NA, features = NULL, log = FALSE, range = 1.5,
+  conf.level = 0.95, ci.fun = plotgroups.ci, cex.xlab = 1, ylim = NULL,
   legendmargin = NULL, plot.fun = plotgroups.boxplot,
   plot.fun.pars = list(), barwidth = 0.8, main = NULL, ylab = NULL,
   signif.test = NULL, signif.test.fun = t.test,
@@ -49,7 +49,7 @@ fragment containing \code{names.italicize} is rendered in italics}
       \item{plain}{each name will be written as-is below the plot}
       \item{combinatorial}{names will be split by \code{names.split}, unique strings will be
             printed at the bottom-left, and observations whose name contains the string will
-            be identified by prining \code{names.pch} below the respective bar. Useful if e.g.
+            be identified by printing \code{names.pch} below the respective bar. Useful if e.g.
            assaying different combinations of single/double/triple knock-outs.}
            }}
 
@@ -80,8 +80,10 @@ parameters for that particular annotation, i.e. \code{pch}, \code{cex}, \code{ro
 
 \item{names.margin}{spacing between the bottom edge of the plot and the annotation, in inches}
 
-\item{names.rotate}{only used when \code{names.style='plain'}. Degrees by which to rotate the
-annotation strings.}
+\item{names.rotate}{Degrees by which to rotate the annotation strings.}
+
+\item{names.placeholder}{Only used when \code{names.style='combinatorial'}. Placeholder character
+to use when no annotation is present for the current sample and row. See examples.}
 
 \item{features}{which features of the sample distributions to plot. Availability of features
 depends on \code{plot.fun} Can contain any combination of the following:
@@ -244,7 +246,8 @@ plotgroups(data, names, colors, legend.text, log=TRUE,
            names.style='combinatorial', names.split=" ", names.pch='\\u0394',
            plot.fun.pars=list(palpha=0.5, bxpcols="black"))
 plotgroups(data, names, colors, legend.text,
-           names.style='combinatorial', names.split=" ", names.pch='\\u0394')
+           names.style='combinatorial', names.split=" ", names.pch='\\u0394',
+           names.placeholder='+')
 plotgroups(data, names, colors, legend.text,
            names.style='combinatorial', names.split=" ", names.pch=19,
            main="test", plot.fun=plotgroups.barplot, features=c("mean", "sd"),
