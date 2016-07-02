@@ -41,6 +41,8 @@
 #' Specifically, it starts with a box plot. It then adds a rotated kernel density plot to each side of the box plot.
 #'
 #' @param x data vector or list of data vectors
+#' @param ... unnamed parameters are additional data vectors (unless x is a list).
+#'            Named parameters are additional parameters to \code{\link{sm.density}}
 #' @param range a factor to calculate the upper/lower adjacent values
 #' @param h the height for the density estimator, if omit as explained in sm.density, h will be set to an optimum
 #' @param ylim y limits
@@ -52,7 +54,7 @@
 #' @param add logical. if FALSE (default) a new plot is created
 #' @param wex relative expansion of the violin.
 #' @param horizontal logical. horizontal or vertical violins
-#' @param ... additional parameters to \code{\link{sm.density}}
+#'
 #'
 #' @examples
 #' ## box- vs violin-plot
@@ -86,12 +88,19 @@
 #' @export
 #' @importFrom sm sm.density
 
-vioplot <- function(x, range=1.5, ylim=NULL, names=NULL, horizontal=FALSE,
+vioplot <- function(x, ..., range=1.5, ylim=NULL, names=NULL, horizontal=FALSE,
   col="magenta", border="black", lty=1, lwd=1, rectCol="black", colMed="white", pchMed=19, at, add=FALSE, wex=1, 
-  drawRect=TRUE, ...)
+  drawRect=TRUE)
 {
+    args <- list(x, ...)
+    if(!is.null(attributes(args)$names)) {
+        namedargs <-  attributes(args)$names != ""
+    } else {
+        namedargs <- rep(FALSE, length.out=length(args))
+    }
+
     if (!is.list(x)) {
-        x <- list(x)
+        x <- args[!namedargs]
     }
     n <- length(x)
 
@@ -128,10 +137,9 @@ vioplot <- function(x, range=1.5, ylim=NULL, names=NULL, horizontal=FALSE,
     names(med) <- names(x)
     names(base) <- names(x)
     names(height) <- names(x)
-    
-    # global args for sm.density function-call   
-    args <- list(...)
-    args$display <- "none"
+
+    args <- lapply(args[namedargs], function(x)rep(x, length.out=n))
+    args <- lapply(1:n, function(i)lapply(args, function(x)x[[i]]))
 
     for(i in 1:n) {
 
@@ -159,7 +167,7 @@ vioplot <- function(x, range=1.5, ylim=NULL, names=NULL, horizontal=FALSE,
         
         # estimate density curve
         
-        smout <- do.call(sm.density, c( list(data, xlim=est.xlim), args ) )
+        smout <- do.call(sm.density, c( list(data, xlim=est.xlim), args[[i]], display="none") )
 
         
         # calculate stretch factor

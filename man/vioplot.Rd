@@ -4,13 +4,16 @@
 \alias{vioplot}
 \title{violin plot}
 \usage{
-vioplot(x, range = 1.5, ylim = NULL, names = NULL, horizontal = FALSE,
-  col = "magenta", border = "black", lty = 1, lwd = 1,
-  rectCol = "black", colMed = "white", pchMed = 19, at, add = FALSE,
-  wex = 1, drawRect = TRUE, ...)
+vioplot(x, ..., range = 1.5, ylim = NULL, names = NULL,
+  horizontal = FALSE, col = "magenta", border = "black", lty = 1,
+  lwd = 1, rectCol = "black", colMed = "white", pchMed = 19, at,
+  add = FALSE, wex = 1, drawRect = TRUE)
 }
 \arguments{
 \item{x}{data vector or list of data vectors}
+
+\item{...}{unnamed parameters are additional data vectors (unless x is a list).
+Named parameters are additional parameters to \code{\link{sm.density}}}
 
 \item{range}{a factor to calculate the upper/lower adjacent values}
 
@@ -29,8 +32,6 @@ vioplot(x, range = 1.5, ylim = NULL, names = NULL, horizontal = FALSE,
 \item{add}{logical. if FALSE (default) a new plot is created}
 
 \item{wex}{relative expansion of the violin.}
-
-\item{...}{additional parameters to \code{\link{sm.density}}}
 
 \item{h}{the height for the density estimator, if omit as explained in sm.density, h will be set to an optimum}
 
