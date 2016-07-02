@@ -957,7 +957,7 @@ plotgroups <- function(
             # tick also works for multiple plots
             ticks <- axTicks(side=2)
             lticks <- length(ticks)
-            if (ticks[lticks] > cylim[2] - lineheight)
+            if (ticks[lticks] > cylim[2] - 0.5 * lineheight)
                 ticks <- ticks[-lticks]
             do.call(axis, list.merge(pars, list(side=2, at=ticks)))
         }
