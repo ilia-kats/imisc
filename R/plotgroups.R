@@ -227,28 +227,20 @@ plotgroups.barplot <- function(data, stats, colors, ylim, features, barwidth, wh
 #' @importFrom rlist list.merge
 plotgroups.vioplot <- function(data, stats, colors, ylim, features, barwidth, boxpars, boxcol="white", boxwidth=barwidth/4, ...)
 {
-    if (!requireNamespace("vioplot", quietly = TRUE))
-        stop("Please install the vioplot package for this plot.")
     if (!missing(ylim))
         return(range(unlist(data)))
-    library("sm") # needed by vioplot
     colors <- rep_len(colors, length(data))
     dots <- list(...)
-    pars <- list(drawRect=TRUE)
+    pars <- list(horizontal=FALSE)
     if (length(dots) > 0)
         pars <- list.merge(pars, dots)
-    vioplot.results <- mapply(function(data, color, i){
-            vioplot.results <- do.call(vioplot::vioplot, list.merge(pars, list(x=data, col=color, at=i, add=TRUE, wex=barwidth, drawRect=FALSE)))
-            vioplot.results
-        }, data, colors, 1:length(data))
-    vioplot.toreturn <- lapply(seq_len(nrow(vioplot.results)), function(i)unlist(vioplot.results[i,]))
-    names(vioplot.toreturn) <- rownames(vioplot.results)
+    vioplot.results <- do.call(vioplot, list.merge(pars, list(x=data, col=colors, add=TRUE, wex=barwidth, drawRect=FALSE)))
     if (missing(boxpars) || is.null(boxpars))
         boxpars <- list()
     if (is.null(boxpars$notch))
         boxpars$notch <- FALSE
     bxp.toreturn <- do.call(plotgroups.boxplot, list.merge(boxpars, list(data=data, stats=stats, colors=boxcol, features=features, barwidth=boxwidth)))
-    invisible(list(vioplot=vioplot.toreturn, boxplot=bxp.toreturn))
+    invisible(list(vioplot=vioplot.results, boxplot=bxp.toreturn))
 }
 
 plotgroups.ci <- function(data, mean, se, ndata, conf.level=0.95) {
