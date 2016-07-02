@@ -647,7 +647,7 @@ plotgroups <- function(
 
         hfracs <- heights / sum(heights)
         hfracscs <- c(0,cumsum(hfracs))[1:length(hfracs)]
-        ycoords <- hfracscs +  0.25 * min(hfracs)
+        ycoords <- hfracscs +  0.25 * (lineheight / sum(heights))
         names(ycoords) <- uniquegenes
 
         legend.height <- max(sum(heights), strheight(paste0(uniquegenes, collapse="\n"), units="inches", cex=cex.xlab))
@@ -698,7 +698,9 @@ plotgroups <- function(
         par(plt=plt)
         plot.window(xlim=c(0,1), ylim=c(0,1), xaxs='i', yaxs='i')
         do.call("clip", as.list(par("usr")))
-        sapply(hfracscs[2:length(hfracscs - 1)], function(x)abline(h=x, lwd=lwd.base))
+        if (length(heights) > 1) {
+            sapply(hfracscs[2:length(hfracscs - 1)], function(x)abline(h=x, lwd=lwd.base))
+        }
     } else {
         if (is.null(names.rotate))
             names.rotate <- 45
