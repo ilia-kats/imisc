@@ -10,7 +10,7 @@ Imports:
     grDevices,
     rlist
 Suggests:
-    beeswarm, IRanges, vioplot, magicaxis
+    beeswarm, IRanges, magicaxis
 License: GPL-2
 LazyData: true
 RoxygenNote: 5.0.1
