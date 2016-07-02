@@ -178,12 +178,19 @@ corresponding plot if multiple data sets are plotted.}
 }
 \value{
 list with the following components:
-        \item{stats}{summary statistics of the data.}
-        \item{plotfun}{Return value of \code{plot.fun}}
-        If significance testing was performed, also contains a component \code{signiftest}, which
-        is a list with elements ordered by \code{signif.test} with the following components:
-        \item{test}{return value of the testing function}
-        \item{label}{return value of \code{signif.test.text}}
+        \describe{
+                 \item{stats}{summary statistics of the data.}
+                 \item{plotfun}{Return value of \code{plot.fun}}
+                 \item{annotation.height}{Height of the annotation in inches.}
+                 \item{annotation.width}{Width of the annotation in inches. If
+                     \code{names.style='combinatorial'} this is the width of the left margin.}
+                 \item{legendmargin}{Top margin required for the legend, in user coordinates.}
+                 If significance testing was performed, also contains a component
+                 \code{signiftest}, which is a list with elements ordered by
+                 \code{signif.test} with the following components:
+                 \describe{
+                         \item{test}{return value of the testing function}
+                         \item{label}{return value of \code{signif.test.text}}}}
 }
 \description{
 Plot several groups of repeated observations, e.g. abundance/half-life of several

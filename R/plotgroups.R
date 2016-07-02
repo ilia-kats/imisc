@@ -417,12 +417,19 @@ plotgroups.ci <- function(data, mean, se, ndata, conf.level=0.95) {
 #'        corresponding plot if multiple data sets are plotted.
 #' @param ... additional parameters passed to \code{\link[base]{par}}
 #' @return list with the following components:
-#'         \item{stats}{summary statistics of the data.}
-#'         \item{plotfun}{Return value of \code{plot.fun}}
-#'         If significance testing was performed, also contains a component \code{signiftest}, which
-#'         is a list with elements ordered by \code{signif.test} with the following components:
-#'         \item{test}{return value of the testing function}
-#'         \item{label}{return value of \code{signif.test.text}}
+#'         \describe{
+#'                  \item{stats}{summary statistics of the data.}
+#'                  \item{plotfun}{Return value of \code{plot.fun}}
+#'                  \item{annotation.height}{Height of the annotation in inches.}
+#'                  \item{annotation.width}{Width of the annotation in inches. If
+#'                      \code{names.style='combinatorial'} this is the width of the left margin.}
+#'                  \item{legendmargin}{Top margin required for the legend, in user coordinates.}
+#'                  If significance testing was performed, also contains a component
+#'                  \code{signiftest}, which is a list with elements ordered by
+#'                  \code{signif.test} with the following components:
+#'                  \describe{
+#'                          \item{test}{return value of the testing function}
+#'                          \item{label}{return value of \code{signif.test.text}}}}
 #' @examples
 #' data <- list()
 #' for (i in 1:14) data[[i]] <- rnorm(50, i, 0.5)
@@ -650,14 +657,14 @@ plotgroups <- function(
         ycoords <- hfracscs +  0.25 * (lineheight / sum(heights))
         names(ycoords) <- uniquegenes
 
-        legend.height <- max(sum(heights), strheight(paste0(uniquegenes, collapse="\n"), units="inches", cex=cex.xlab))
+        legend.height <- max(sum(heights), strheight(paste0(uniquegenes, collapse="\n"), units="inches", cex=cex.xlab)) + names.margin * lineheight
         legend.width <- max(strwidth(uniquegenes, units="inches"))
 
         layout(matrix(c(2:(nplots + 1), 1), byrow=TRUE), heights=c(rep(1, nplots), lcm(cm(legend.height))))
         par(cex=origcex)
 
         mai[2] <- max(mai[2], legend.width)
-        par(mai=c(0, mai[2], 0, mai[4]))
+        par(mai=c(0, mai[2], names.margin * lineheight, mai[4]))
         plot.new()
         plot.window(xlim=c(0.5, ngroups + 0.5), ylim=c(0,1), xaxs='i', yaxs='i')
         mapply(function(nm, x) {
@@ -734,15 +741,14 @@ plotgroups <- function(
             vadj <- names.adj
         }
         legend.width <- max(strwidth(labels, units="inches", cex=cex.xlab))
-        legend.height <- sin(names.rotate * pi / 180) * legend.width + vadj * max(strheight(labels, units="inches", cex=cex.xlab)) + 0.15 * lineheight
+        legend.height <- sin(names.rotate * pi / 180) * legend.width + vadj * max(strheight(labels, units="inches", cex=cex.xlab)) + 0.15 * lineheight + names.margin * lineheight
         layout(matrix(c(2:(nplots + 1), 1), byrow=TRUE), heights=c(rep(1, nplots), lcm(cm(legend.height))))
         par(cex=origcex)
-        par(mai=c(0, mai[2], 0, mai[4]))
+        par(mai=c(0, mai[2], names.margin * lineheight, mai[4]))
         plot.new()
         plot.window(xlim=c(0.5, ngroups + 0.5), ylim=c(0,1), xaxs='i', yaxs='i')
         text(1:ngroups, 1, srt=names.rotate, adj=names.adj, labels=labels, xpd=NA, cex=cex.xlab)
     }
-    mai[1] <- names.margin * lineheight
     title(main=main, outer=TRUE)
 
     allstats <- list()
@@ -996,6 +1002,6 @@ plotgroups <- function(
         }
         allplotfunrets <- plotfunret
     }
-    toreturn <- list(stats=allstats, plotfun=allplotfunrets, signiftest=allsigniftestrets)
+    toreturn <- list(stats=allstats, plotfun=allplotfunrets, signiftest=allsigniftestrets, annotation.height=legend.height, annotation.width=legend.width, legendmargin=legendmargin)
     invisible(toreturn)
 }
