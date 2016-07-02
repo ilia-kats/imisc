@@ -784,10 +784,8 @@ plotgroups <- function(
             stats$iqrmin[i] <- bstats[1]
         }
         allstats[[cplot]] <- stats
-        ylim.usr <- NULL
-        cylim <- ylim[[cplot]]
+        ylim.usr <- cylim <- ylim[[cplot]]
         if (!is.null(cylim) && (!is.finite(cylim[1]) || !is.finite(cylim[2]))) {
-            ylim.usr <- cylim
             cylim <- NULL
         }
         if (is.null(cylim))
@@ -829,7 +827,6 @@ plotgroups <- function(
             cylim <- log10(cylim)
             cylim[is.na(cylim)] <- 0
         }
-
 
         if (!is.null(ylim.usr)) {
             if (is.finite(ylim.usr[1])) {
