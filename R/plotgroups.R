@@ -654,7 +654,7 @@ plotgroups <- function(
 
         hfracs <- heights / sum(heights)
         hfracscs <- c(0,cumsum(hfracs))[1:length(hfracs)]
-        ycoords <- hfracscs +  0.25 * (lineheight / sum(heights))
+        ycoords <- hfracscs +  0.15 * (lineheight / sum(heights))
         names(ycoords) <- uniquegenes
 
         legend.height <- max(sum(heights), strheight(paste0(uniquegenes, collapse="\n"), units="inches", cex=cex.xlab)) + names.margin * lineheight
