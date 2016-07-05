@@ -867,7 +867,7 @@ plotgroups <- function(
         # to do the conversion manually
         inchestouser <- (cylim[2] - cylim[1]) / par("pin")[2]
         lineheight <- strheight("\n", units="inches", cex=par("cex")) * inchestouser
-        signifheight <- 0.3 * lineheight
+        signifheight <- 0.25 * lineheight
         legendbase <- cylim[2]
         if (cplot == 1 && !is.null(legend.text)) {
             grouplength <- rle(legend.text)$lengths
@@ -893,7 +893,7 @@ plotgroups <- function(
             signifoverlaps <- signifoverlaps[which(signifoverlaps[,1] != signifoverlaps[,2]),]
             if (nrow(signifoverlaps)) {
                 signifoverlaps <- t(apply(signifoverlaps, 1, function(x)c(min(x),max(x))))
-                signifoverlaps <- signifoverlaps[!duplicated(signifoverlaps),]
+                signifoverlaps <- signifoverlaps[!duplicated(signifoverlaps),, drop=FALSE]
 
                 maxsignifoverlaps <- max(rle(signifoverlaps[,1])$length)
             } else {
