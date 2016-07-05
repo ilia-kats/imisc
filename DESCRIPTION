@@ -8,7 +8,8 @@ Depends:
 Imports:
     graphics,
     grDevices,
-    rlist
+    rlist,
+    sm
 Suggests:
     beeswarm, IRanges, magicaxis
 License: GPL-2
