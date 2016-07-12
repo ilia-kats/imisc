@@ -834,6 +834,7 @@ plotgroups <- function(
             cylim[is.na(cylim)] <- 0
         }
 
+        ylim.extended <- FALSE
         if (!is.null(ylim.usr)) {
             if (is.finite(ylim.usr[1])) {
                 if (log[cplot]) {
@@ -853,11 +854,15 @@ plotgroups <- function(
             datarange <- diff(cylim)
             if (!is.finite(ylim.usr[1]))
                 cylim[1] <- cylim[1] - 0.04 * datarange
-            if (!is.finite(ylim.usr[2]))
+            if (!is.finite(ylim.usr[2])) {
                 cylim[2] <- cylim[2] + 0.04 * datarange
+                ylim.extended <- TRUE
+            }
         } else {
-            if (!is.null(cylim) && all(is.finite(cylim)))
+            if (!is.null(cylim) && all(is.finite(cylim))) {
                 cylim <- extendrange(cylim, f=0.04)
+                ylim.extended <- TRUE
+            }
         }
 
 
@@ -868,7 +873,9 @@ plotgroups <- function(
         inchestouser <- (cylim[2] - cylim[1]) / par("pin")[2]
         lineheight <- strheight("\n", units="inches", cex=par("cex")) * inchestouser
         signifheight <- 0.2 * lineheight
-        legendbase <- cylim[2] + signifheight
+        legendbase <- cylim[2]
+        if (!ylim.extended)
+            legendbase <- legendbase + signifheight
         if (cplot == 1 && !is.null(legend.text)) {
             grouplength <- rle(legend.text)$lengths
             if (length(colors) != ngroups) {
@@ -877,6 +884,8 @@ plotgroups <- function(
             }
             if (is.null(legendmargin))
                 legendmargin <- max(max(strheight(legend.text, units="inches")) * inchestouser, lineheight)
+            if (!ylim.extended)
+                legendmargin <- legendmargin + signifheight
         } else {
             legendmargin <- 0
         }
@@ -920,13 +929,13 @@ plotgroups <- function(
                 }
             }
 
-            signifmargin <- (maxsignifoverlaps + 1) * (lineheight + signifheight)
+            signifmargin <- maxsignifoverlaps * (lineheight + signifheight) + lineheight
             signifbase <- legendbase
+            if (!ylim.extended)
+                signifbase <- legendbase - signifheight
             legendbase <- signifbase + signifmargin
-
-            if (!is.null(legendmargin) && legendmargin > 0)
+            if (legendmargin > 0 && ylim.extended)
                 legendmargin <- legendmargin + signifheight
-
         }
         cylim <- c(cylim[1], cylim[2] + legendmargin + signifmargin)
         xlim <- c(0.5, ngroups + 0.5)
