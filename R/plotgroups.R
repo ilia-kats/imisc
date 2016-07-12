@@ -867,7 +867,7 @@ plotgroups <- function(
         # to do the conversion manually
         inchestouser <- (cylim[2] - cylim[1]) / par("pin")[2]
         lineheight <- strheight("\n", units="inches", cex=par("cex")) * inchestouser
-        signifheight <- 0.25 * lineheight
+        signifheight <- 0.2 * lineheight
         legendbase <- cylim[2]
         if (cplot == 1 && !is.null(legend.text)) {
             grouplength <- rle(legend.text)$lengths
@@ -899,10 +899,6 @@ plotgroups <- function(
             } else {
                 maxsignifoverlaps <- 0
             }
-            signifmargin <- (maxsignifoverlaps + 1) * lineheight
-            signifbase <- legendbase + signifheight
-            legendbase <- signifbase + signifmargin
-            signifmargin <- signifmargin + signifheight
 
             if (maxsignifoverlaps == 0) {
                 signiflines <- rep(0, length(signif.test[[cplot]]))
@@ -923,6 +919,12 @@ plotgroups <- function(
                     currline <- currline + 1
                 }
             }
+
+            signifmargin <- (maxsignifoverlaps + 1) * (lineheight + signifheight)
+            signifbase <- legendbase + signifheight
+            legendbase <- signifbase + signifmargin
+            signifmargin <- signifmargin + 2 * signifheight
+
         }
         cylim <- c(cylim[1], cylim[2] + legendmargin + signifmargin)
         xlim <- c(0.5, ngroups + 0.5)
@@ -992,7 +994,7 @@ plotgroups <- function(
                     begin <- signif.test[[cplot]][[i]][1] + (1 - barwidth) / 2
                     end <- signif.test[[cplot]][[i]][2] - (1 - barwidth) / 2
                     mid <- (end - begin) / 2 + begin
-                    base <- signifbase + signiflines[i] * lineheight
+                    base <- signifbase + signiflines[i] * (lineheight + signifheight)
                     lines(c(begin, begin, end, end), c(base - signifheight, base, base, base - signifheight), lwd=signif.test.lwd[[cplot]], col=signif.test.col[[cplot]], lend="butt")
                     do.call(text, c(list(x=mid, y=base + 0.2 * lineheight, labels=label, adj=c(0.5, 0), col=signif.test.col[[cplot]]), signif.test.pars[[cplot]]))
                 }
