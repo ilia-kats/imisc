@@ -868,7 +868,7 @@ plotgroups <- function(
         inchestouser <- (cylim[2] - cylim[1]) / par("pin")[2]
         lineheight <- strheight("\n", units="inches", cex=par("cex")) * inchestouser
         signifheight <- 0.2 * lineheight
-        legendbase <- cylim[2]
+        legendbase <- cylim[2] + signifheight
         if (cplot == 1 && !is.null(legend.text)) {
             grouplength <- rle(legend.text)$lengths
             if (length(colors) != ngroups) {
@@ -921,11 +921,11 @@ plotgroups <- function(
             }
 
             signifmargin <- (maxsignifoverlaps + 1) * (lineheight + signifheight)
-            signifbase <- legendbase + signifheight
+            signifbase <- legendbase
             legendbase <- signifbase + signifmargin
 
-            if (legendmargin > 0)
-                signifmargin <- signifmargin + signifheight
+            if (!is.null(legendmargin) && legendmargin > 0)
+                legendmargin <- legendmargin + signifheight
 
         }
         cylim <- c(cylim[1], cylim[2] + legendmargin + signifmargin)
@@ -984,7 +984,7 @@ plotgroups <- function(
             segments(segs.begin, legendbase, segs.end, legendbase, lwd=legend.lwd, col=cols, lend="butt")
 
             mids <- (segs.end - segs.begin) / 2 + segs.begin
-            do.call(text, c(list(x=mids, y=legendbase + 0.2 * lineheight, labels=unique(legend.text), adj=c(0.5, 0), col=cols), legend.pars))
+            do.call(text, c(list(x=mids, y=legendbase + signifheight, labels=unique(legend.text), adj=c(0.5, 0), col=cols), legend.pars))
         }
         if (!is.null(signif.test[[cplot]])) {
             signif.test.ret <- vector("list", length(signif.test[[cplot]]))
