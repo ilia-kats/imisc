@@ -587,7 +587,7 @@ plotgroups <- function(
     }
     haveMagicAxis <- requireNamespace("magicaxis", quietly = TRUE)
 
-    pars <- list(oma=c(0,0,0,0), mar=c(0, 3, 0.2, 0.2), las=1, mgp=c(2, 0.5, 0), ljoin="mitre", lend="square", lwd=2)
+    pars <- list(oma=c(0,0,0,0), mar=c(0, 3, 0.2, 0.2), las=1, mgp=c(2, 0.5, 0), ljoin="mitre", lend="square")
     if (!is.null(main))
         pars$oma <- c(0, 0, 2, 0)
     if (length(dots) > 0)
