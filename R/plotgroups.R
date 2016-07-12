@@ -923,7 +923,9 @@ plotgroups <- function(
             signifmargin <- (maxsignifoverlaps + 1) * (lineheight + signifheight)
             signifbase <- legendbase + signifheight
             legendbase <- signifbase + signifmargin
-            signifmargin <- signifmargin + 2 * signifheight
+
+            if (legendmargin > 0)
+                signifmargin <- signifmargin + signifheight
 
         }
         cylim <- c(cylim[1], cylim[2] + legendmargin + signifmargin)
