@@ -865,17 +865,13 @@ plotgroups <- function(
             }
         }
 
-
         if (is.null(colors))
             colors <- "grey"
         # can't use grconvertY here because plot.window has not been called yet, have
         # to do the conversion manually
-        inchestouser <- (cylim[2] - cylim[1]) / par("pin")[2]
-        lineheight <- strheight("\n", units="inches", cex=par("cex")) * inchestouser
+        lineheight <- strheight("", units="inches", cex=par("cex")) * 2
         signifheight <- 0.2 * lineheight
         legendbase <- cylim[2]
-        if (!ylim.extended)
-            legendbase <- legendbase + signifheight
         if (cplot == 1 && !is.null(legend.text)) {
             grouplength <- rle(legend.text)$lengths
             if (length(colors) != ngroups) {
@@ -883,7 +879,7 @@ plotgroups <- function(
                 colors <- rep(colors, times=grouplength)
             }
             if (is.null(legendmargin))
-                legendmargin <- max(max(strheight(legend.text, units="inches")) * inchestouser, lineheight)
+                legendmargin <- max(max(strheight(legend.text, units="inches", cex=par("cex"))), lineheight)
             if (!ylim.extended)
                 legendmargin <- legendmargin + signifheight
         } else {
@@ -929,21 +925,32 @@ plotgroups <- function(
                 }
             }
 
-            signifmargin <- maxsignifoverlaps * (lineheight + signifheight) + lineheight
+            signifmargin <- (maxsignifoverlaps + 1) * lineheight
             signifbase <- legendbase
             if (!ylim.extended)
                 signifbase <- legendbase - signifheight
-            legendbase <- signifbase + signifmargin
-            if (legendmargin > 0 && ylim.extended)
-                legendmargin <- legendmargin + signifheight
+#             if (legendmargin > 0 && ylim.extended)
+#                 legendmargin <- legendmargin + signifheight
         }
-        cylim <- c(cylim[1], cylim[2] + legendmargin + signifmargin)
+
+        margin <- legendmargin + signifmargin
+        inchestouser <- (cylim[2] - cylim[1]) / (par("pin")[2] - margin)
+        cylim <- c(cylim[1], cylim[2] + margin * inchestouser)
         xlim <- c(0.5, ngroups + 0.5)
 
         if (log[cplot]) {
             plot.window(xlim=xlim, ylim=10^cylim, xaxs='i', yaxs='i', log='y')
         } else {
             plot.window(xlim=xlim, ylim=cylim, xaxs='i', yaxs='i')
+        }
+        inchestouser <- (cylim[2] - cylim[1]) / par("pin")[2]
+        lineheight <- lineheight * inchestouser
+        signifheight <- signifheight * inchestouser
+        if (!ylim.extended)
+            legendbase <- legendbase + signifheight
+        if (!is.null(signif.test[[cplot]])) {
+            signifbase <- legendbase
+            legendbase <- signifbase + signifmargin * inchestouser
         }
 
         if (!is.null(extrafun.before[[cplot]]))
@@ -1005,7 +1012,7 @@ plotgroups <- function(
                     begin <- signif.test[[cplot]][[i]][1] + (1 - barwidth) / 2
                     end <- signif.test[[cplot]][[i]][2] - (1 - barwidth) / 2
                     mid <- (end - begin) / 2 + begin
-                    base <- signifbase + signiflines[i] * (lineheight + signifheight)
+                    base <- signifbase + signiflines[i] * lineheight
                     lines(c(begin, begin, end, end), c(base - signifheight, base, base, base - signifheight), lwd=signif.test.lwd[[cplot]], col=signif.test.col[[cplot]], lend="butt")
                     do.call(text, c(list(x=mid, y=base + 0.2 * lineheight, labels=label, adj=c(0.5, 0), col=signif.test.col[[cplot]]), signif.test.pars[[cplot]]))
                 }
