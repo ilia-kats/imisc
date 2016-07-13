@@ -926,11 +926,7 @@ plotgroups <- function(
             }
 
             signifmargin <- (maxsignifoverlaps + 1) * lineheight
-            signifbase <- legendbase
-            if (!ylim.extended)
-                signifbase <- legendbase - signifheight
-#             if (legendmargin > 0 && ylim.extended)
-#                 legendmargin <- legendmargin + signifheight
+            legendmargin <- legendmargin + signifheight
         }
 
         margin <- legendmargin + signifmargin
@@ -949,7 +945,7 @@ plotgroups <- function(
         if (!ylim.extended)
             legendbase <- legendbase + signifheight
         if (!is.null(signif.test[[cplot]])) {
-            signifbase <- legendbase
+            signifbase <- legendbase + signifheight
             legendbase <- signifbase + signifmargin * inchestouser
         }
 
