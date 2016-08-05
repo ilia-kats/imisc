@@ -249,7 +249,7 @@ plotgroups.ci <- function(data, mean, se, ndata, conf.level=0.95) {
     if (!missing(data)) {
         mean <- mean(data)
         ndata <- length(data)
-        se <- mean / sqrt(ndata)
+        se <- sd(data) / sqrt(ndata)
     }
     Q <- qt(conf.level + (1 - conf.level) / 2, df=ndata - 1)
     c(mean - Q * se, mean + Q * se)
