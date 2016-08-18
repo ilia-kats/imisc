@@ -4,12 +4,14 @@
 \alias{plotgroups.barplot}
 \title{Plot several groups of repeated observations as a barplot.}
 \usage{
-plotgroups.barplot(data, stats, colors, ylim, features, barwidth,
+plotgroups.barplot(data, at, stats, colors, ylim, features, barwidth,
   whiskerswidth = barwidth, whiskerslwd = par("lwd"),
   whiskerscol = "black", bordercol = "black", ...)
 }
 \arguments{
 \item{data}{list, each element is a vector of replicates for one combination of parameters}
+
+\item{at}{numeric vector giving the X locations where the plots should be drawn}
 
 \item{stats}{list containing the summary statistics (see \code{\link{plotgroups}})}
 

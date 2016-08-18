@@ -4,10 +4,13 @@
 \alias{plotgroups.boxplot}
 \title{Plot several groups of repeated observations as a boxplot (extended with mean, standard deviation, and standard error of the mean).}
 \usage{
-plotgroups.boxplot(data, stats, colors, ylim, features, barwidth, bxppars, ...)
+plotgroups.boxplot(data, at, stats, colors, ylim, features, barwidth, bxppars,
+  ...)
 }
 \arguments{
 \item{data}{list, each element is a vector of replicates for one combination of parameters}
+
+\item{at}{numeric vector giving the X locations where the plots should be drawn}
 
 \item{stats}{list containing the summary statistics (see \code{\link{plotgroups}})}
 

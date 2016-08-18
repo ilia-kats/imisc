@@ -6,11 +6,12 @@
 \usage{
 plotgroups(data, names, colors = NULL, legend.text = NULL,
   legend.col = NULL, legend.pars = list(), legend.lwd = NULL,
-  names.split = NULL, names.italicize = NULL, names.style = c("plain",
-  "combinatorial"), names.pch.cex = 1, names.pch = 19, names.adj = NA,
-  names.map.fun = NULL, names.margin = 0.5, names.rotate = NULL,
-  names.placeholder = NA, features = NULL, log = FALSE, range = 1.5,
-  conf.level = 0.95, ci.fun = plotgroups.ci, cex.xlab = 1, ylim = NULL,
+  groups.spacing = 0, names.split = NULL, names.italicize = NULL,
+  names.style = c("plain", "combinatorial"), names.pch.cex = 1,
+  names.pch = 19, names.adj = NA, names.map.fun = NULL,
+  names.margin = 0.5, names.rotate = NULL, names.placeholder = NA,
+  features = NULL, log = FALSE, range = 1.5, conf.level = 0.95,
+  ci.fun = plotgroups.ci, cex.xlab = 1, ylim = NULL,
   legendmargin = NULL, plot.fun = plotgroups.boxplot,
   plot.fun.pars = list(), barwidth = 0.8, main = NULL, ylab = NULL,
   signif.test = NULL, signif.test.fun = t.test,
@@ -36,6 +37,8 @@ A group of observations is identified by consecutive occurrence of the same name
 \item{legend.pars}{parameters for group annotation. Will be passed to \code{\link[base]{text}}}
 
 \item{legend.lwd}{line width for grouping annotations. Defaults to \code{par("lwd")}}
+
+\item{groups.spacing}{extra space between the groups in user coordinates.}
 
 \item{names.split}{character by which to split the \code{names}. Only useful in combination with
 \code{names.italicize} or \code{names.style='combinatorial'}}
@@ -94,7 +97,8 @@ depends on \code{plot.fun} Can contain any combination of the following:
                      interquartile range away from the \code{box}}
           \item{mean}{the mean}
           \item{sd}{mean \eqn{\pm} standard deviation}
-          \item{sem}{mean \eqn{\pm} standard error of the mean}}
+          \item{sem}{mean \eqn{\pm} standard error of the mean}
+          \item{ci}{confidence interval at \code{conf.level}}}
 Can be a list containing character vectors, in which case the specified feature set will
 apply to the corresponding plot if multiple data sets are plotted (see examples). Will be
 recycled to the number of plots.}
@@ -181,6 +185,7 @@ list with the following components:
         \describe{
                  \item{stats}{summary statistics of the data.}
                  \item{plotfun}{Return value of \code{plot.fun}}
+                 \item{xcoords}{X coordinates of the data.}
                  \item{annotation.height}{Height of the annotation in inches.}
                  \item{annotation.width}{Width of the annotation in inches. If
                      \code{names.style='combinatorial'} this is the width of the left margin.}
@@ -205,6 +210,7 @@ This is a wrapper function around \code{plot.fun}. It sets up the coordinate sys
 \code{extrafun.after}. All three functions are passed the following arguments:
 \describe{
           \item{data}{the \code{data} argument passed to \code{plotgroups}}
+          \item{at}{X coordinates of the data. Particularly important when groups.spacing != 0}
           \item{stats}{summary statistics of the data. List with the following components:
                        \describe{
                               \item{means}{means}

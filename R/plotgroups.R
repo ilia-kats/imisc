@@ -27,7 +27,7 @@
 #' @seealso \code{\link[graphics]{boxplot}}
 #' @export
 #' @importFrom rlist list.merge
-plotgroups.boxplot <- function(data, stats, colors, ylim, features, barwidth, bxppars, ...)
+plotgroups.boxplot <- function(data, at, stats, colors, ylim, features, barwidth, bxppars, ...)
 {
     if (!missing(ylim))
         return(NULL)
@@ -68,9 +68,9 @@ plotgroups.boxplot <- function(data, stats, colors, ylim, features, barwidth, bx
 
     plotsd <- function() {
         if ("sd" %in% features) {
-            segments(1:length(data) - bxppars$boxwex / 4, stats$means + stats$sds, 1:length(data) + bxppars$boxwex / 4, stats$means + stats$sds, lend='butt', col=pars$sdstaplecol, lwd=pars$sdstaplelwd, lty=pars$sdstaplelty)
-            segments(1:length(data) - bxppars$boxwex / 4, stats$means - stats$sds, 1:length(data) + bxppars$boxwex / 4, stats$means - stats$sds, lend='butt', col=pars$sdstaplecol, lwd=pars$sdstaplelwd, lty=pars$sdstaplelty)
-            segments(1:length(data), stats$means + stats$sds, 1:length(data), stats$means - stats$sds, lend='butt', col=pars$sdwhiskcol, lty=pars$sdwhisklty, lwd=pars$sdwhisklwd)
+            segments(at - bxppars$boxwex / 4, stats$means + stats$sds, at + bxppars$boxwex / 4, stats$means + stats$sds, lend='butt', col=pars$sdstaplecol, lwd=pars$sdstaplelwd, lty=pars$sdstaplelty)
+            segments(at - bxppars$boxwex / 4, stats$means - stats$sds, at + bxppars$boxwex / 4, stats$means - stats$sds, lend='butt', col=pars$sdstaplecol, lwd=pars$sdstaplelwd, lty=pars$sdstaplelty)
+            segments(at, stats$means + stats$sds, at, stats$means - stats$sds, lend='butt', col=pars$sdwhiskcol, lty=pars$sdwhisklty, lwd=pars$sdwhisklwd)
         }
     }
 
@@ -79,24 +79,24 @@ plotgroups.boxplot <- function(data, stats, colors, ylim, features, barwidth, bx
         plotsd()
         havesd <- TRUE
     }
-    toreturn <- do.call(boxplot, list.merge(pars, list(x=data, xaxt="n", col=colors, yaxt='n', add=TRUE, range=stats$range)))
+    toreturn <- do.call(boxplot, list.merge(pars, list(x=data, at=at, xaxt="n", col=colors, yaxt='n', add=TRUE, range=stats$range)))
     if (!havesd) {
         plotsd()
         havesd <- TRUE
     }
 
     if ("mean" %in% features)
-        segments(1:length(data) - bxppars$boxwex / 2, stats$means, 1:length(data) + bxppars$boxwex / 2, stats$means, lend='butt', lty=pars$meanlty, lwd=pars$meanlwd, col=pars$meancol)
-        points(1:length(data), stats$means, pch=pars$meanpch, cex=pars$meancex, col=pars$meancol)
+        segments(at - bxppars$boxwex / 2, stats$means, at + bxppars$boxwex / 2, stats$means, lend='butt', lty=pars$meanlty, lwd=pars$meanlwd, col=pars$meancol)
+        points(at, stats$means, pch=pars$meanpch, cex=pars$meancex, col=pars$meancol)
     if ("sem" %in% features) {
-        segments(1:length(data) - bxppars$boxwex / 2, stats$means + stats$sems, 1:length(data) + bxppars$boxwex / 2, stats$means + stats$sems, lend='butt', lty=pars$semstaplelty, lwd=pars$semstaplelwd, col=pars$semstaplecol)
-        segments(1:length(data) - bxppars$boxwex / 2, stats$means - stats$sems, 1:length(data) + bxppars$boxwex / 2, stats$means - stats$sems, lend='butt', lty=pars$semstaplelty, lwd=pars$semstaplelwd, col=pars$semstaplecol)
-        segments(1:length(data), stats$means +stats$sems, 1:length(data), stats$means - stats$sems, lend='butt', lty=pars$semwhisklty, lwd=pars$semwhisklwd, col=pars$semwhiskcol)
+        segments(at - bxppars$boxwex / 2, stats$means + stats$sems, at + bxppars$boxwex / 2, stats$means + stats$sems, lend='butt', lty=pars$semstaplelty, lwd=pars$semstaplelwd, col=pars$semstaplecol)
+        segments(at - bxppars$boxwex / 2, stats$means - stats$sems, at + bxppars$boxwex / 2, stats$means - stats$sems, lend='butt', lty=pars$semstaplelty, lwd=pars$semstaplelwd, col=pars$semstaplecol)
+        segments(at, stats$means +stats$sems, at, stats$means - stats$sems, lend='butt', lty=pars$semwhisklty, lwd=pars$semwhisklwd, col=pars$semwhiskcol)
     }
     if ("ci" %in% features) {
-        segments(1:length(data) - bxppars$boxwex / 2, stats$cimax, 1:length(data) + bxppars$boxwex / 2, stats$cimax, lend='butt', lty=pars$cistaplelty, lwd=pars$cistaplelwd, col=pars$cistaplecol)
-        segments(1:length(data) - bxppars$boxwex / 2, stats$cimin, 1:length(data) + bxppars$boxwex / 2, stats$cimin, lend='butt', lty=pars$cistaplelty, lwd=pars$cistaplelwd, col=pars$cistaplecol)
-        segments(1:length(data), stats$cimax, 1:length(data), stats$cimin, lend='butt', lty=pars$ciwhisklty, lwd=pars$ciwhisklwd, col=pars$ciwhiskcol)
+        segments(at - bxppars$boxwex / 2, stats$cimax, at + bxppars$boxwex / 2, stats$cimax, lend='butt', lty=pars$cistaplelty, lwd=pars$cistaplelwd, col=pars$cistaplecol)
+        segments(at - bxppars$boxwex / 2, stats$cimin, at + bxppars$boxwex / 2, stats$cimin, lend='butt', lty=pars$cistaplelty, lwd=pars$cistaplelwd, col=pars$cistaplecol)
+        segments(at, stats$cimax, 1:length(data), stats$cimin, lend='butt', lty=pars$ciwhisklty, lwd=pars$ciwhisklwd, col=pars$ciwhiskcol)
     }
     invisible(toreturn)
 }
@@ -153,7 +153,7 @@ allfeatures <- c("median", "box", "iqr", "mean", "sd", "sem", "ci")
 #' @seealso \code{\link[beeswarm]{beeswarm}}
 #' @export
 #' @importFrom rlist list.merge
-plotgroups.beeswarm <- function(data, stats, colors, ylim, features, barwidth, palpha=1, bxplwd=par("lwd"), bxpcols=colors, ...)
+plotgroups.beeswarm <- function(data, at, stats, colors, ylim, features, barwidth, palpha=1, bxplwd=par("lwd"), bxpcols=colors, ...)
 {
     if (!requireNamespace("beeswarm", quietly = TRUE))
         stop("Please install the beeswarm package for this plot.")
@@ -166,16 +166,16 @@ plotgroups.beeswarm <- function(data, stats, colors, ylim, features, barwidth, p
     if (length(dots) > 0)
         pars <- list.merge(pars, dots)
 
-    toreturn <- do.call(beeswarm::beeswarm, list.merge(pars, list(x=data, corralWidth=barwidth, add=TRUE, col=adjustcolor(colors, alpha.f=palpha), yaxs='i', xaxt='n')))
+    toreturn <- do.call(beeswarm::beeswarm, list.merge(pars, list(x=data, at=at, corralWidth=barwidth, add=TRUE, col=adjustcolor(colors, alpha.f=palpha), yaxs='i', xaxt='n')))
 
     bars <- threeparamsstats(stats, features)
 
     if (!is.null(bars$u) && !is.null(bars$l))
-        segments(1:length(data), bars$l, 1:length(data), bars$u, col=bxpcols, lend='butt', lwd=bxplwd)
+        segments(at, bars$l, at, bars$u, col=bxpcols, lend='butt', lwd=bxplwd)
 
     for (b in bars) {
         if (!is.null(b))
-            segments(1:length(data) - barwidth / 2, b, 1:length(data) + barwidth / 2, b, col=bxpcols, lend='butt', lwd=bxplwd)
+            segments(at - barwidth / 2, b, at + barwidth / 2, b, col=bxpcols, lend='butt', lwd=bxplwd)
     }
     invisible(toreturn)
 }
@@ -190,7 +190,7 @@ plotgroups.beeswarm <- function(data, stats, colors, ylim, features, barwidth, p
 #' @param ... additional parameters passed to \code{\link[graphics]{rect}}
 #' @export
 #' @importFrom rlist list.merge
-plotgroups.barplot <- function(data, stats, colors, ylim, features, barwidth, whiskerswidth=barwidth, whiskerslwd=par("lwd"), whiskerscol="black", bordercol="black", ...)
+plotgroups.barplot <- function(data, at, stats, colors, ylim, features, barwidth, whiskerswidth=barwidth, whiskerslwd=par("lwd"), whiskerscol="black", bordercol="black", ...)
 {
     threeparamcheck(features)
     if (!missing(ylim))
@@ -200,14 +200,14 @@ plotgroups.barplot <- function(data, stats, colors, ylim, features, barwidth, wh
     pars <- list(names.arg=NULL)
     if (length(dots) > 0)
         pars <- list.merge(pars, dots)
-    do.call(rect, list.merge(pars, list(xleft=1:length(data) - barwidth/2, ybottom=par("usr")[3], xright=1:length(data) + barwidth/2, ytop=bars$m, col=colors, border=bordercol)))
+    do.call(rect, list.merge(pars, list(xleft=at - barwidth/2, ybottom=par("usr")[3], xright=at + barwidth/2, ytop=bars$m, col=colors, border=bordercol)))
 
     if (!is.null(bars$u) && !is.null(bars$l))
-        segments(1:length(data), bars$l, 1:length(data), bars$u, col=whiskerscol, lend='butt', lwd=whiskerslwd)
+        segments(at, bars$l, at, bars$u, col=whiskerscol, lend='butt', lwd=whiskerslwd)
 
     for (b in bars[c("u", "l")]) {
         if (!is.null(b))
-            segments(1:length(data) - whiskerswidth / 2, b, 1:length(data) + whiskerswidth / 2, b, col=whiskerscol, lend='butt', lwd=whiskerslwd)
+            segments(at - whiskerswidth / 2, b, at + whiskerswidth / 2, b, col=whiskerscol, lend='butt', lwd=whiskerslwd)
     }
     invisible(NULL)
 }
@@ -225,7 +225,7 @@ plotgroups.barplot <- function(data, stats, colors, ylim, features, barwidth, wh
 #' @seealso \code{\link[vioplot]{vioplot}}
 #' @export
 #' @importFrom rlist list.merge
-plotgroups.vioplot <- function(data, stats, colors, ylim, features, barwidth, boxpars, boxcol="white", boxwidth=barwidth/4, ...)
+plotgroups.vioplot <- function(data, at, stats, colors, ylim, features, barwidth, boxpars, boxcol="white", boxwidth=barwidth/4, ...)
 {
     if (!missing(ylim))
         return(range(unlist(data)))
@@ -234,12 +234,12 @@ plotgroups.vioplot <- function(data, stats, colors, ylim, features, barwidth, bo
     pars <- list(horizontal=FALSE)
     if (length(dots) > 0)
         pars <- list.merge(pars, dots)
-    vioplot.results <- do.call(vioplot, list.merge(pars, list(x=data, col=colors, add=TRUE, wex=barwidth, drawRect=FALSE)))
+    vioplot.results <- do.call(vioplot, list.merge(pars, list(x=data, at=at, col=colors, add=TRUE, wex=barwidth, drawRect=FALSE)))
     if (missing(boxpars) || is.null(boxpars))
         boxpars <- list()
     if (is.null(boxpars$notch))
         boxpars$notch <- FALSE
-    bxp.toreturn <- do.call(plotgroups.boxplot, list.merge(boxpars, list(data=data, stats=stats, colors=boxcol, features=features, barwidth=boxwidth)))
+    bxp.toreturn <- do.call(plotgroups.boxplot, list.merge(boxpars, list(data=data, at=at, stats=stats, colors=boxcol, features=features, barwidth=boxwidth)))
     invisible(list(vioplot=vioplot.results, boxplot=bxp.toreturn))
 }
 
@@ -268,6 +268,7 @@ plotgroups.ci <- function(data, mean, se, ndata, conf.level=0.95) {
 #' \code{extrafun.after}. All three functions are passed the following arguments:
 #' \describe{
 #'           \item{data}{the \code{data} argument passed to \code{plotgroups}}
+#'           \item{at}{X coordinates of the data. Particularly important when groups.spacing != 0}
 #'           \item{stats}{summary statistics of the data. List with the following components:
 #'                        \describe{
 #'                               \item{means}{means}
@@ -308,6 +309,7 @@ plotgroups.ci <- function(data, mean, se, ndata, conf.level=0.95) {
 #' @param legend.col colors for group annotations. Defaults to plotting colors
 #' @param legend.pars parameters for group annotation. Will be passed to \code{\link[base]{text}}
 #' @param legend.lwd line width for grouping annotations. Defaults to \code{par("lwd")}
+#' @param groups.spacing extra space between the groups in user coordinates.
 #' @param names.split character by which to split the \code{names}. Only useful in combination with
 #'        \code{names.italicize} or \code{names.style='combinatorial'}
 #' @param names.italicize if a part of a \code{name} is to be written in italic text, the part is
@@ -355,7 +357,8 @@ plotgroups.ci <- function(data, mean, se, ndata, conf.level=0.95) {
 #'                             interquartile range away from the \code{box}}
 #'                  \item{mean}{the mean}
 #'                  \item{sd}{mean \eqn{\pm} standard deviation}
-#'                  \item{sem}{mean \eqn{\pm} standard error of the mean}}
+#'                  \item{sem}{mean \eqn{\pm} standard error of the mean}
+#'                  \item{ci}{confidence interval at \code{conf.level}}}
 #'        Can be a list containing character vectors, in which case the specified feature set will
 #'        apply to the corresponding plot if multiple data sets are plotted (see examples). Will be
 #'        recycled to the number of plots.
@@ -420,6 +423,7 @@ plotgroups.ci <- function(data, mean, se, ndata, conf.level=0.95) {
 #'         \describe{
 #'                  \item{stats}{summary statistics of the data.}
 #'                  \item{plotfun}{Return value of \code{plot.fun}}
+#'                  \item{xcoords}{X coordinates of the data.}
 #'                  \item{annotation.height}{Height of the annotation in inches.}
 #'                  \item{annotation.width}{Width of the annotation in inches. If
 #'                      \code{names.style='combinatorial'} this is the width of the left margin.}
@@ -502,6 +506,7 @@ plotgroups <- function(
                         legend.col=NULL,
                         legend.pars=list(),
                         legend.lwd=NULL,
+                        groups.spacing=0,
                         names.split=NULL,
                         names.italicize=NULL,
                         names.style=c("plain", "combinatorial"),
@@ -587,6 +592,14 @@ plotgroups <- function(
     }
     haveMagicAxis <- requireNamespace("magicaxis", quietly = TRUE)
 
+    grouplength <- rle(legend.text)$lengths
+    if (length(colors) != ngroups) {
+        colors <- rep(colors, length.out=length(grouplength))
+        colors <- rep(colors, times=grouplength)
+    }
+    xcoords <- 1:ngroups + rep(cumsum(c(0, rep(groups.spacing, times=length(grouplength) - 1))), times=grouplength)
+    xlim <- c(0.5, max(xcoords) + 0.5)
+
     pars <- list(oma=c(0,0,0,0), mar=c(0, 3, 0.2, 0.2), las=1, mgp=c(2, 0.5, 0), ljoin="mitre", lend="square")
     if (!is.null(main))
         pars$oma <- c(0, 0, 2, 0)
@@ -666,7 +679,7 @@ plotgroups <- function(
         mai[2] <- max(mai[2], legend.width)
         par(mai=c(0, mai[2], names.margin * lineheight, mai[4]))
         plot.new()
-        plot.window(xlim=c(0.5, ngroups + 0.5), ylim=c(0,1), xaxs='i', yaxs='i')
+        plot.window(xlim=xlim, ylim=c(0,1), xaxs='i', yaxs='i')
         mapply(function(nm, x) {
             lapply(uniquegenes, function(g, x, nm) {
                 n <- nm[[g]]
@@ -688,7 +701,7 @@ plotgroups <- function(
                     do.call(pfun, args)
                 }
             }, x, nm)
-        }, names.mapped, 1:length(names.mapped))
+        }, names.mapped, xcoords)
 
         labels <- uniquegenes
         if (!is.null(names.italicize)) {
@@ -746,8 +759,8 @@ plotgroups <- function(
         par(cex=origcex)
         par(mai=c(0, mai[2], names.margin * lineheight, mai[4]))
         plot.new()
-        plot.window(xlim=c(0.5, ngroups + 0.5), ylim=c(0,1), xaxs='i', yaxs='i')
-        text(1:ngroups, 1, srt=names.rotate, adj=names.adj, labels=labels, xpd=NA, cex=cex.xlab)
+        plot.window(xlim=xlim, ylim=c(0,1), xaxs='i', yaxs='i')
+        text(xcoords, 1, srt=names.rotate, adj=names.adj, labels=labels, xpd=NA, cex=cex.xlab)
     }
     title(main=main, outer=TRUE)
 
@@ -873,11 +886,6 @@ plotgroups <- function(
         signifheight <- 0.2 * lineheight
         legendbase <- cylim[2]
         if (cplot == 1 && !is.null(legend.text)) {
-            grouplength <- rle(legend.text)$lengths
-            if (length(colors) != ngroups) {
-                colors <- rep(colors, length.out=length(grouplength))
-                colors <- rep(colors, times=grouplength)
-            }
             if (is.null(legendmargin))
                 legendmargin <- max(max(strheight(legend.text, units="inches", cex=par("cex"))), lineheight)
             if (!ylim.extended)
@@ -932,7 +940,6 @@ plotgroups <- function(
         margin <- legendmargin + signifmargin
         inchestouser <- (cylim[2] - cylim[1]) / (par("pin")[2] - margin)
         cylim <- c(cylim[1], cylim[2] + margin * inchestouser)
-        xlim <- c(0.5, ngroups + 0.5)
 
         if (log[cplot]) {
             plot.window(xlim=xlim, ylim=10^cylim, xaxs='i', yaxs='i', log='y')
@@ -950,10 +957,10 @@ plotgroups <- function(
         }
 
         if (!is.null(extrafun.before[[cplot]]))
-            extrafun.before[[cplot]](data[[cplot]], stats, colors, features, barwidth)
-        plotfunret <- do.call(plot.fun[[cplot]], c(list(data=data[[cplot]], stats=allstats[[cplot]], colors=colors, features=features[[cplot]], barwidth=barwidth), plot.fun.pars[[cplot]]))
+            extrafun.before[[cplot]](data[[cplot]], xcoords, stats, colors, features, barwidth)
+        plotfunret <- do.call(plot.fun[[cplot]], c(list(data=data[[cplot]], at=xcoords, stats=allstats[[cplot]], colors=colors, features=features[[cplot]], barwidth=barwidth), plot.fun.pars[[cplot]]))
         if (!is.null(extrafun.after[[cplot]]))
-            extrafun.after[[cplot]](data[[cplot]], stats, colors, features, barwidth)
+            extrafun.after[[cplot]](data[[cplot]], xcoords, stats, colors, features, barwidth)
 
         if (log[cplot] && haveMagicAxis) {
             maglab.old <- magicaxis::maglab
@@ -986,8 +993,8 @@ plotgroups <- function(
             plot.window(xlim=xlim, ylim=cylim, xaxs='i', yaxs='i')
         }
         if (cplot == 1 && !is.null(legend.text)) {
-            segs.begin <- c(1, cumsum(grouplength)[-length(grouplength)] + 1) - barwidth / 2
-            segs.end <- cumsum(grouplength) + barwidth / 2
+            segs.begin <- c(1, xcoords[cumsum(grouplength)[-length(grouplength)] + 1]) - barwidth / 2
+            segs.end <- xcoords[cumsum(grouplength)] + barwidth / 2
             if (is.null(legend.col)) {
                 cols <- unique(colors)
             } else {
@@ -1005,8 +1012,8 @@ plotgroups <- function(
                 p <- signif.test.ret[[i]]$test$p.value
                 label <- signif.test.text[[cplot]](p)
                 if (!is.null(label)) {
-                    begin <- signif.test[[cplot]][[i]][1] + (1 - barwidth) / 2
-                    end <- signif.test[[cplot]][[i]][2] - (1 - barwidth) / 2
+                    begin <- xcoords[signif.test[[cplot]][[i]][1]] + (1 - barwidth) / 2
+                    end <- xcoords[signif.test[[cplot]][[i]][2]] - (1 - barwidth) / 2
                     mid <- (end - begin) / 2 + begin
                     base <- signifbase + signiflines[i] * lineheight
                     lines(c(begin, begin, end, end), c(base - signifheight, base, base, base - signifheight), lwd=signif.test.lwd[[cplot]], col=signif.test.col[[cplot]], lend="butt")

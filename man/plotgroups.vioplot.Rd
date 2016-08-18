@@ -4,11 +4,13 @@
 \alias{plotgroups.vioplot}
 \title{Plot several groups of repeated observations as a violin plot.}
 \usage{
-plotgroups.vioplot(data, stats, colors, ylim, features, barwidth, boxpars,
+plotgroups.vioplot(data, at, stats, colors, ylim, features, barwidth, boxpars,
   boxcol = "white", boxwidth = barwidth/4, ...)
 }
 \arguments{
 \item{data}{list, each element is a vector of replicates for one combination of parameters}
+
+\item{at}{numeric vector giving the X locations where the plots should be drawn}
 
 \item{stats}{list containing the summary statistics (see \code{\link{plotgroups}})}
 
