@@ -598,7 +598,7 @@ plotgroups <- function(
         colors <- rep(colors, times=grouplength)
     }
     xcoords <- 1:ngroups + rep(cumsum(c(0, rep(groups.spacing, times=length(grouplength) - 1))), times=grouplength)
-    xlim <- c(0.5, max(xcoords) + 0.5)
+    xlim <- c(0.5 - 0.5 * groups.spacing, max(xcoords) + 0.5 + 0.5 * groups.spacing)
 
     pars <- list(oma=c(0,0,0,0), mar=c(0, 3, 0.2, 0.2), las=1, mgp=c(2, 0.5, 0), ljoin="mitre", lend="square")
     if (!is.null(main))
