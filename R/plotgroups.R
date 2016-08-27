@@ -158,8 +158,9 @@ plotgroups.beeswarm <- function(data, at, stats, colors, ylim, features, barwidt
     if (!requireNamespace("beeswarm", quietly = TRUE))
         stop("Please install the beeswarm package for this plot.")
     threeparamcheck(features)
+    bars <- threeparamsstats(stats, features)
     if (!missing(ylim))
-        return(range(unlist(data)))
+        return(range(c(unlist(data), bars$u, bars$l, bars$m)))
 
     dots <- list(...)
     pars <- list(method="swarm", corral="random", priority="random", pch=16)
@@ -167,9 +168,6 @@ plotgroups.beeswarm <- function(data, at, stats, colors, ylim, features, barwidt
         pars <- list.merge(pars, dots)
 
     toreturn <- do.call(beeswarm::beeswarm, list.merge(pars, list(x=data, at=at, corralWidth=barwidth, add=TRUE, col=adjustcolor(colors, alpha.f=palpha), yaxs='i', xaxt='n')))
-
-    bars <- threeparamsstats(stats, features)
-
     if (!is.null(bars$u) && !is.null(bars$l))
         segments(at, bars$l, at, bars$u, col=bxpcols, lend='butt', lwd=bxplwd)
 
@@ -808,7 +806,7 @@ plotgroups <- function(
             cylim <- NULL
         }
         if (is.null(cylim))
-            cylim <- plot.fun[[cplot]](data=data[[cplot]], features=features[[cplot]], ylim=TRUE)
+            cylim <- plot.fun[[cplot]](data=data[[cplot]], stats=stats, features=features[[cplot]], ylim=TRUE)
         if (is.null(cylim)) {
             cylim <- c(Inf, 0)
             if ("median" %in% features[[cplot]]) {
