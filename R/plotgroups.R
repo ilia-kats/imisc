@@ -148,19 +148,26 @@ allfeatures <- c("median", "box", "iqr", "mean", "sd", "sem", "ci")
 #' @param palpha opacity of the individual points
 #' @param bxplwd line width for the simplified boxplot
 #' @param bxpcols colors for the simplified boxplot
+#' @param showfeatures whether to plot summary statistics overlaid over the data points
 #' @param ... additional parameters passed to \code{\link[beeswarm]{beeswarm}}
 #' @return Same as \code{\link[beeswarm]{beeswarm}}
 #' @seealso \code{\link[beeswarm]{beeswarm}}
 #' @export
 #' @importFrom rlist list.merge
-plotgroups.beeswarm <- function(data, at, stats, colors, ylim, features, barwidth, palpha=1, bxplwd=par("lwd"), bxpcols=colors, ...)
+plotgroups.beeswarm <- function(data, at, stats, colors, ylim, features, barwidth, palpha=1, bxplwd=par("lwd"), bxpcols=colors, showfeatures=TRUE, ...)
 {
     if (!requireNamespace("beeswarm", quietly = TRUE))
         stop("Please install the beeswarm package for this plot.")
-    threeparamcheck(features)
-    bars <- threeparamsstats(stats, features)
-    if (!missing(ylim))
-        return(range(c(unlist(data), bars$u, bars$l, bars$m)))
+    if (showfeatures) {
+        threeparamcheck(features)
+        bars <- threeparamsstats(stats, features)
+    }
+    if (!missing(ylim)) {
+        r <- range(c(unlist(data)))
+        if (showfeatures)
+            r <- range(c(r, bars$u, bars$l, bars$m))
+        return(r)
+    }
 
     dots <- list(...)
     pars <- list(method="swarm", corral="random", priority="random", pch=16)
@@ -168,12 +175,15 @@ plotgroups.beeswarm <- function(data, at, stats, colors, ylim, features, barwidt
         pars <- list.merge(pars, dots)
 
     toreturn <- do.call(beeswarm::beeswarm, list.merge(pars, list(x=data, at=at, corralWidth=barwidth, add=TRUE, col=adjustcolor(colors, alpha.f=palpha), yaxs='i', xaxt='n')))
-    if (!is.null(bars$u) && !is.null(bars$l))
-        segments(at, bars$l, at, bars$u, col=bxpcols, lend='butt', lwd=bxplwd)
 
-    for (b in bars) {
-        if (!is.null(b))
-            segments(at - barwidth / 2, b, at + barwidth / 2, b, col=bxpcols, lend='butt', lwd=bxplwd)
+    if (showfeatures) {
+        if (!is.null(bars$u) && !is.null(bars$l))
+            segments(at, bars$l, at, bars$u, col=bxpcols, lend='butt', lwd=bxplwd)
+
+        for (b in bars) {
+            if (!is.null(b))
+                segments(at - barwidth / 2, b, at + barwidth / 2, b, col=bxpcols, lend='butt', lwd=bxplwd)
+        }
     }
     invisible(toreturn)
 }

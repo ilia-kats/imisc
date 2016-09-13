@@ -5,7 +5,8 @@
 \title{Plot several groups of repeated observations as a beeswarm plot.}
 \usage{
 plotgroups.beeswarm(data, at, stats, colors, ylim, features, barwidth,
-  palpha = 1, bxplwd = par("lwd"), bxpcols = colors, ...)
+  palpha = 1, bxplwd = par("lwd"), bxpcols = colors,
+  showfeatures = TRUE, ...)
 }
 \arguments{
 \item{data}{list, each element is a vector of replicates for one combination of parameters}
@@ -27,6 +28,8 @@ plotgroups.beeswarm(data, at, stats, colors, ylim, features, barwidth,
 \item{bxplwd}{line width for the simplified boxplot}
 
 \item{bxpcols}{colors for the simplified boxplot}
+
+\item{showfeatures}{whether to plot summary statistics overlaid over the data points}
 
 \item{...}{additional parameters passed to \code{\link[beeswarm]{beeswarm}}}
 }
