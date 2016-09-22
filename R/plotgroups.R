@@ -605,7 +605,7 @@ plotgroups <- function(
     } else {
         grouplength <- ngroups
     }
-    if (length(colors) != ngroups) {
+    if (!is.null(colors) && length(colors) != ngroups) {
         colors <- rep(colors, length.out=length(grouplength))
         colors <- rep(colors, times=grouplength)
     }
