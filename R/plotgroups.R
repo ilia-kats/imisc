@@ -1012,7 +1012,7 @@ plotgroups <- function(
             } else {
                 cols <- legend.col
             }
-            segments(segs.begin, legendbase, segs.end, legendbase, lwd=legend.lwd, col=cols, lend="butt")
+            segments(segs.begin, legendbase, segs.end, legendbase, lwd=legend.lwd, col=cols)
 
             mids <- (segs.end - segs.begin) / 2 + segs.begin
             do.call(text, c(list(x=mids, y=legendbase + signifheight, labels=unique(legend.text), adj=c(0.5, 0), col=cols), legend.pars))
@@ -1028,7 +1028,7 @@ plotgroups <- function(
                     end <- xcoords[signif.test[[cplot]][[i]][2]] - (1 - barwidth) / 2
                     mid <- (end - begin) / 2 + begin
                     base <- signifbase + signiflines[i] * lineheight
-                    lines(c(begin, begin, end, end), c(base - signifheight, base, base, base - signifheight), lwd=signif.test.lwd[[cplot]], col=signif.test.col[[cplot]], lend="butt")
+                    lines(c(begin, begin, end, end), c(base - signifheight, base, base, base - signifheight), lwd=signif.test.lwd[[cplot]], col=signif.test.col[[cplot]])
                     do.call(text, c(list(x=mid, y=base + 0.2 * lineheight, labels=label, adj=c(0.5, 0), col=signif.test.col[[cplot]]), signif.test.pars[[cplot]]))
                 }
                 signif.test.ret[[i]]$label <- label
