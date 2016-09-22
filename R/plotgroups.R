@@ -600,7 +600,11 @@ plotgroups <- function(
     }
     haveMagicAxis <- requireNamespace("magicaxis", quietly = TRUE)
 
-    grouplength <- rle(legend.text)$lengths
+    if (!is.null(legend.text)) {
+        grouplength <- rle(legend.text)$lengths
+    } else {
+        grouplength <- ngroups
+    }
     if (length(colors) != ngroups) {
         colors <- rep(colors, length.out=length(grouplength))
         colors <- rep(colors, times=grouplength)
