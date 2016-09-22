@@ -932,7 +932,7 @@ plotgroups <- function(
                 currline <- 0
                 while (currline <= maxsignifoverlaps) {
                     i <- which(signiflines == -1)[1]
-                    while (i <= length(signif.test[[cplot]])) {
+                    while (!is.na(i) && i <= length(signif.test[[cplot]])) {
                         signiflines[i] <- currline
                         overlaps <- which(signifoverlaps[,1] == i)
                         if (length(overlaps) > 0) {
