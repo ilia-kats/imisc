@@ -726,7 +726,7 @@ plotgroups <- function(
         text(0.5, ycoords, labels=labels, adj=c(1, 0), cex=cex.xlab, xpd=NA)
 
         plt <- par("plt")
-        plt[1] <- plt[1] - max(strwidth(uniquegenes, units="figure", cex=cex.xlab))
+        plt[1] <- max(0, plt[1] - max(strwidth(uniquegenes, units="figure", cex=cex.xlab)))
         par(plt=plt)
         plot.window(xlim=c(0,1), ylim=c(0,1), xaxs='i', yaxs='i')
         do.call("clip", as.list(par("usr")))
