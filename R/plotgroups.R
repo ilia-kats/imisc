@@ -755,6 +755,8 @@ plotgroups <- function(
                     parse(text=paste0("paste(", paste(sapply(xx[[1]], function(x) {
                             if (grepl(names.italicize, x, fixed=TRUE)) {
                                 x <- deparse(substitute(italic(x), list(x=x)))
+                            } else {
+                                x <- paste0('"', x, '"')
                             }
                             x
                         }, USE.NAMES=F), collapse='," ",'), ")"))
@@ -767,6 +769,7 @@ plotgroups <- function(
         }
         legend.width <- max(strwidth(labels, units="inches", cex=cex.xlab))
         legend.height <- sin(names.rotate * pi / 180) * legend.width + vadj * max(strheight(labels, units="inches", cex=cex.xlab)) + 0.15 * lineheight + names.margin * lineheight
+
         layout(matrix(c(2:(nplots + 1), 1), byrow=TRUE), heights=c(rep(1, nplots), lcm(cm(legend.height))))
         par(cex=origcex)
         par(mai=c(0, mai[2], names.margin * lineheight, mai[4]))
