@@ -973,9 +973,7 @@ plotgroups <- function(
         if (!ylim.extended)
             legendbase <- legendbase + signifheight
         if (!is.null(signif.test[[cplot]])) {
-            signifbase <- legendbase
-            if (!ylim.extended)
-                signifbase <- signifbase + signifheight
+            signifbase <- legendbase + signifheight
             legendbase <- signifbase + signifmargin * inchestouser
         }
 
