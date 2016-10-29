@@ -10,9 +10,9 @@ plotgroups(data, names, colors = NULL, legend.text = NULL,
   names.style = c("plain", "combinatorial"), names.pch.cex = 1,
   names.pch = 19, names.adj = NA, names.map.fun = NULL,
   names.margin = 0.5, names.rotate = NULL, names.placeholder = NA,
-  features = NULL, log = FALSE, range = 1.5, conf.level = 0.95,
+  features = NA, log = FALSE, range = 1.5, conf.level = 0.95,
   ci.fun = plotgroups.ci, cex.xlab = 1, ylim = NULL,
-  legendmargin = NULL, plot.fun = plotgroups.boxplot,
+  legendmargin = NULL, plot.type = plotgroups.boxplot,
   plot.fun.pars = list(), barwidth = 0.8, main = NULL, ylab = NULL,
   signif.test = NULL, signif.test.fun = t.test,
   signif.test.text = function(p) paste0("p=", formatC(p, digits = 3, format =
@@ -89,7 +89,7 @@ parameters for that particular annotation, i.e. \code{pch}, \code{cex}, \code{ro
 to use when no annotation is present for the current sample and row. See examples.}
 
 \item{features}{which features of the sample distributions to plot. Availability of features
-depends on \code{plot.fun} Can contain any combination of the following:
+depends on \code{plot.type} Can contain any combination of the following:
 \describe{
           \item{median}{the median}
           \item{box}{the first and third quartiles}
@@ -135,12 +135,25 @@ data sets are plotted. Will be recycled to the number of plots.}
 \item{legendmargin}{spacing between the upper-most data point/feature and the upper edge of the
 plot, required for group annotation. Will be determined automatically if \code{NULL}}
 
-\item{plot.fun}{function to do the actual plotting. See \code{\link{plotgroups.boxplot}},
-\code{\link{plotgroups.beeswarm}}, \code{\link{plotgroups.barplot}},
-\code{\link{plotgroups.vioplot}}. Can be a list containing functions, in which case the
-functions will apply to the corresponding plot.}
+\item{plot.type}{list containint three functions:
+\describe{
+          \item{plot}{function to do the actual plotting. See
+                      \code{\link{plotgroups.boxplot}}, \code{\link{plotgroups.beeswarm}},
+                      \code{\link{plotgroups.barplot}}, \code{\link{plotgroups.vioplot}}.}
+          \item{ylim}{Function to calculate Y axis limits based on data and features.
+                      Takes three arguments:\describe{
+                              \item{data}{List of numeric vectors with data}
+                              \item{stats}{Precomputed statistics}
+                              \item{features}{Features to plot}}
+                      Returns either a 2-element vector with Y limits or \code{NULL}, in
+                      which case Y limits will be computed based on sensible defaults.}
+          \item{features}{Function to check user-supplied feature lists for correctness
+                      and compute default features, if necessary. Takes one argument
+                      (the user-supplied feature character vector) and returns a
+                      character vector with features to plot.}}
+Can be a list of lists, in which case the elements will apply to the corresponding plot.}
 
-\item{plot.fun.pars}{additional parameters to pass to \code{plot.fun}}
+\item{plot.fun.pars}{additional parameters to pass to \code{plot.type$plot}}
 
 \item{barwidth}{width of the individual bars/boxes etc. as fraction of 1}
 
@@ -184,7 +197,8 @@ corresponding plot if multiple data sets are plotted.}
 list with the following components:
         \describe{
                  \item{stats}{summary statistics of the data.}
-                 \item{plotfun}{Return value of \code{plot.fun}}
+                 \item{features}{Character vector of features actually plotted.}
+                 \item{plotfun}{Return value of \code{plot.type$plot}}
                  \item{xcoords}{X coordinates of the data.}
                  \item{annotation.height}{Height of the annotation in inches.}
                  \item{annotation.width}{Width of the annotation in inches. If
@@ -205,8 +219,8 @@ and proteins above the plot) or by cell line. Related parameters can be plotted 
 below each other, sharing the groupings and annotations (see examples)
 }
 \details{
-This is a wrapper function around \code{plot.fun}. It sets up the coordinate system, calls
-\code{extrafun.before} followed by \code{plot.fun}, which does the actual plotting, and
+This is a wrapper function around \code{plot.type$plot}. It sets up the coordinate system, calls
+\code{extrafun.before} followed by \code{plot.type$plot}, which does the actual plotting, and
 \code{extrafun.after}. All three functions are passed the following arguments:
 \describe{
           \item{data}{the \code{data} argument passed to \code{plotgroups}}
@@ -234,7 +248,7 @@ This is a wrapper function around \code{plot.fun}. It sets up the coordinate sys
           \item{colors}{the \code{colors} argument passed to \code{plotgroups}}
           \item{features}{the \code{features} argument passed to \code{plotgroups}}
           \item{barwidth}{the \code{barwidth} argument passed to \code{plotgroups}}}
-\code{plot.fun} is additionally passed the arguments given by \code{plot.fun.pars}.
+\code{plot.type$plot} is additionally passed the arguments given by \code{plot.fun.pars}.
 
 Significance testing is performed by calling \code{signif.test.fun} with two vector arguments
 containing the samples to be compared. \code{signif.test.fun} must return a list containing
@@ -251,11 +265,11 @@ names2[2] <- "abc\\nefg"
 colors <- c("green", "blue")
 legend.text <- rep(c("protein1", "protein2"), each=7)
 plotgroups(data, names, colors, legend.text,
-           plot.fun=plotgroups.beeswarm, features=c('mean', 'sd'), ylim=c(0,Inf))
-plotgroups(data, names2, colors, legend.text,plot.fun=plotgroups.vioplot, ylim=c(0,Inf),
+           plot.type=plotgroups.beeswarm, features=c('mean', 'sd'), ylim=c(0,Inf))
+plotgroups(data, names2, colors, legend.text,plot.type=plotgroups.vioplot, ylim=c(0,Inf),
            names.rotate=0, names.adj=c(0.5, 1))
 plotgroups(data, names, colors, legend.text, log=TRUE,
-           plot.fun=plotgroups.beeswarm, features=c('mean', 'sd'),
+           plot.type=plotgroups.beeswarm, features=c('mean', 'sd'),
            names.style='combinatorial', names.split=" ", names.pch='\\u0394',
            plot.fun.pars=list(palpha=0.5, bxpcols="black"))
 plotgroups(data, names, colors, legend.text,
@@ -263,7 +277,7 @@ plotgroups(data, names, colors, legend.text,
            names.placeholder='+')
 plotgroups(data, names, colors, legend.text,
            names.style='combinatorial', names.split=" ", names.pch=19,
-           main="test", plot.fun=plotgroups.barplot, features=c("mean", "sd"),
+           main="test", plot.type=plotgroups.barplot, features=c("mean", "sd"),
            plot.fun.pars=list(whiskerswidth=0.6))
 
 map.fun <- function(n, split, pch, cex, rotate, adj) {
@@ -301,7 +315,7 @@ plotgroups(data, names, colors, legend.text,names.style='combinatorial',
 plotgroups(list(data, rev(data)), names, colors, legend.text,names.style='combinatorial',
            names.split=" ",names.pch='\\u0394', names.map.fun=map.fun,
            ylim=c(0,Inf), ylab=c("data1", "data2"), main="test", features=list(NULL,
-           c("median", "box")), plot.fun=list(plotgroups.boxplot, plotgroups.beeswarm),
+           c("median", "box")), plot.type=list(plotgroups.boxplot, plotgroups.beeswarm),
            signif.test=list(NULL,list(c(1,3), c(2,5), c(5,8), c(3,10))))
 }
 

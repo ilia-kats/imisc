@@ -1,104 +1,24 @@
-#' @templateVar plottype boxplot (extended with mean, standard deviation, and standard error of the mean)
-#' @template plotgroups.-
-#' @param bxppars additional parameters passed to \code{\link[graphics]{boxplot}} as
-#'        sig\code{pars} parameter
-#' @param ... additional parameters passed to \code{\link[graphics]{boxplot}} as \code{...}. Can also
-#'        contain the following:
-#'        \describe{
-#'                  \item{meanlty, meanlwd, meancol, meanpch, meancex}{Mean line type, line width,
-#'                        color, point character, and point size expansion. The default
-#'                        \code{meanpch=NA} suppresses the point, and \code{meanlty="blank"}
-#'                        does so for the line. Note that \code{meanlwd} defaults to 3x the
-#'                        default lwd and \code{meancol} defaults to \code{"red"}}
-#'                  \item{sdwhisklty, sdwhisklwd, sdwhiskcol}{Whisker line type(default:
-#'                        \code{"solid"}), width, and color for standard deviation whiskers.}
-#'                  \item{sdstaplelty, sdstaplelwd, sdstaplecol}{Staple (end of whisker) line type,
-#'                        width, and color for standard deviation whiskers}
-#'                  \item{semwhisklty, semwhisklwd, semwhiskcol}{Whisker line type(default:
-#'                        \code{"solid"}), width, and color (default: \code{"#EDA217"})
-#'                        for standard error of the mean whiskers.}
-#'                  \item{semstaplelty, semstaplelwd, semstaplecol}{Staple (end of whisker) line type,
-#'                        width, and color (default: \code{"#090E97"}) for standard error
-#'                        of the mean whiskers}
-#'                  \item{cistaplelty, cistaplelwd, cistaplecol}{Staple (end of whisker) line type,
-#'                        width, and color (default: \code{"#EDA217"}) for confidence interval
-#'                        whiskers}}
-#' @return Same as \code{\link[graphics]{boxplot}}
-#' @seealso \code{\link[graphics]{boxplot}}
-#' @export
-#' @importFrom rlist list.merge
-plotgroups.boxplot <- function(data, at, stats, colors, ylim, features, barwidth, bxppars, ...)
+allfeatures <- c("median", "box", "iqr", "mean", "sd", "sem", "ci")
+
+threeparamcheck <- function(features)
 {
-    if (!missing(ylim))
-        return(NULL)
-    if (missing(bxppars) || is.null(bxppars))
-        bxppars <- list()
-    lwd.base <- par("lwd")
-    if (is.null(bxppars$boxwex))
-        bxppars$boxwex <- barwidth
-    dots <- list(...)
-    pars <- list(notch=TRUE, las=1, notch.frac=0.9, outpch=NA,
-                 meanlty=1, meanlwd=3*lwd.base, meancol="red", meanpch=NA, meancex=1,
-                 sdwhisklty=1, sdwhisklwd=lwd.base, sdwhiskcol="black",
-                 sdstaplelty=1, sdstaplelwd=lwd.base, sdstaplecol="black",
-                 semwhisklty=0, semwhisklwd=lwd.base, semwhiskcol="#090E97",
-                 semstaplelty=1, semstaplelwd=lwd.base, semstaplecol="#090E97",
-                 ciwhisklty=0, ciwhisklwd=lwd.base, ciwhiskcol="#EDA217",
-                 cistaplelty=1, cistaplelwd=lwd.base, cistaplecol="#EDA217")
+    if (is.na(features) || !length(features))
+        features <- c('mean', 'ci')
+    if ("mean" %in% features && "median" %in% features)
+        stop("both mean and median present in features, only one can be plotted")
+    if (as.integer("box" %in% features + "iqr" %in% features + "sd" %in% features + "sem" %in% features) > 1 + "ci" %in% features)
+        stop("only one of 'box', 'iqr', 'sd', 'sem', 'ci' can be plotted, ajust features argument accordingly")
+    features
+}
 
-    if (!("median" %in% features)) {
-        bxppars$medlty <- "blank"
-        bxppars$medpch <- NA
-    }
-    if (!("box" %in% features)) {
-        bxppars$boxlty <- "blank"
-        bxppars$boxfill <- "transparent"
-    }
-    if (!("iqr" %in% features)) {
-        bxppars$whisklty <- "blank"
-        bxppars$staplelty <- "blank"
+allparamcheck <- function(features)
+{
+    if (!is.na(features) && length(features) > 0) {
+        features <- match.arg(features, choices=allfeatures, several.ok=TRUE)
     } else {
-        bxppars$whisklty <- "22"
-        bxppars$staplelty <- "22"
+        features <- c("median", "box", "iqr", "mean", "sd", "ci")
     }
-
-    pars$pars <- bxppars
-    if (length(dots) > 0)
-        pars <- list.merge(pars, dots)
-
-    plotsd <- function() {
-        if ("sd" %in% features) {
-            segments(at - bxppars$boxwex / 4, stats$means + stats$sds, at + bxppars$boxwex / 4, stats$means + stats$sds, lend='butt', col=pars$sdstaplecol, lwd=pars$sdstaplelwd, lty=pars$sdstaplelty)
-            segments(at - bxppars$boxwex / 4, stats$means - stats$sds, at + bxppars$boxwex / 4, stats$means - stats$sds, lend='butt', col=pars$sdstaplecol, lwd=pars$sdstaplelwd, lty=pars$sdstaplelty)
-            segments(at, stats$means + stats$sds, at, stats$means - stats$sds, lend='butt', col=pars$sdwhiskcol, lty=pars$sdwhisklty, lwd=pars$sdwhisklwd)
-        }
-    }
-
-    havesd <- FALSE
-    if (max(stats$means + stats$sds) > max(stats$boxmax) && min(stats$means - stats$sds) < min(stats$boxmin)) {
-        plotsd()
-        havesd <- TRUE
-    }
-    toreturn <- do.call(boxplot, list.merge(pars, list(x=data, at=at, xaxt="n", col=colors, yaxt='n', add=TRUE, range=stats$range)))
-    if (!havesd) {
-        plotsd()
-        havesd <- TRUE
-    }
-
-    if ("mean" %in% features)
-        segments(at - bxppars$boxwex / 2, stats$means, at + bxppars$boxwex / 2, stats$means, lend='butt', lty=pars$meanlty, lwd=pars$meanlwd, col=pars$meancol)
-        points(at, stats$means, pch=pars$meanpch, cex=pars$meancex, col=pars$meancol)
-    if ("sem" %in% features) {
-        segments(at - bxppars$boxwex / 2, stats$means + stats$sems, at + bxppars$boxwex / 2, stats$means + stats$sems, lend='butt', lty=pars$semstaplelty, lwd=pars$semstaplelwd, col=pars$semstaplecol)
-        segments(at - bxppars$boxwex / 2, stats$means - stats$sems, at + bxppars$boxwex / 2, stats$means - stats$sems, lend='butt', lty=pars$semstaplelty, lwd=pars$semstaplelwd, col=pars$semstaplecol)
-        segments(at, stats$means +stats$sems, at, stats$means - stats$sems, lend='butt', lty=pars$semwhisklty, lwd=pars$semwhisklwd, col=pars$semwhiskcol)
-    }
-    if ("ci" %in% features) {
-        segments(at - bxppars$boxwex / 2, stats$cimax, at + bxppars$boxwex / 2, stats$cimax, lend='butt', lty=pars$cistaplelty, lwd=pars$cistaplelwd, col=pars$cistaplecol)
-        segments(at - bxppars$boxwex / 2, stats$cimin, at + bxppars$boxwex / 2, stats$cimin, lend='butt', lty=pars$cistaplelty, lwd=pars$cistaplelwd, col=pars$cistaplecol)
-        segments(at, stats$cimax, 1:length(data), stats$cimin, lend='butt', lty=pars$ciwhisklty, lwd=pars$ciwhisklwd, col=pars$ciwhiskcol)
-    }
-    invisible(toreturn)
+    features
 }
 
 threeparamsstats <- function(stats, features)
@@ -131,126 +51,6 @@ threeparamsstats <- function(stats, features)
     bars
 }
 
-threeparamcheck <- function(features)
-{
-    if ("mean" %in% features && "median" %in% features)
-        stop("both mean and median present in features, only one can be plotted")
-    if (as.integer("box" %in% features + "iqr" %in% features + "sd" %in% features + "sem" %in% features) > 1 + "ci" %in% features)
-        stop("only one of 'box', 'iqr', 'sd', 'sem', 'ci' can be plotted, ajust features argument accordingly")
-}
-
-allfeatures <- c("median", "box", "iqr", "mean", "sd", "sem", "ci")
-
-#' @templateVar plottype beeswarm plot
-#' @templateVar additionaldesc Requires the \code{beeswarm} package.
-#' @templateVar featuresdesc At the moment, either \code{mean} or \code{median} can be plotted. Also, only one of \code{box}, \code{iqr}, \code{sd}, \code{sem}, \code{ci} can be plotted at the moment.
-#' @template plotgroups.-
-#' @param palpha opacity of the individual points
-#' @param bxplwd line width for the simplified boxplot
-#' @param bxpcols colors for the simplified boxplot
-#' @param showfeatures whether to plot summary statistics overlaid over the data points
-#' @param ... additional parameters passed to \code{\link[beeswarm]{beeswarm}}
-#' @return Same as \code{\link[beeswarm]{beeswarm}}
-#' @seealso \code{\link[beeswarm]{beeswarm}}
-#' @export
-#' @importFrom rlist list.merge
-plotgroups.beeswarm <- function(data, at, stats, colors, ylim, features, barwidth, palpha=1, bxplwd=par("lwd"), bxpcols=colors, showfeatures=TRUE, ...)
-{
-    if (!requireNamespace("beeswarm", quietly = TRUE))
-        stop("Please install the beeswarm package for this plot.")
-    if (showfeatures) {
-        threeparamcheck(features)
-        bars <- threeparamsstats(stats, features)
-    }
-    if (!missing(ylim)) {
-        r <- range(c(unlist(data)))
-        if (showfeatures)
-            r <- range(c(r, bars$u, bars$l, bars$m))
-        return(r)
-    }
-
-    dots <- list(...)
-    pars <- list(method="swarm", corral="random", priority="random", pch=16)
-    if (length(dots) > 0)
-        pars <- list.merge(pars, dots)
-
-    toreturn <- do.call(beeswarm::beeswarm, list.merge(pars, list(x=data, at=at, corralWidth=barwidth, add=TRUE, col=adjustcolor(colors, alpha.f=palpha), yaxs='i', xaxt='n')))
-
-    if (showfeatures) {
-        if (!is.null(bars$u) && !is.null(bars$l))
-            segments(at, bars$l, at, bars$u, col=bxpcols, lend='butt', lwd=bxplwd)
-
-        for (b in bars) {
-            if (!is.null(b))
-                segments(at - barwidth / 2, b, at + barwidth / 2, b, col=bxpcols, lend='butt', lwd=bxplwd)
-        }
-    }
-    invisible(toreturn)
-}
-
-#' @templateVar plottype barplot
-#' @templateVar featuresdesc At the moment, either \code{mean} or \code{median} can be plotted. Also, only one of \code{box}, \code{iqr}, \code{sd}, \code{sem}, \code{ci} can be plotted at the moment.
-#' @template plotgroups.-
-#' @param whiskerswidth width of the whiskers as fraction of 1
-#' @param whiskerslwd line width of the whiskers
-#' @param whiskerscol color of the whiskers
-#' @param bordercol color of the border
-#' @param ... additional parameters passed to \code{\link[graphics]{rect}}
-#' @export
-#' @importFrom rlist list.merge
-plotgroups.barplot <- function(data, at, stats, colors, ylim, features, barwidth, whiskerswidth=barwidth, whiskerslwd=par("lwd"), whiskerscol="black", bordercol="black", ...)
-{
-    threeparamcheck(features)
-    if (!missing(ylim))
-        return(NULL)
-    bars <- threeparamsstats(stats, features)
-    dots <- list(...)
-    pars <- list(names.arg=NULL)
-    if (length(dots) > 0)
-        pars <- list.merge(pars, dots)
-    do.call(rect, list.merge(pars, list(xleft=at - barwidth/2, ybottom=par("usr")[3], xright=at + barwidth/2, ytop=bars$m, col=colors, border=bordercol)))
-
-    if (!is.null(bars$u) && !is.null(bars$l))
-        segments(at, bars$l, at, bars$u, col=whiskerscol, lend='butt', lwd=whiskerslwd)
-
-    for (b in bars[c("u", "l")]) {
-        if (!is.null(b))
-            segments(at - whiskerswidth / 2, b, at + whiskerswidth / 2, b, col=whiskerscol, lend='butt', lwd=whiskerslwd)
-    }
-    invisible(NULL)
-}
-
-#' @templateVar plottype violin plot
-#' @templateVar additionaldesc Requires the \code{vioplot} package.
-#' @template plotgroups.-
-#' @param boxpars parameters passed to \code{\link{plotgroups.boxplot}}
-#' @param boxcol color of the boxes
-#' @param boxwidth width of the boxes
-#' @param ... addtional parameters passed to \code{\link[vioplot]{vioplot}}
-#' @return List with the following components:
-#'        \item{vioplot}{List containing the aggregated return values of \code{\link[vioplot]{vioplot}}}
-#'        \item{boxplot}{Return value of \code{\link{plotgroups.boxplot}}}
-#' @seealso \code{\link[vioplot]{vioplot}}
-#' @export
-#' @importFrom rlist list.merge
-plotgroups.vioplot <- function(data, at, stats, colors, ylim, features, barwidth, boxpars, boxcol="white", boxwidth=barwidth/4, ...)
-{
-    if (!missing(ylim))
-        return(range(unlist(data)))
-    colors <- rep_len(colors, length(data))
-    dots <- list(...)
-    pars <- list(horizontal=FALSE)
-    if (length(dots) > 0)
-        pars <- list.merge(pars, dots)
-    vioplot.results <- do.call(vioplot, list.merge(pars, list(x=data, at=at, col=colors, add=TRUE, wex=barwidth, drawRect=FALSE)))
-    if (missing(boxpars) || is.null(boxpars))
-        boxpars <- list()
-    if (is.null(boxpars$notch))
-        boxpars$notch <- FALSE
-    bxp.toreturn <- do.call(plotgroups.boxplot, list.merge(boxpars, list(data=data, at=at, stats=stats, colors=boxcol, features=features, barwidth=boxwidth)))
-    invisible(list(vioplot=vioplot.results, boxplot=bxp.toreturn))
-}
-
 plotgroups.ci <- function(data, mean, se, ndata, conf.level=0.95) {
     if (missing(data) && (missing(mean) || missing(se) || missing(ndata)))
         stop("need either the data set or mean and standard error estimates", call.=TRUE)
@@ -271,8 +71,8 @@ plotgroups.ci <- function(data, mean, se, ndata, conf.level=0.95) {
 #' and proteins above the plot) or by cell line. Related parameters can be plotted in separate plots
 #' below each other, sharing the groupings and annotations (see examples)
 #'
-#' This is a wrapper function around \code{plot.fun}. It sets up the coordinate system, calls
-#' \code{extrafun.before} followed by \code{plot.fun}, which does the actual plotting, and
+#' This is a wrapper function around \code{plot.type$plot}. It sets up the coordinate system, calls
+#' \code{extrafun.before} followed by \code{plot.type$plot}, which does the actual plotting, and
 #' \code{extrafun.after}. All three functions are passed the following arguments:
 #' \describe{
 #'           \item{data}{the \code{data} argument passed to \code{plotgroups}}
@@ -300,7 +100,7 @@ plotgroups.ci <- function(data, mean, se, ndata, conf.level=0.95) {
 #'           \item{colors}{the \code{colors} argument passed to \code{plotgroups}}
 #'           \item{features}{the \code{features} argument passed to \code{plotgroups}}
 #'           \item{barwidth}{the \code{barwidth} argument passed to \code{plotgroups}}}
-#' \code{plot.fun} is additionally passed the arguments given by \code{plot.fun.pars}.
+#' \code{plot.type$plot} is additionally passed the arguments given by \code{plot.fun.pars}.
 #'
 #' Significance testing is performed by calling \code{signif.test.fun} with two vector arguments
 #' containing the samples to be compared. \code{signif.test.fun} must return a list containing
@@ -357,7 +157,7 @@ plotgroups.ci <- function(data, mean, se, ndata, conf.level=0.95) {
 #'        parameters for that particular annotation, i.e. \code{pch}, \code{cex}, \code{rotate},
 #'        \code{adj}.
 #' @param features which features of the sample distributions to plot. Availability of features
-#'        depends on \code{plot.fun} Can contain any combination of the following:
+#'        depends on \code{plot.type} Can contain any combination of the following:
 #'        \describe{
 #'                  \item{median}{the median}
 #'                  \item{box}{the first and third quartiles}
@@ -395,11 +195,24 @@ plotgroups.ci <- function(data, mean, se, ndata, conf.level=0.95) {
 #'        data sets are plotted. Will be recycled to the number of plots.
 #' @param legendmargin spacing between the upper-most data point/feature and the upper edge of the
 #'        plot, required for group annotation. Will be determined automatically if \code{NULL}
-#' @param plot.fun function to do the actual plotting. See \code{\link{plotgroups.boxplot}},
-#'        \code{\link{plotgroups.beeswarm}}, \code{\link{plotgroups.barplot}},
-#'        \code{\link{plotgroups.vioplot}}. Can be a list containing functions, in which case the
-#'        functions will apply to the corresponding plot.
-#' @param plot.fun.pars additional parameters to pass to \code{plot.fun}
+#' @param plot.type list containint three functions:
+#'        \describe{
+#'                  \item{plot}{function to do the actual plotting. See
+#'                              \code{\link{plotgroups.boxplot}}, \code{\link{plotgroups.beeswarm}},
+#'                              \code{\link{plotgroups.barplot}}, \code{\link{plotgroups.vioplot}}.}
+#'                  \item{ylim}{Function to calculate Y axis limits based on data and features.
+#'                              Takes three arguments:\describe{
+#'                                      \item{data}{List of numeric vectors with data}
+#'                                      \item{stats}{Precomputed statistics}
+#'                                      \item{features}{Features to plot}}
+#'                              Returns either a 2-element vector with Y limits or \code{NULL}, in
+#'                              which case Y limits will be computed based on sensible defaults.}
+#'                  \item{features}{Function to check user-supplied feature lists for correctness
+#'                              and compute default features, if necessary. Takes one argument
+#'                              (the user-supplied feature character vector) and returns a
+#'                              character vector with features to plot.}}
+#'        Can be a list of lists, in which case the elements will apply to the corresponding plot.
+#' @param plot.fun.pars additional parameters to pass to \code{plot.type$plot}
 #' @param barwidth width of the individual bars/boxes etc. as fraction of 1
 #' @param main main title
 #' @param ylab Y axis label. Will be recycled to the number of plots.
@@ -430,7 +243,8 @@ plotgroups.ci <- function(data, mean, se, ndata, conf.level=0.95) {
 #' @return list with the following components:
 #'         \describe{
 #'                  \item{stats}{summary statistics of the data.}
-#'                  \item{plotfun}{Return value of \code{plot.fun}}
+#'                  \item{features}{Character vector of features actually plotted.}
+#'                  \item{plotfun}{Return value of \code{plot.type$plot}}
 #'                  \item{xcoords}{X coordinates of the data.}
 #'                  \item{annotation.height}{Height of the annotation in inches.}
 #'                  \item{annotation.width}{Width of the annotation in inches. If
@@ -452,11 +266,11 @@ plotgroups.ci <- function(data, mean, se, ndata, conf.level=0.95) {
 #' colors <- c("green", "blue")
 #' legend.text <- rep(c("protein1", "protein2"), each=7)
 #' plotgroups(data, names, colors, legend.text,
-#'            plot.fun=plotgroups.beeswarm, features=c('mean', 'sd'), ylim=c(0,Inf))
-#' plotgroups(data, names2, colors, legend.text,plot.fun=plotgroups.vioplot, ylim=c(0,Inf),
+#'            plot.type=plotgroups.beeswarm, features=c('mean', 'sd'), ylim=c(0,Inf))
+#' plotgroups(data, names2, colors, legend.text,plot.type=plotgroups.vioplot, ylim=c(0,Inf),
 #'            names.rotate=0, names.adj=c(0.5, 1))
 #' plotgroups(data, names, colors, legend.text, log=TRUE,
-#'            plot.fun=plotgroups.beeswarm, features=c('mean', 'sd'),
+#'            plot.type=plotgroups.beeswarm, features=c('mean', 'sd'),
 #'            names.style='combinatorial', names.split=" ", names.pch='\u0394',
 #'            plot.fun.pars=list(palpha=0.5, bxpcols="black"))
 #' plotgroups(data, names, colors, legend.text,
@@ -464,7 +278,7 @@ plotgroups.ci <- function(data, mean, se, ndata, conf.level=0.95) {
 #'            names.placeholder='+')
 #' plotgroups(data, names, colors, legend.text,
 #'            names.style='combinatorial', names.split=" ", names.pch=19,
-#'            main="test", plot.fun=plotgroups.barplot, features=c("mean", "sd"),
+#'            main="test", plot.type=plotgroups.barplot, features=c("mean", "sd"),
 #'            plot.fun.pars=list(whiskerswidth=0.6))
 #'
 #' map.fun <- function(n, split, pch, cex, rotate, adj) {
@@ -502,7 +316,7 @@ plotgroups.ci <- function(data, mean, se, ndata, conf.level=0.95) {
 #' plotgroups(list(data, rev(data)), names, colors, legend.text,names.style='combinatorial',
 #'            names.split=" ",names.pch='\u0394', names.map.fun=map.fun,
 #'            ylim=c(0,Inf), ylab=c("data1", "data2"), main="test", features=list(NULL,
-#'            c("median", "box")), plot.fun=list(plotgroups.boxplot, plotgroups.beeswarm),
+#'            c("median", "box")), plot.type=list(plotgroups.boxplot, plotgroups.beeswarm),
 #'            signif.test=list(NULL,list(c(1,3), c(2,5), c(5,8), c(3,10))))
 #' @export
 #' @importFrom rlist list.merge
@@ -525,7 +339,7 @@ plotgroups <- function(
                         names.margin=0.5,
                         names.rotate=NULL,
                         names.placeholder=NA,
-                        features=NULL,
+                        features=NA,
                         log=FALSE,
                         range=1.5,
                         conf.level=0.95,
@@ -533,7 +347,7 @@ plotgroups <- function(
                         cex.xlab=1,
                         ylim=NULL,
                         legendmargin=NULL,
-                        plot.fun=plotgroups.boxplot,
+                        plot.type=plotgroups.boxplot,
                         plot.fun.pars=list(),
                         barwidth=0.8,
                         main=NULL,
@@ -577,7 +391,7 @@ plotgroups <- function(
     for (arg in c("log", "range", "conf.level", "ylab")) {
         cenv[[arg]] <- rep(cenv[[arg]], length.out=nplots)
     }
-    for (arg in c("features", "ylim", "plot.fun", "signif.test.fun", "ci.fun", "signif.test.text", "signif.test.col", "signif.test.lwd", "extrafun.before", "extrafun.after")) {
+    for (arg in c("features", "ylim", "signif.test.fun", "ci.fun", "signif.test.text", "signif.test.col", "signif.test.lwd", "extrafun.before", "extrafun.after")) {
         if (!is.list(cenv[[arg]])) {
             cenv[[arg]] <- rep(list(cenv[[arg]]), nplots)
         } else {
@@ -585,7 +399,7 @@ plotgroups <- function(
         }
     }
 
-    for (arg in c("plot.fun.pars", "signif.test.pars", "signif.test")) {
+    for (arg in c("plot.type", "plot.fun.pars", "signif.test.pars", "signif.test")) {
         if (!is.null(cenv[[arg]])
             &&length(cenv[[arg]])
             &&!all(sapply(cenv[[arg]], function(x)is.list(x) || is.null(x)))
@@ -784,12 +598,9 @@ plotgroups <- function(
     allsigniftestrets <- list()
 
     for (cplot in 1:nplots) {
-        if (!is.null(features[[cplot]]) && length(features[[cplot]]) > 0) {
-            features[[cplot]] <- match.arg(features[[cplot]], choices=allfeatures, several.ok=TRUE)
-        } else {
-            features[[cplot]] <- c("median", "box", "iqr", "mean", "sd", "ci")
-        }
-
+        if (is.null(features[[cplot]]))
+            features[[cplot]] <- NA
+        features[[cplot]] <- plot.type[[cplot]]$features(features[[cplot]])
         cmai <- mai
         if (cplot > 1 && cplot < nplots) {
             cmai[c(1,3)] <- 0
@@ -823,7 +634,7 @@ plotgroups <- function(
             cylim <- NULL
         }
         if (is.null(cylim))
-            cylim <- plot.fun[[cplot]](data=data[[cplot]], stats=stats, features=features[[cplot]], ylim=TRUE)
+            cylim <- plot.type[[cplot]]$ylim(data=data[[cplot]], stats=stats, features=features[[cplot]])
         if (is.null(cylim)) {
             cylim <- c(Inf, 0)
             if ("median" %in% features[[cplot]]) {
@@ -982,7 +793,7 @@ plotgroups <- function(
 
         if (!is.null(extrafun.before[[cplot]]))
             extrafun.before[[cplot]](data[[cplot]], xcoords, stats, colors, features, barwidth)
-        plotfunret <- do.call(plot.fun[[cplot]], c(list(data=data[[cplot]], at=xcoords, stats=allstats[[cplot]], colors=colors, features=features[[cplot]], barwidth=barwidth), plot.fun.pars[[cplot]]))
+        plotfunret <- do.call(plot.type[[cplot]]$plot, c(list(data=data[[cplot]], at=xcoords, stats=allstats[[cplot]], colors=colors, features=features[[cplot]], barwidth=barwidth), plot.fun.pars[[cplot]]))
         if (!is.null(extrafun.after[[cplot]]))
             extrafun.after[[cplot]](data[[cplot]], xcoords, stats, colors, features, barwidth)
 
@@ -1049,6 +860,6 @@ plotgroups <- function(
         }
         allplotfunrets <- plotfunret
     }
-    toreturn <- list(stats=allstats, plotfun=allplotfunrets, signiftest=allsigniftestrets, annotation.height=legend.height, annotation.width=legend.width, legendmargin=legendmargin)
+    toreturn <- list(stats=allstats, features=features, plotfun=allplotfunrets, signiftest=allsigniftestrets, annotation.height=legend.height, annotation.width=legend.width, legendmargin=legendmargin)
     invisible(toreturn)
 }
