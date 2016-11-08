@@ -1,6 +1,6 @@
 Package: imisc
 Title: miscellaneous functions
-Version: 0.2a1
+Version: 0.1.9000
 Authors@R: person("Ilia", "Kats", email = "ilia-kats@gmx.net", role = c("aut", "cre"))
 Description: miscellaneous stuff
 Depends:
