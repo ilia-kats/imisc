@@ -900,13 +900,16 @@ plotgroups <- function(
         lineheight <- strheight("", units="inches", cex=par("cex")) * 2
         signifheight <- 0.2 * lineheight
         legendbase <- cylim[2]
-        if (cplot == 1 && !is.null(legend.text)) {
-            if (is.null(legendmargin))
-                legendmargin <- max(max(strheight(legend.text, units="inches", cex=par("cex"))), lineheight)
-            if (!ylim.extended)
-                legendmargin <- legendmargin + signifheight
-        } else {
-            legendmargin <- 0
+        legendmargin <- 0
+        if (cplot == 1) {
+            if (!is.null(legend.text)) {
+                if (is.null(legendmargin))
+                    legendmargin <- max(max(strheight(legend.text, units="inches", cex=par("cex"))), lineheight)
+                if (!ylim.extended)
+                    legendmargin <- legendmargin + signifheight
+            } else if (!is.null(signif.test[[cplot]]) && !ylim.extended) {
+                legendmargin <- signifheight
+            }
         }
         signifmargin <- 0
         if (!is.null(signif.test[[cplot]])) {
