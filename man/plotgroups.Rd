@@ -34,7 +34,7 @@ A group of observations is identified by consecutive occurrence of the same name
 
 \item{legend.col}{colors for group annotations. Defaults to plotting colors}
 
-\item{legend.pars}{parameters for group annotation. Will be passed to \code{\link[base]{text}}}
+\item{legend.pars}{parameters for group annotation. Will be passed to \code{\link[graphics]{text}}}
 
 \item{legend.lwd}{line width for grouping annotations. Defaults to \code{par("lwd")}}
 
@@ -62,7 +62,7 @@ fragment containing \code{names.italicize} is rendered in italics}
 \code{names.style='combinatorial'}}
 
 \item{names.adj}{text adjustment for \code{names} or \code{names.pch}, depending on
-\code{names.style}.See \code{\link[base]{text}}. Defaults to 1 for
+\code{names.style}.See \code{\link[graphics]{text}}. Defaults to 1 for
 \code{names.style = 'plain'}, unless \code{names.rotate = 0}, in which case it
 defaults to 0.5. Defaults to 0.5 for \code{names.style='combinatorial'}.}
 
@@ -178,7 +178,7 @@ corresponding plot if multiple data sets are plotted.}
 \item{signif.test.lwd}{line width for p-value annotations. Can be a list, in which case the lwd
 will apply to the corresponding plot if multiple data sets are plotted.}
 
-\item{signif.test.pars}{parameters for group annotation. Will be passed to \code{\link[base]{text}}.
+\item{signif.test.pars}{parameters for group annotation. Will be passed to \code{\link[graphics]{text}}.
 Can be a list of lists, in which case each element will apply to the corresponding
 plot if multiple data sets are plotted.}
 
@@ -191,7 +191,7 @@ plotted.}
 to the plot. Can be a list of functions, in which case each element will apply to the
 corresponding plot if multiple data sets are plotted.}
 
-\item{...}{additional parameters passed to \code{\link[base]{par}}}
+\item{...}{additional parameters passed to \code{\link[graphics]{par}}}
 }
 \value{
 list with the following components:
@@ -253,7 +253,7 @@ This is a wrapper function around \code{plot.type$plot}. It sets up the coordina
 Significance testing is performed by calling \code{signif.test.fun} with two vector arguments
 containing the samples to be compared. \code{signif.test.fun} must return a list containing
 a \code{p.value} element. The p value is passed as single argument to \code{signif.test.text}
-which returns a character vector (or anything usable by \code{\link[graphix]{text}}).
+which returns a character vector (or anything usable by \code{\link[graphics]{text}}).
 }
 \examples{
 data <- list()

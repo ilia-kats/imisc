@@ -105,7 +105,7 @@ plotgroups.ci <- function(data, mean, se, ndata, conf.level=0.95) {
 #' Significance testing is performed by calling \code{signif.test.fun} with two vector arguments
 #' containing the samples to be compared. \code{signif.test.fun} must return a list containing
 #' a \code{p.value} element. The p value is passed as single argument to \code{signif.test.text}
-#' which returns a character vector (or anything usable by \code{\link[graphix]{text}}).
+#' which returns a character vector (or anything usable by \code{\link[graphics]{text}}).
 #'
 #' @param data list, each element is a vector of replicates for one combination of parameters, or
 #'             each element is a list containing a vector of replicates, in which case the data sets
@@ -115,7 +115,7 @@ plotgroups.ci <- function(data, mean, se, ndata, conf.level=0.95) {
 #' @param legend.text character vector of the same length as \code{data} giving the group names.
 #'        A group of observations is identified by consecutive occurrence of the same name.
 #' @param legend.col colors for group annotations. Defaults to plotting colors
-#' @param legend.pars parameters for group annotation. Will be passed to \code{\link[base]{text}}
+#' @param legend.pars parameters for group annotation. Will be passed to \code{\link[graphics]{text}}
 #' @param legend.lwd line width for grouping annotations. Defaults to \code{par("lwd")}
 #' @param groups.spacing extra space between the groups in user coordinates.
 #' @param names.split character by which to split the \code{names}. Only useful in combination with
@@ -132,7 +132,7 @@ plotgroups.ci <- function(data, mean, se, ndata, conf.level=0.95) {
 #'                   assaying different combinations of single/double/triple knock-outs.}
 #'                   }
 #' @param names.adj text adjustment for \code{names} or \code{names.pch}, depending on
-#'                  \code{names.style}.See \code{\link[base]{text}}. Defaults to 1 for
+#'                  \code{names.style}.See \code{\link[graphics]{text}}. Defaults to 1 for
 #'                  \code{names.style = 'plain'}, unless \code{names.rotate = 0}, in which case it
 #'                  defaults to 0.5. Defaults to 0.5 for \code{names.style='combinatorial'}.
 #' @param names.pch character to be used for annotation of observations when
@@ -229,7 +229,7 @@ plotgroups.ci <- function(data, mean, se, ndata, conf.level=0.95) {
 #'        corresponding plot if multiple data sets are plotted.
 #' @param signif.test.lwd line width for p-value annotations. Can be a list, in which case the lwd
 #'        will apply to the corresponding plot if multiple data sets are plotted.
-#' @param signif.test.pars parameters for group annotation. Will be passed to \code{\link[base]{text}}.
+#' @param signif.test.pars parameters for group annotation. Will be passed to \code{\link[graphics]{text}}.
 #'        Can be a list of lists, in which case each element will apply to the corresponding
 #'        plot if multiple data sets are plotted.
 #' @param extrafun.before additional function to call after the coordinate system has been set up, but
@@ -239,7 +239,7 @@ plotgroups.ci <- function(data, mean, se, ndata, conf.level=0.95) {
 #' @param extrafun.after additional function to call after plotting, e.g. to add additional elements
 #'        to the plot. Can be a list of functions, in which case each element will apply to the
 #'        corresponding plot if multiple data sets are plotted.
-#' @param ... additional parameters passed to \code{\link[base]{par}}
+#' @param ... additional parameters passed to \code{\link[graphics]{par}}
 #' @return list with the following components:
 #'         \describe{
 #'                  \item{stats}{summary statistics of the data.}
