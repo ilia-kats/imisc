@@ -711,7 +711,6 @@ plotgroups <- function(
         lineheight <- strheight("", units="inches", cex=par("cex")) * 2
         signifheight <- 0.2 * lineheight
         legendbase <- cylim[2]
-        legendmargin <- 0
         if (cplot == 1) {
             if (!is.null(legend.text)) {
                 if (is.null(legendmargin))
@@ -720,6 +719,8 @@ plotgroups <- function(
                     legendmargin <- legendmargin + signifheight
             } else if (!is.null(signif.test[[cplot]]) && !ylim.extended) {
                 legendmargin <- signifheight
+            } else {
+                legendmargin <- 0
             }
         }
         signifmargin <- 0
