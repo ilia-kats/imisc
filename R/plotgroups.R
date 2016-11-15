@@ -722,6 +722,8 @@ plotgroups <- function(
             } else {
                 legendmargin <- 0
             }
+        } else {
+            legendmargin <- 0
         }
         signifmargin <- 0
         if (!is.null(signif.test[[cplot]])) {
