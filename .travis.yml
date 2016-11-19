@@ -4,8 +4,8 @@ r:
     - bioc-release
 
 os:
-    -linux
-    -osx
+    - linux
+    - osx
 
 apt:
     sources:
