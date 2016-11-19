@@ -1,7 +1,6 @@
 language: r
 cache: packages
-r:
-    - bioc-release
+r: bioc-release
 
 matrix:
     include:
