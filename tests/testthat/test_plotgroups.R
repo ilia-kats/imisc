@@ -81,11 +81,17 @@ test_that('significance testing with legend', {
     expect_doppelganger('significance testing single', function() {
         plotgroups(data, names, colors, legend.text, plot.type=plot.type, ylab=ylab, names.style='combinatorial', names.split=" ", names.pch='\u0394', signif.test=list(c(1,2), c(3,5)))
     })
+    expect_doppelganger('significance testing single fixed ylim', function() {
+        plotgroups(data, names, colors, legend.text, plot.type=plot.type, ylab=ylab, names.style='combinatorial', names.split=" ", names.pch='\u0394', signif.test=list(c(1,2), c(3,5)), ylim=c(0, 15))
+    })
+    expect_doppelganger('significance testing single fixed ylim bottom only', function() {
+        plotgroups(data, names, colors, legend.text, plot.type=plot.type, ylab=ylab, names.style='combinatorial', names.split=" ", names.pch='\u0394', signif.test=list(c(1,2), c(3,5)), ylim=c(0, Inf))
+    })
     expect_doppelganger('significance testing multi', function() {
         plotgroups(list(data, rev(data), data), names, colors, legend.text, plot.type=plot.type, ylab=ylab, names.style='combinatorial', names.split=" ", names.pch='\u0394', signif.test=list(list(c(1,2), c(3,5)), list(c(1, 2)), NULL))
     })
     expect_doppelganger('significance testing multi overlap', function() {
-        plotgroups(list(data, rev(data), data), names, colors, legend.text, plot.type=plot.type, ylab=ylab, names.style='combinatorial', names.split=" ", names.pch='\u0394', signif.test=list(list(c(1,3), c(2,5), c(5, 8), c(3, 10)), list(c(1, 5), c(1, 2), c(2, 4)), NULL))
+        plotgroups(list(data, rev(data), data), names, colors, legend.text, plot.type=plot.type, ylab=ylab, names.style='combinatorial', names.split=" ", names.pch='\u0394', signif.test=list(list(c(1,3), c(2,5), c(5, 8), c(3, 10)), list(c(1, 5), c(1, 2), c(2, 4)), NULL), ylim=list(NULL, c(0, 15), c(0, Inf)))
     })
     expect_doppelganger('significance testing multi overlap log', function() {
         plotgroups(list(data, rev(data), data), names, colors, legend.text, plot.type=plot.type, ylab=ylab, names.style='combinatorial', names.split=" ", names.pch='\u0394', signif.test=list(list(c(1,3), c(2,5), c(5, 8), c(3, 10)), list(c(1, 5), c(1, 2), c(2, 4)), NULL), log=c(TRUE, FALSE, TRUE))
@@ -96,11 +102,14 @@ test_that('significance testing without legend', {
     expect_doppelganger('significance testing single w/o legend', function() {
         plotgroups(data, names, colors, NULL, plot.type=plot.type, ylab=ylab, names.style='combinatorial', names.split=" ", names.pch='\u0394', signif.test=list(c(1,3), c(2,5)))
     })
+    expect_doppelganger('significance testing single w/o legend fixed ylim', function() {
+        plotgroups(data, names, colors, NULL, plot.type=plot.type, ylab=ylab, names.style='combinatorial', names.split=" ", names.pch='\u0394', signif.test=list(c(1,3), c(2,5)), ylim=c(0, 15))
+    })
     expect_doppelganger('significance testing multi w/o legend', function() {
         plotgroups(list(data, rev(data), data), names, colors, NULL, plot.type=plot.type, ylab=ylab, names.style='combinatorial', names.split=" ", names.pch='\u0394', signif.test=list(list(c(1,3), c(2,5)), list(c(1, 2)), NULL))
     })
     expect_doppelganger('significance testing multi overlap w/o legend', function() {
-        plotgroups(list(data, rev(data), data), names, colors, NULL, plot.type=plot.type, ylab=ylab, names.style='combinatorial', names.split=" ", names.pch='\u0394', signif.test=list(list(c(1,3), c(2,5), c(5, 8), c(3, 10)), list(c(1, 5), c(1, 2), c(2, 4)), NULL))
+        plotgroups(list(data, rev(data), data), names, colors, NULL, plot.type=plot.type, ylab=ylab, names.style='combinatorial', names.split=" ", names.pch='\u0394', signif.test=list(list(c(1,3), c(2,5), c(5, 8), c(3, 10)), list(c(1, 5), c(1, 2), c(2, 4)), NULL), ylim=list(NULL, c(0, 15), c(0, Inf)))
     })
     expect_doppelganger('significance testing multi overlap w/o legend log', function() {
         plotgroups(list(data, rev(data), data), names, colors, NULL, plot.type=plot.type, ylab=ylab, names.style='combinatorial', names.split=" ", names.pch='\u0394', signif.test=list(list(c(1,3), c(2,5), c(5, 8), c(3, 10)), list(c(1, 5), c(1, 2), c(2, 4)), NULL), log=c(TRUE, FALSE, TRUE))
