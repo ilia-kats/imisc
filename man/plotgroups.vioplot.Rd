@@ -4,30 +4,22 @@
 \name{plotgroups.vioplot}
 \alias{plotgroups.vioplot}
 \title{Plot several groups of repeated observations as a violin plot.}
-\format{An object of class \code{list} of length 3.}
+\format{list of functions \code{plot}, \code{ylim}, \code{features}
+\code{plot} accepts the following parameters:
+\describe{
+\item{data}{list, each element is a vector of replicates for one combination of parameters}
+\item{at}{numeric vector giving the X locations where the plots should be drawn}
+\item{stats}{list containing the summary statistics (see \code{\link{plotgroups}})}
+\item{colors}{colors for plotting}
+\item{features}{the features to plot. }
+\item{barwidth}{width of the individual bars/boxes etc. as fraction of 1}
+\item{boxpars}{parameters passed to \code{\link{plotgroups.boxplot}}}
+\item{boxcol}{color of the boxes}
+\item{boxwidth}{width of the boxes}
+\item{...}{addtional parameters passed to \code{\link[vioplot]{vioplot}}}
+}}
 \usage{
 plotgroups.vioplot
-}
-\arguments{
-\item{data}{list, each element is a vector of replicates for one combination of parameters}
-
-\item{at}{numeric vector giving the X locations where the plots should be drawn}
-
-\item{stats}{list containing the summary statistics (see \code{\link{plotgroups}})}
-
-\item{colors}{colors for plotting}
-
-\item{features}{the features to plot.}
-
-\item{barwidth}{width of the individual bars/boxes etc. as fraction of 1}
-
-\item{boxpars}{parameters passed to \code{\link{plotgroups.boxplot}}}
-
-\item{boxcol}{color of the boxes}
-
-\item{boxwidth}{width of the boxes}
-
-\item{...}{addtional parameters passed to \code{\link[vioplot]{vioplot}}}
 }
 \value{
 List with the following components:

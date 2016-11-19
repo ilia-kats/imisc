@@ -4,47 +4,41 @@
 \name{plotgroups.boxplot}
 \alias{plotgroups.boxplot}
 \title{Plot several groups of repeated observations as a boxplot (extended with mean, standard deviation, and standard error of the mean).}
-\format{An object of class \code{list} of length 3.}
+\format{list of functions \code{plot}, \code{ylim}, \code{features}
+\code{plot} accepts the following parameters:
+\describe{
+\item{data}{list, each element is a vector of replicates for one combination of parameters}
+\item{at}{numeric vector giving the X locations where the plots should be drawn}
+\item{stats}{list containing the summary statistics (see \code{\link{plotgroups}})}
+\item{colors}{colors for plotting}
+\item{features}{the features to plot. }
+\item{barwidth}{width of the individual bars/boxes etc. as fraction of 1}
+\item{bxppars}{additional parameters passed to \code{\link[graphics]{boxplot}} as
+       sig\code{pars} parameter}
+\item{...}{additional parameters passed to \code{\link[graphics]{boxplot}} as \code{...}. Can also
+       contain the following:
+       \describe{
+                 \item{meanlty, meanlwd, meancol, meanpch, meancex}{Mean line type, line width,
+                       color, point character, and point size expansion. The default
+                       \code{meanpch=NA} suppresses the point, and \code{meanlty="blank"}
+                       does so for the line. Note that \code{meanlwd} defaults to 3x the
+                       default lwd and \code{meancol} defaults to \code{"red"}}
+                 \item{sdwhisklty, sdwhisklwd, sdwhiskcol}{Whisker line type(default:
+                       \code{"solid"}), width, and color for standard deviation whiskers.}
+                 \item{sdstaplelty, sdstaplelwd, sdstaplecol}{Staple (end of whisker) line type,
+                       width, and color for standard deviation whiskers}
+                 \item{semwhisklty, semwhisklwd, semwhiskcol}{Whisker line type(default:
+                       \code{"solid"}), width, and color (default: \code{"#EDA217"})
+                       for standard error of the mean whiskers.}
+                 \item{semstaplelty, semstaplelwd, semstaplecol}{Staple (end of whisker) line type,
+                       width, and color (default: \code{"#090E97"}) for standard error
+                       of the mean whiskers}
+                 \item{cistaplelty, cistaplelwd, cistaplecol}{Staple (end of whisker) line type,
+                       width, and color (default: \code{"#EDA217"}) for confidence interval
+                       whiskers}}}
+}}
 \usage{
 plotgroups.boxplot
-}
-\arguments{
-\item{data}{list, each element is a vector of replicates for one combination of parameters}
-
-\item{at}{numeric vector giving the X locations where the plots should be drawn}
-
-\item{stats}{list containing the summary statistics (see \code{\link{plotgroups}})}
-
-\item{colors}{colors for plotting}
-
-\item{features}{the features to plot.}
-
-\item{barwidth}{width of the individual bars/boxes etc. as fraction of 1}
-
-\item{bxppars}{additional parameters passed to \code{\link[graphics]{boxplot}} as
-sig\code{pars} parameter}
-
-\item{...}{additional parameters passed to \code{\link[graphics]{boxplot}} as \code{...}. Can also
-contain the following:
-\describe{
-          \item{meanlty, meanlwd, meancol, meanpch, meancex}{Mean line type, line width,
-                color, point character, and point size expansion. The default
-                \code{meanpch=NA} suppresses the point, and \code{meanlty="blank"}
-                does so for the line. Note that \code{meanlwd} defaults to 3x the
-                default lwd and \code{meancol} defaults to \code{"red"}}
-          \item{sdwhisklty, sdwhisklwd, sdwhiskcol}{Whisker line type(default:
-                \code{"solid"}), width, and color for standard deviation whiskers.}
-          \item{sdstaplelty, sdstaplelwd, sdstaplecol}{Staple (end of whisker) line type,
-                width, and color for standard deviation whiskers}
-          \item{semwhisklty, semwhisklwd, semwhiskcol}{Whisker line type(default:
-                \code{"solid"}), width, and color (default: \code{"#EDA217"})
-                for standard error of the mean whiskers.}
-          \item{semstaplelty, semstaplelwd, semstaplecol}{Staple (end of whisker) line type,
-                width, and color (default: \code{"#090E97"}) for standard error
-                of the mean whiskers}
-          \item{cistaplelty, cistaplelwd, cistaplecol}{Staple (end of whisker) line type,
-                width, and color (default: \code{"#EDA217"}) for confidence interval
-                whiskers}}}
 }
 \value{
 Same as \code{\link[graphics]{boxplot}}

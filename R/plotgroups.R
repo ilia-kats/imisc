@@ -51,6 +51,7 @@ threeparamsstats <- function(stats, features)
     bars
 }
 
+#' @importFrom stats qt
 plotgroups.ci <- function(data, mean, se, ndata, conf.level=0.95) {
     if (missing(data) && (missing(mean) || missing(se) || missing(ndata)))
         stop("need either the data set or mean and standard error estimates", call.=TRUE)
@@ -227,6 +228,7 @@ plotgroups.ci <- function(data, mean, se, ndata, conf.level=0.95) {
 #'        for plotting or \code{NULL} if this p-value is not to be plotted (e.g. if it is not
 #'        significant). Can be a list of functions, in which case each element will apply to the
 #'        corresponding plot if multiple data sets are plotted.
+#' @param signif.test.col color of p-value annotations.
 #' @param signif.test.lwd line width for p-value annotations. Can be a list, in which case the lwd
 #'        will apply to the corresponding plot if multiple data sets are plotted.
 #' @param signif.test.pars parameters for group annotation. Will be passed to \code{\link[graphics]{text}}.
@@ -320,6 +322,11 @@ plotgroups.ci <- function(data, mean, se, ndata, conf.level=0.95) {
 #'            signif.test=list(NULL,list(c(1,3), c(2,5), c(5,8), c(3,10))))
 #' @export
 #' @importFrom rlist list.merge
+#' @importFrom grDevices boxplot.stats cm dev.cur extendrange
+#' @importFrom graphics abline axTicks axis box layout lcm lines par plot.new plot.window
+#'             points segments strheight strwidth text title
+#' @importFrom stats sd t.test
+#' @importFrom utils assignInNamespace
 plotgroups <- function(
                         data,
                         names,
@@ -729,8 +736,10 @@ plotgroups <- function(
         }
         signifmargin <- 0
         if (!is.null(signif.test[[cplot]])) {
-            if (!requireNamespace("IRanges", quietly = TRUE))
-                stop("Please install the IRanges package if significance testing is to be performed.")
+            for (p in c('IRanges', 'S4Vectors')) {
+                if (!requireNamespace(p, quietly = TRUE))
+                    stop(paste0("Please install the ", p, " package if significance testing is to be performed."))
+            }
             intervals.start <- sapply(signif.test[[cplot]], function(x)min(x))
             intervals.stop <- sapply(signif.test[[cplot]], function(x)max(x))
             intervals.order <- order(intervals.start, intervals.stop)

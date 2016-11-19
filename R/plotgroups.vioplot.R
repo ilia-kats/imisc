@@ -1,10 +1,11 @@
 #' @templateVar plottype violin plot
 #' @templateVar additionaldesc Requires the \code{vioplot} package.
+#' @templateVar additionalparams
+#' \item{boxpars}{parameters passed to \code{\link{plotgroups.boxplot}}}
+#' \item{boxcol}{color of the boxes}
+#' \item{boxwidth}{width of the boxes}
+#' \item{...}{addtional parameters passed to \code{\link[vioplot]{vioplot}}}
 #' @template plotgroups.-
-#' @param boxpars parameters passed to \code{\link{plotgroups.boxplot}}
-#' @param boxcol color of the boxes
-#' @param boxwidth width of the boxes
-#' @param ... addtional parameters passed to \code{\link[vioplot]{vioplot}}
 #' @return List with the following components:
 #'        \item{vioplot}{List containing the aggregated return values of \code{\link[vioplot]{vioplot}}}
 #'        \item{boxplot}{Return value of \code{\link{plotgroups.boxplot}}}

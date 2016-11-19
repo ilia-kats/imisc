@@ -33,9 +33,7 @@ Named parameters are additional parameters to \code{\link{sm.density}}}
 
 \item{wex}{relative expansion of the violin.}
 
-\item{h}{the height for the density estimator, if omit as explained in sm.density, h will be set to an optimum}
-
-\item{rawRect}{logical. the box is drawn if \code{TRUE}.}
+\item{drawRect}{logical. the box is drawn if \code{TRUE}.}
 }
 \description{
 Produce violin plot(s) of the given (grouped) values.

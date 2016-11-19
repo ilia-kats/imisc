@@ -4,32 +4,23 @@
 \name{plotgroups.barplot}
 \alias{plotgroups.barplot}
 \title{Plot several groups of repeated observations as a barplot.}
-\format{An object of class \code{list} of length 3.}
+\format{list of functions \code{plot}, \code{ylim}, \code{features}
+\code{plot} accepts the following parameters:
+\describe{
+\item{data}{list, each element is a vector of replicates for one combination of parameters}
+\item{at}{numeric vector giving the X locations where the plots should be drawn}
+\item{stats}{list containing the summary statistics (see \code{\link{plotgroups}})}
+\item{colors}{colors for plotting}
+\item{features}{the features to plot. At the moment, either \code{mean} or \code{median} can be plotted. Also, only one of \code{box}, \code{iqr}, \code{sd}, \code{sem}, \code{ci} can be plotted at the moment.}
+\item{barwidth}{width of the individual bars/boxes etc. as fraction of 1}
+\item{whiskerswidth}{width of the whiskers as fraction of 1}
+\item{whiskerslwd}{line width of the whiskers}
+\item{whiskerscol}{color of the whiskers}
+\item{bordercol}{color of the border}
+\item{...}{additional parameters passed to \code{\link[graphics]{rect}}}
+}}
 \usage{
 plotgroups.barplot
-}
-\arguments{
-\item{data}{list, each element is a vector of replicates for one combination of parameters}
-
-\item{at}{numeric vector giving the X locations where the plots should be drawn}
-
-\item{stats}{list containing the summary statistics (see \code{\link{plotgroups}})}
-
-\item{colors}{colors for plotting}
-
-\item{features}{the features to plot. At the moment, either \code{mean} or \code{median} can be plotted. Also, only one of \code{box}, \code{iqr}, \code{sd}, \code{sem}, \code{ci} can be plotted at the moment.}
-
-\item{barwidth}{width of the individual bars/boxes etc. as fraction of 1}
-
-\item{whiskerswidth}{width of the whiskers as fraction of 1}
-
-\item{whiskerslwd}{line width of the whiskers}
-
-\item{whiskerscol}{color of the whiskers}
-
-\item{bordercol}{color of the border}
-
-\item{...}{additional parameters passed to \code{\link[graphics]{rect}}}
 }
 \description{
 This is intended to be called from \code{\link{plotgroups}}.

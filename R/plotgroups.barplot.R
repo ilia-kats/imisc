@@ -1,13 +1,15 @@
 #' @templateVar plottype barplot
 #' @templateVar featuresdesc At the moment, either \code{mean} or \code{median} can be plotted. Also, only one of \code{box}, \code{iqr}, \code{sd}, \code{sem}, \code{ci} can be plotted at the moment.
+#' @templateVar additionalparams
+#' \item{whiskerswidth}{width of the whiskers as fraction of 1}
+#' \item{whiskerslwd}{line width of the whiskers}
+#' \item{whiskerscol}{color of the whiskers}
+#' \item{bordercol}{color of the border}
+#' \item{...}{additional parameters passed to \code{\link[graphics]{rect}}}
 #' @template plotgroups.-
-#' @param whiskerswidth width of the whiskers as fraction of 1
-#' @param whiskerslwd line width of the whiskers
-#' @param whiskerscol color of the whiskers
-#' @param bordercol color of the border
-#' @param ... additional parameters passed to \code{\link[graphics]{rect}}
 #' @export
 #' @importFrom rlist list.merge
+#' @importFrom graphics rect segments
 plotgroups.barplot <- list(
 plot=function(data, at, stats, colors, features, barwidth, whiskerswidth=barwidth, whiskerslwd=par("lwd"), whiskerscol="black", whiskerslty=1, bordercol="black", ...)
 {

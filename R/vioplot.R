@@ -44,12 +44,11 @@
 #' @param ... unnamed parameters are additional data vectors (unless x is a list).
 #'            Named parameters are additional parameters to \code{\link{sm.density}}
 #' @param range a factor to calculate the upper/lower adjacent values
-#' @param h the height for the density estimator, if omit as explained in sm.density, h will be set to an optimum
 #' @param ylim y limits
 #' @param names one label, or a vector of labels for the x must match the number of x given
 #' @param col,border,lty,lwd Graphical parameters for the violin passed to lines and polygon
 #' @param rectCol,colMed,pchMed Graphical parameters to control the look of the box
-#' @param rawRect logical. the box is drawn if \code{TRUE}.
+#' @param drawRect logical. the box is drawn if \code{TRUE}.
 #' @param at position of each violin. Default to \code{1:n}
 #' @param add logical. if FALSE (default) a new plot is created
 #' @param wex relative expansion of the violin.
@@ -87,6 +86,8 @@
 #' @keywords hplot
 #' @export
 #' @importFrom sm sm.density
+#' @importFrom stats quantile median
+#' @importFrom graphics polygon points axis box lines plot.new plot.window rect
 
 vioplot <- function(x, ..., range=1.5, ylim=NULL, names=NULL, horizontal=FALSE,
   col="magenta", border="black", lty=1, lwd=1, rectCol="black", colMed="white", pchMed=19, at, add=FALSE, wex=1, 
@@ -226,7 +227,7 @@ vioplot <- function(x, ..., range=1.5, ylim=NULL, names=NULL, horizontal=FALSE,
       if(!add){
         plot.window(xlim = xlim, ylim = ylim)
         axis(2)
-        axis(1,at = at, label=label )
+        axis(1,at = at, labels=label )
       }  
       
       box()
@@ -259,7 +260,7 @@ vioplot <- function(x, ..., range=1.5, ylim=NULL, names=NULL, horizontal=FALSE,
       if(!add){
         plot.window(xlim = ylim, ylim = xlim)
         axis(1)
-        axis(2,at = at, label=label )
+        axis(2,at = at, labels=label )
       }
       
       box()

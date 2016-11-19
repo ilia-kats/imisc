@@ -175,6 +175,8 @@ for plotting or \code{NULL} if this p-value is not to be plotted (e.g. if it is 
 significant). Can be a list of functions, in which case each element will apply to the
 corresponding plot if multiple data sets are plotted.}
 
+\item{signif.test.col}{color of p-value annotations.}
+
 \item{signif.test.lwd}{line width for p-value annotations. Can be a list, in which case the lwd
 will apply to the corresponding plot if multiple data sets are plotted.}
 

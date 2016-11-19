@@ -1,0 +1,1 @@
+[![Build Status](https://travis-ci.org/ilia-kats/imisc.svg?branch=master)](https://travis-ci.org/ilia-kats/imisc) [![codecov](https://codecov.io/gh/ilia-kats/imisc/branch/master/graph/badge.svg)](https://codecov.io/gh/ilia-kats/imisc)

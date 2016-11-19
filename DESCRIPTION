@@ -11,7 +11,7 @@ Imports:
     rlist,
     sm
 Suggests:
-    beeswarm, IRanges, magicaxis,
+    beeswarm, IRanges, S4Vectors, magicaxis,
     testthat, vdiffr
 License: GPL-2
 LazyData: true

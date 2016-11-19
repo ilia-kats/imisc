@@ -1,15 +1,17 @@
 #' @templateVar plottype beeswarm plot
 #' @templateVar additionaldesc Requires the \code{beeswarm} package.
 #' @templateVar featuresdesc At the moment, either \code{mean} or \code{median} can be plotted. Also, only one of \code{box}, \code{iqr}, \code{sd}, \code{sem}, \code{ci} can be plotted at the moment.
+#' @templateVar additionalparams
+#' \item{palpha}{opacity of the individual points}
+#' \item{bxplwd}{line width for the simplified boxplot}
+#' \item{bxpcols}{colors for the simplified boxplot}
+#' \item{...}{additional parameters passed to \code{\link[beeswarm]{beeswarm}}}
 #' @template plotgroups.-
-#' @param palpha opacity of the individual points
-#' @param bxplwd line width for the simplified boxplot
-#' @param bxpcols colors for the simplified boxplot
-#' @param ... additional parameters passed to \code{\link[beeswarm]{beeswarm}}
 #' @return Same as \code{\link[beeswarm]{beeswarm}}
 #' @seealso \code{\link[beeswarm]{beeswarm}}
 #' @export
 #' @importFrom rlist list.merge
+#' @importFrom graphics segments
 plotgroups.beeswarm <- list(
 plot=function(data, at, stats, colors, features, barwidth, palpha=1, bxplwd=par("lwd"), bxpcols=colors, ...)
 {

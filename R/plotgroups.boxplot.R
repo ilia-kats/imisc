@@ -1,8 +1,8 @@
 #' @templateVar plottype boxplot (extended with mean, standard deviation, and standard error of the mean)
-#' @template plotgroups.-
-#' @param bxppars additional parameters passed to \code{\link[graphics]{boxplot}} as
-#'        sig\code{pars} parameter
-#' @param ... additional parameters passed to \code{\link[graphics]{boxplot}} as \code{...}. Can also
+#' @templateVar additionalparams
+#' \item{bxppars}{additional parameters passed to \code{\link[graphics]{boxplot}} as
+#'        sig\code{pars} parameter}
+#' \item{...}{additional parameters passed to \code{\link[graphics]{boxplot}} as \code{...}. Can also
 #'        contain the following:
 #'        \describe{
 #'                  \item{meanlty, meanlwd, meancol, meanpch, meancex}{Mean line type, line width,
@@ -22,11 +22,13 @@
 #'                        of the mean whiskers}
 #'                  \item{cistaplelty, cistaplelwd, cistaplecol}{Staple (end of whisker) line type,
 #'                        width, and color (default: \code{"#EDA217"}) for confidence interval
-#'                        whiskers}}
+#'                        whiskers}}}
+#' @template plotgroups.-
 #' @return Same as \code{\link[graphics]{boxplot}}
 #' @seealso \code{\link[graphics]{boxplot}}
 #' @export
 #' @importFrom rlist list.merge
+#' @importFrom graphics boxplot segments points
 plotgroups.boxplot <- list(
 plot=function(data, at, stats, colors, features, barwidth, bxppars, ...)
 {
