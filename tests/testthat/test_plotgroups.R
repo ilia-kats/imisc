@@ -149,6 +149,7 @@ test_that('boxplot arguments', {
 })
 
 test_that('boxplot with swarm', {
+    set.seed(42)
     expect_doppelganger('boxplot swarm', function() {
         plotgroups(list(data, rev(data), data), names, colors, legend.text, plot.type=plotgroups.boxplot, ylab=ylab, features=list(c('median', 'box'), c('median', 'mean', 'ci', 'box', 'iqr', 'sem', 'sd'), c('median', 'box', 'iqr')), plot.fun.pars=list(swarm=TRUE, beeswarmpars=list(palpha=0.2)))
     })
