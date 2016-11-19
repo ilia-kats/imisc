@@ -36,7 +36,7 @@ plot=function(data, at, stats, colors, features, barwidth, bxppars, ...)
     if (is.null(bxppars$boxwex))
         bxppars$boxwex <- barwidth
     dots <- list(...)
-    pars <- list(notch=TRUE, las=1, notch.frac=0.9, outpch=NA,
+    pars <- list(notch=TRUE, notch.frac=0.9, outpch=NA,
                  meanlty=1, meanlwd=3*lwd.base, meancol="red", meanpch=NA, meancex=1,
                  sdwhisklty=1, sdwhisklwd=lwd.base, sdwhiskcol="black",
                  sdstaplelty=1, sdstaplelwd=lwd.base, sdstaplecol="black",
@@ -57,8 +57,10 @@ plot=function(data, at, stats, colors, features, barwidth, bxppars, ...)
         bxppars$whisklty <- "blank"
         bxppars$staplelty <- "blank"
     } else {
-        bxppars$whisklty <- "22"
-        bxppars$staplelty <- "22"
+        if (is.null(bxppars$whisklty))
+            bxppars$whisklty <- "22"
+        if (is.null(bxppars$staplelty))
+            bxppars$staplelty <- "22"
     }
 
     pars$pars <- bxppars

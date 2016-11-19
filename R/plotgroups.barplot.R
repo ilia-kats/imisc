@@ -9,7 +9,7 @@
 #' @export
 #' @importFrom rlist list.merge
 plotgroups.barplot <- list(
-plot=function(data, at, stats, colors, features, barwidth, whiskerswidth=barwidth, whiskerslwd=par("lwd"), whiskerscol="black", bordercol="black", ...)
+plot=function(data, at, stats, colors, features, barwidth, whiskerswidth=barwidth, whiskerslwd=par("lwd"), whiskerscol="black", whiskerslty=1, bordercol="black", ...)
 {
     bars <- threeparamsstats(stats, features)
     dots <- list(...)
@@ -19,11 +19,11 @@ plot=function(data, at, stats, colors, features, barwidth, whiskerswidth=barwidt
     do.call(rect, list.merge(pars, list(xleft=at - barwidth/2, ybottom=par("usr")[3], xright=at + barwidth/2, ytop=bars$m, col=colors, border=bordercol)))
 
     if (!is.null(bars$u) && !is.null(bars$l))
-        segments(at, bars$l, at, bars$u, col=whiskerscol, lend='butt', lwd=whiskerslwd)
+        segments(at, bars$l, at, bars$u, col=whiskerscol, lend='butt', lwd=whiskerslwd, lty=whiskerslty)
 
     for (b in bars[c("u", "l")]) {
         if (!is.null(b))
-            segments(at - whiskerswidth / 2, b, at + whiskerswidth / 2, b, col=whiskerscol, lend='butt', lwd=whiskerslwd)
+            segments(at - whiskerswidth / 2, b, at + whiskerswidth / 2, b, col=whiskerscol, lend='butt', lwd=whiskerslwd, lty=whiskerslty)
     }
     invisible(NULL)
 },
