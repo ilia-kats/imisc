@@ -3,6 +3,10 @@ r:
     - 3.1
     - bioc-release
 
+os:
+    -linux
+    -osx
+
 apt:
     sources:
       - debian-sid
