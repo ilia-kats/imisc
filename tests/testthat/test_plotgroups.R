@@ -33,6 +33,9 @@ test_that('no legend works', {
     expect_doppelganger('no legend double', function() {
         plotgroups(list(data, rev(data)), names, colors, NULL, plot.type=plot.type, ylab=ylab)
     })
+    expect_doppelganger('no legend double log', function() {
+        plotgroups(list(data, rev(data)), names, colors, NULL, plot.type=plot.type, ylab=ylab, log=c(TRUE, FALSE))
+    })
 })
 
 test_that('legend works', {
@@ -41,6 +44,9 @@ test_that('legend works', {
     })
     expect_doppelganger('legend double', function() {
         plotgroups(list(data, rev(data)), names, colors, legend.text, plot.type=plot.type, ylab=ylab)
+    })
+    expect_doppelganger('legend double log', function() {
+        plotgroups(list(data, rev(data)), names, colors, legend.text, plot.type=plot.type, ylab=ylab, log=c(TRUE, FALSE))
     })
 })
 
@@ -81,6 +87,9 @@ test_that('significance testing with legend', {
     expect_doppelganger('significance testing multi overlap', function() {
         plotgroups(list(data, rev(data), data), names, colors, legend.text, plot.type=plot.type, ylab=ylab, names.style='combinatorial', names.split=" ", names.pch='\u0394', signif.test=list(list(c(1,3), c(2,5), c(5, 8), c(3, 10)), list(c(1, 5), c(1, 2), c(2, 4)), NULL))
     })
+    expect_doppelganger('significance testing multi overlap log', function() {
+        plotgroups(list(data, rev(data), data), names, colors, legend.text, plot.type=plot.type, ylab=ylab, names.style='combinatorial', names.split=" ", names.pch='\u0394', signif.test=list(list(c(1,3), c(2,5), c(5, 8), c(3, 10)), list(c(1, 5), c(1, 2), c(2, 4)), NULL), log=c(TRUE, FALSE, TRUE))
+    })
 })
 
 test_that('significance testing without legend', {
@@ -92,6 +101,18 @@ test_that('significance testing without legend', {
     })
     expect_doppelganger('significance testing multi overlap w/o legend', function() {
         plotgroups(list(data, rev(data), data), names, colors, NULL, plot.type=plot.type, ylab=ylab, names.style='combinatorial', names.split=" ", names.pch='\u0394', signif.test=list(list(c(1,3), c(2,5), c(5, 8), c(3, 10)), list(c(1, 5), c(1, 2), c(2, 4)), NULL))
+    })
+    expect_doppelganger('significance testing multi overlap w/o legend log', function() {
+        plotgroups(list(data, rev(data), data), names, colors, NULL, plot.type=plot.type, ylab=ylab, names.style='combinatorial', names.split=" ", names.pch='\u0394', signif.test=list(list(c(1,3), c(2,5), c(5, 8), c(3, 10)), list(c(1, 5), c(1, 2), c(2, 4)), NULL), log=c(TRUE, FALSE, TRUE))
+    })
+})
+
+test_that('italicize', {
+    expect_doppelganger('italic combinatorial', function() {
+        plotgroups(data, names, colors, NULL, plot.type=plot.type, names.style='combinatorial', names.split=" ", names.pch='\u0394', names.italicize='')
+    })
+    expect_doppelganger('italic plain', function() {
+        plotgroups(data, names, colors, NULL, plot.type=plot.type, names.pch='\u0394', names.split=' ', names.italicize='1')
     })
 })
 
