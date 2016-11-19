@@ -30,7 +30,7 @@
 #' @importFrom rlist list.merge
 #' @importFrom graphics boxplot segments points
 plotgroups.boxplot <- list(
-plot=function(data, at, stats, colors, features, barwidth, bxppars, ...)
+plot=function(data, at, stats, colors, features, barwidth, bxppars, swarm=FALSE, swarmcols='black', beeswarmpars=NULL, ...)
 {
     if (missing(bxppars) || is.null(bxppars))
         bxppars <- list()
@@ -82,7 +82,7 @@ plot=function(data, at, stats, colors, features, barwidth, bxppars, ...)
         plotsd()
         havesd <- TRUE
     }
-    toreturn <- do.call(boxplot, list.merge(pars, list(x=data, at=at, xaxt="n", col=colors, yaxt='n', add=TRUE, range=stats$range)))
+    bxp.toreturn <- do.call(boxplot, list.merge(pars, list(x=data, at=at, xaxt="n", col=colors, yaxt='n', add=TRUE, range=stats$range)))
     if (!havesd) {
         plotsd()
         havesd <- TRUE
@@ -101,8 +101,29 @@ plot=function(data, at, stats, colors, features, barwidth, bxppars, ...)
         segments(at - bxppars$boxwex / 2, stats$cimin, at + bxppars$boxwex / 2, stats$cimin, lend='butt', lty=pars$cistaplelty, lwd=pars$cistaplelwd, col=pars$cistaplecol)
         segments(at, stats$cimax, 1:length(data), stats$cimin, lend='butt', lty=pars$ciwhisklty, lwd=pars$ciwhisklwd, col=pars$ciwhiskcol)
     }
-    invisible(toreturn)
+
+    if (swarm) {
+        args <- list(data=data, at=at, stats=stats, colors=swarmcols, features=NA, barwidth=barwidth)
+        if (!is.null(beeswarmpars) && length(beeswarmpars))
+            args <- list.merge(beeswarmpars, args)
+        swarm.toreturn <- do.call(plotgroups.beeswarm$plot, args)
+    } else {
+        swarm.toreturn <- NULL
+    }
+    invisible(list(boxplot=bxp.toreturn, beeswarm=swarm.toreturn))
 },
-ylim=function(...)NULL,
+ylim=function(data, stats, features, ...) {
+    dots <- list(...)
+    if (!is.null(dots$swarm)) {
+        swarm <- dots$swarm
+    } else {
+        swarm <- formals(plotgroups.boxplot$plot)$swarm
+    }
+    if (swarm)
+        do.call(plotgroups.beeswarm$ylim, c(list(data=data, stats=stats, features=NA), dots$beeswarmpars))
+    else {
+        NULL
+    }
+},
 features=allparamcheck
 )

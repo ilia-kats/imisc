@@ -643,7 +643,7 @@ plotgroups <- function(
             cylim <- NULL
         }
         if (is.null(cylim))
-            cylim <- plot.type[[cplot]]$ylim(data=data[[cplot]], stats=stats, features=features[[cplot]])
+            cylim <- do.call(plot.type[[cplot]]$ylim, c(list(data=data[[cplot]], stats=stats, features=features[[cplot]]), plot.fun.pars[[cplot]]))
         if (is.null(cylim)) {
             cylim <- c(Inf, 0)
             if ("median" %in% features[[cplot]]) {
