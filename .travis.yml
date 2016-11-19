@@ -17,7 +17,8 @@ matrix:
           brew_packages: cairo
           latex: false
     exclude:
-        - dist: precise
+        - os: linux
+          dist: precise
 
 r_github_packages:
     - jimhester/covr
