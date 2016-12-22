@@ -28,7 +28,7 @@ plot=function(data, at, stats, colors, features, barwidth, boxpars, boxcol="whit
     bxp.toreturn <- do.call(plotgroups.boxplot$plot, list.merge(boxpars, list(data=data, at=at, stats=stats, colors=boxcol, features=features, barwidth=boxwidth)))
     invisible(list(vioplot=vioplot.results, boxplot=bxp.toreturn))
 },
-ylim=function(data, ...)range(unlist(data)),
+ylim=function(data, ...)range(unlist(data), na.rm=TRUE),
 features=function(features)
 {
     if (!is.na(features) && length(features)) {

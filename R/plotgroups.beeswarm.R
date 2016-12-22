@@ -37,7 +37,7 @@ plot=function(data, at, stats, colors, features, barwidth, palpha=1, bxplwd=par(
     invisible(toreturn)
 },
 ylim=function(data, stats, features, ...) {
-    r <- range(c(unlist(data)))
+    r <- range(unlist(data), na.rm=TRUE)
     if (!is.na(features) && length(features)) {
         bars <- threeparamsstats(stats, features)
         r <- range(c(r, bars$u, bars$l, bars$m))
