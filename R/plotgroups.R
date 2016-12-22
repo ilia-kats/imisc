@@ -623,11 +623,11 @@ plotgroups <- function(
         emptyvec <- vector("numeric", length=ngroups)
         stats <- list(means=emptyvec, sds=emptyvec, sems=emptyvec, medians=emptyvec, boxmax=emptyvec, iqrmax=emptyvec, boxmin=emptyvec, iqrmin=emptyvec, cimin=emptyvec, cimax=emptyvec, range=range[cplot], conf.level=conf.level[cplot])
         for (i in 1:ngroups) {
-            ndata <- length(data[[cplot]][[i]])
-            stats$means[i] <- mean(data[[cplot]][[i]])
-            stats$sds[i] <- sd(data[[cplot]][[i]])
+            ndata <- length(data[[cplot]][[i]]) - length(which(is.na(data[[cplot]][[i]])))
+            stats$means[i] <- mean(data[[cplot]][[i]], na.rm=TRUE)
+            stats$sds[i] <- sd(data[[cplot]][[i]], na.rm=TRUE)
             stats$sems[i] <- stats$sds[i] / sqrt(ndata)
-            ci <- ci.fun[[cplot]](mean=stats$means[i], se=stats$se[i], ndata=ndata, conf.level=conf.level[cplot])
+            ci <- ci.fun[[cplot]](mean=stats$means[i], se=stats$sems[i], ndata=ndata, conf.level=conf.level[cplot])
             stats$cimin[i] <- ci[1]
             stats$cimax[i] <- ci[2]
             bstats <- boxplot.stats(data[[cplot]][[i]], coef=range[cplot], do.conf=F, do.out=F)$stats

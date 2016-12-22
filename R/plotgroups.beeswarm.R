@@ -40,7 +40,7 @@ ylim=function(data, stats, features, ...) {
     r <- range(unlist(data), na.rm=TRUE)
     if (!is.na(features) && length(features)) {
         bars <- threeparamsstats(stats, features)
-        r <- range(c(r, bars$u, bars$l, bars$m))
+        r <- range(c(r, bars$u, bars$l, bars$m), na.rm=TRUE)
     }
     r
 },
