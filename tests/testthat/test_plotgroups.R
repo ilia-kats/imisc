@@ -186,4 +186,7 @@ test_that('barplot', {
     expect_doppelganger('barplot with error bars', function() {
         plotgroups(data, names, colors, legend.text, plot.type=plotgroups.barplot, ylab=ylab, features=c('mean', 'ci'), plot.fun.pars=list(whiskerswidth=0.6, whiskerslwd=3, whiskerslty='21', bordercol=rep_len(c('red', 'yellow'), length(data))))
     })
+    expect_doppelganger('barplot on log scale', function() {
+        plotgroups(data, names, colors, legend.text, plot.type=plotgroups.barplot, ylab=ylab, features=c('mean', 'ci'), plot.fun.pars=list(whiskerswidth=0.6, whiskerslwd=3, whiskerslty='21', bordercol=rep_len(c('red', 'yellow'), length(data))), log=TRUE)
+    })
 })
