@@ -208,7 +208,11 @@ plotgroups.barplot <- function(data, at, stats, colors, ylim, features, barwidth
     pars <- list(names.arg=NULL)
     if (length(dots) > 0)
         pars <- list.merge(pars, dots)
-    do.call(rect, list.merge(pars, list(xleft=at - barwidth/2, ybottom=par("usr")[3], xright=at + barwidth/2, ytop=bars$m, col=colors, border=bordercol)))
+
+    ybottom <- par("usr")[3]
+    if (par("ylog"))
+        ybottom <- 10^ybottom
+    do.call(rect, list.merge(pars, list(xleft=at - barwidth/2, ybottom=ybottom, xright=at + barwidth/2, ytop=bars$m, col=colors, border=bordercol)))
 
     if (!is.null(bars$u) && !is.null(bars$l))
         segments(at, bars$l, at, bars$u, col=whiskerscol, lend='butt', lwd=whiskerslwd)
