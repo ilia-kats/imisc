@@ -823,7 +823,7 @@ plotgroups <- function(
                     ret
                 }, "magicaxis")
             }
-            do.call(magicaxis::magaxis, list.merge(pars, list(side=2, usepar=TRUE, minorn='auto', majorn=abs(ceiling(diff(cylim))))))
+            do.call(magicaxis::magaxis, list.merge(pars, list(side=2, usepar=TRUE, minorn='auto', majorn=abs(ceiling(diff(cylim))), family=par('family'))))
             assignInNamespace("maglab", maglab.old, "magicaxis")
         } else {
             # try to avoid axis ticks to close to the upper edge
