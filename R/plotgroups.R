@@ -374,23 +374,19 @@ plotgroups <- function(
 
     stopifnot(is.list(data))
     stopifnot(is.list(plot.fun.pars))
-    if (length(data) != length(names)) {
-        if (all(sapply(data, is.list))) {
-            nplots <- length(data)
-            if (is.null(ylab)) {
-                if (!is.null(names(data))) {
-                    ylab <- names(data)
-                } else {
-                    ylab <- deparse(substitute(data))
-                }
+    if (all(sapply(data, is.list))) {
+        nplots <- length(data)
+        if (is.null(ylab)) {
+            if (!is.null(names(data))) {
+                ylab <- names(data)
+            } else {
+                ylab <- deparse(substitute(data))
             }
-        } else {
-            stop("")
         }
     } else {
         if (is.null(ylab))
             ylab <- deparse(substitute(data))
-        data <- list(data)
+            data <- list(data)
         nplots <- 1
     }
     ngroups <- length(names)
