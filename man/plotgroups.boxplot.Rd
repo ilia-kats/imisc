@@ -15,6 +15,9 @@
 \item{barwidth}{width of the individual bars/boxes etc. as fraction of 1}
 \item{bxppars}{additional parameters passed to \code{\link[graphics]{boxplot}} as
        sig\code{pars} parameter}
+\item{swarm}{whether to overplot the boxplot with a beeswarm plot}
+\item{swarmcols}{color of the beeswarm points}
+\item{beeswarmpars}{additional parameters passed to \code{\link{plotgroups.beeswarm}}}
 \item{...}{additional parameters passed to \code{\link[graphics]{boxplot}} as \code{...}. Can also
        contain the following:
        \describe{
