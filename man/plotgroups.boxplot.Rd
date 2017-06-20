@@ -5,7 +5,7 @@
 \title{Plot several groups of repeated observations as a boxplot (extended with mean, standard deviation, and standard error of the mean).}
 \usage{
 plotgroups.boxplot(data, at, stats, colors, ylim, features, barwidth, bxppars,
-  ...)
+  swarm = FALSE, swarmcols = "black", beeswarmpars = NULL, ...)
 }
 \arguments{
 \item{data}{list, each element is a vector of replicates for one combination of parameters}
@@ -23,7 +23,10 @@ plotgroups.boxplot(data, at, stats, colors, ylim, features, barwidth, bxppars,
 \item{barwidth}{width of the individual bars/boxes etc. as fraction of 1}
 
 \item{bxppars}{additional parameters passed to \code{\link[graphics]{boxplot}} as
-sig\code{pars} parameter}
+       sig\code{pars} parameter
+\item{swarm}{whether to overplot the boxplot with a beeswarm plot}
+\item{swarmcols}{color of the beeswarm points}
+\item{beeswarmpars}{additional parameters passed to \code{\link{plotgroups.beeswarm}}}}
 
 \item{...}{additional parameters passed to \code{\link[graphics]{boxplot}} as \code{...}. Can also
 contain the following:
