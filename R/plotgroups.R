@@ -27,7 +27,7 @@
 #' @seealso \code{\link[graphics]{boxplot}}
 #' @export
 #' @importFrom rlist list.merge
-plotgroups.boxplot <- function(data, at, stats, colors, ylim, features, barwidth, bxppars, ...)
+plotgroups.boxplot <- function(data, at, stats, colors, ylim, features, barwidth, bxppars, swarm=FALSE, swarmcols='black', beeswarmpars=NULL, ...)
 {
     if (!missing(ylim))
         return(NULL)
@@ -79,7 +79,7 @@ plotgroups.boxplot <- function(data, at, stats, colors, ylim, features, barwidth
         plotsd()
         havesd <- TRUE
     }
-    toreturn <- do.call(boxplot, list.merge(pars, list(x=data, at=at, xaxt="n", col=colors, yaxt='n', add=TRUE, range=stats$range)))
+    bxp.toreturn <- do.call(boxplot, list.merge(pars, list(x=data, at=at, xaxt="n", col=colors, yaxt='n', add=TRUE, range=stats$range)))
     if (!havesd) {
         plotsd()
         havesd <- TRUE
@@ -98,7 +98,16 @@ plotgroups.boxplot <- function(data, at, stats, colors, ylim, features, barwidth
         segments(at - bxppars$boxwex / 2, stats$cimin, at + bxppars$boxwex / 2, stats$cimin, lend='butt', lty=pars$cistaplelty, lwd=pars$cistaplelwd, col=pars$cistaplecol)
         segments(at, stats$cimax, 1:length(data), stats$cimin, lend='butt', lty=pars$ciwhisklty, lwd=pars$ciwhisklwd, col=pars$ciwhiskcol)
     }
-    invisible(toreturn)
+
+    if (swarm) {
+        args <- list(data=data, at=at, stats=stats, colors=swarmcols, features=NA, barwidth=barwidth)
+        if (!is.null(beeswarmpars) && length(beeswarmpars))
+            args <- list.merge(beeswarmpars, args)
+        swarm.toreturn <- do.call(plotgroups.beeswarm, args)
+    } else {
+        swarm.toreturn <- NULL
+    }
+    invisible(list(boxplot=bxp.toreturn, beeswarm=swarm.toreturn))
 }
 
 threeparamsstats <- function(stats, features)
