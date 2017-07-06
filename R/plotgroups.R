@@ -78,7 +78,7 @@ plotgroups.boxplot <- function(data, at, stats, colors, ylim, features, barwidth
     }
 
     havesd <- FALSE
-    if (max(stats$means + stats$sds) > max(stats$boxmax) && min(stats$means - stats$sds) < min(stats$boxmin)) {
+    if (max(stats$means + stats$sds, na.rm=TRUE) > max(stats$boxmax, na.rm=TRUE) && min(stats$means - stats$sds, na.rm=TRUE) < min(stats$boxmin, na.rm=TRUE)) {
         plotsd()
         havesd <- TRUE
     }
