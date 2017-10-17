@@ -695,7 +695,7 @@ plotgroups <- function(
         names(ycoords) <- uniquegenes
 
         legend.height <- max(sum(heights), strheight(paste0(uniquegenes, collapse="\n"), units="inches", cex=cex.xlab)) + names.margin * lineheight
-        legend.width <- max(strwidth(uniquegenes, units="inches"))
+        legend.width <- max(strwidth(uniquegenes, units="inches", cex=cex.xlab))
 
         layout(matrix(c(2:(nplots + 1), 1), byrow=TRUE), heights=c(rep(1, nplots), lcm(cm(legend.height))))
         par(cex=origcex)
