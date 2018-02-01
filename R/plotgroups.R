@@ -418,7 +418,7 @@ plotgroups <- function(
     haveMagicAxis <- requireNamespace("magicaxis", quietly = TRUE)
 
     if (!is.null(legend.text)) {
-        grouplength <- rle(legend.text)$lengths
+        grouplength <- rle(as.character(legend.text))$lengths
     } else {
         grouplength <- ngroups
     }
@@ -719,7 +719,7 @@ plotgroups <- function(
         if (cplot == 1) {
             if (!is.null(legend.text)) {
                 if (is.null(legendmargin))
-                    legendmargin <- max(max(strheight(legend.text, units="inches", cex=par("cex"))), lineheight)
+                    legendmargin <- max(max(strheight(legend.text, units="inches", cex=par("cex"))) + 2*signifheight, lineheight)
                 if (!ylim.extended)
                     legendmargin <- legendmargin + signifheight
             } else if (!is.null(signif.test[[cplot]]) && !ylim.extended) {
@@ -851,7 +851,7 @@ plotgroups <- function(
             segments(segs.begin, legendbase, segs.end, legendbase, lwd=legend.lwd, col=cols)
 
             mids <- (segs.end - segs.begin) / 2 + segs.begin
-            do.call(text, c(list(x=mids, y=legendbase + signifheight, labels=unique(legend.text), adj=c(0.5, 0), col=cols), legend.pars))
+            do.call(text, c(list(x=mids, y=legendbase + signifheight, labels=legend.text[cumsum(grouplength)], adj=c(0.5, 0), col=cols), legend.pars))
         }
         if (!is.null(signif.test[[cplot]])) {
             signif.test.ret <- vector("list", length(signif.test[[cplot]]))
