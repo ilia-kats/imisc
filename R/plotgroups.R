@@ -429,9 +429,12 @@ plotgroups <- function(
     xcoords <- 1:ngroups + rep(cumsum(c(0, rep(groups.spacing, times=length(grouplength) - 1))), times=grouplength)
     xlim <- c(0.5 - 0.5 * groups.spacing, max(xcoords) + 0.5 + 0.5 * groups.spacing)
 
-    pars <- list(oma=c(0,0,0,0), mar=c(0, 3, 0.2, 0.2), las=1, mgp=c(2, 0.5, 0), ljoin="mitre", lend="square")
+    mar <- par('mar')
+    mar[1] <- 0
+    oma <- c(0, 0, mar[3:4])
     if (!is.null(main))
-        pars$oma <- c(0, 0, 2, 0)
+        oma[3] <- max(oma[3], 2)
+    pars <- list(oma=oma, mar=c(0, 0, 0, 0), las=1, mgp=c(2, 0.5, 0), ljoin="mitre", lend="square")
     if (length(dots) > 0)
         pars <- list.merge(pars, dots)
     do.call(par, pars)
@@ -607,10 +610,9 @@ plotgroups <- function(
             features[[cplot]] <- NA
         features[[cplot]] <- plot.type[[cplot]]$features(features[[cplot]])
         cmai <- mai
+        cmai[1] <- 0
         if (cplot > 1 && cplot < nplots) {
-            cmai[c(1,3)] <- 0
-        } else if (cplot == 1 && cplot < nplots) {
-            cmai[1] <- 0
+            cmai[3] <- 0
         } else if (cplot == nplots && cplot > 1) {
             cmai[3] <- 0
         }
@@ -873,6 +875,6 @@ plotgroups <- function(
         }
         allplotfunrets <- plotfunret
     }
-    toreturn <- list(stats=allstats, features=features, plotfun=allplotfunrets, signiftest=allsigniftestrets, annotation.height=legend.height, annotation.width=legend.width, legendmargin=legendmargin)
+    toreturn <- list(stats=allstats, features=features, plotfun=allplotfunrets, signiftest=allsigniftestrets, plot.height=par('pin')[2],  annotation.height=legend.height, annotation.width=legend.width, legendmargin=legendmargin)
     invisible(toreturn)
 }
