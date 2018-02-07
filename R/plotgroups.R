@@ -2,9 +2,9 @@
 #' @template plotgroups.-
 #' @param bxppars additional parameters passed to \code{\link[graphics]{boxplot}} as
 #'        sig\code{pars} parameter
-#' \item{swarm}{whether to overplot the boxplot with a beeswarm plot}
-#' \item{swarmcols}{color of the beeswarm points}
-#' \item{beeswarmpars}{additional parameters passed to \code{\link{plotgroups.beeswarm}}}
+#' @param swarm whether to overplot the boxplot with a beeswarm plot
+#' @param swarmcols color of the beeswarm points
+#' @param beeswarmpars additional parameters passed to \code{\link{plotgroups.beeswarm}}
 #' @param ... additional parameters passed to \code{\link[graphics]{boxplot}} as \code{...}. Can also
 #'        contain the following:
 #'        \describe{
