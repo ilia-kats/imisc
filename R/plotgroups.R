@@ -430,11 +430,12 @@ plotgroups <- function(
     xlim <- c(0.5 - 0.5 * groups.spacing, max(xcoords) + 0.5 + 0.5 * groups.spacing)
 
     mar <- par('mar')
-    mar[1] <- 0
-    oma <- c(0, 0, mar[3:4])
+    oma <- par('oma')
     if (!is.null(main))
-        oma[3] <- max(oma[3], 2)
-    pars <- list(oma=oma, mar=c(0, 0, 0, 0), las=1, mgp=c(2, 0.5, 0), ljoin="mitre", lend="square")
+        mar[3] <- oma[3] + mar[3]
+    oma[3] <- mar[3]
+    mar[c(1, 3)] <- 0
+    pars <- list(mar=mar, oma=oma, las=1, mgp=c(2, 0.5, 0), ljoin="mitre", lend="square")
     if (length(dots) > 0)
         pars <- list.merge(pars, dots)
     do.call(par, pars)
