@@ -538,14 +538,15 @@ plotgroups <- function(
         }, names.mapped, xcoords)
 
         labels <- uniquegenes
+        fonts <- 1
         if (!is.null(names.italicize)) {
             if (!is.na(names.italicize)) {
-                labels <- sapply(labels, function(x) {if (grepl(names.italicize, x, fixed=TRUE)) {x <- as.expression(substitute(italic(x), list(x=x)))}; x}, USE.NAMES=FALSE)
+                fonts <- ifelse(grepl(names.italicize, labels, fixed=TRUE), 3, 1)
             } else {
-                labels <- sapply(labels, function(x)as.expression(substitute(italic(x), list(x=x))), USE.NAMES=FALSE)
+                fonts <- 3
             }
         }
-        text(0.5, ycoords, labels=labels, adj=c(1, 0), cex=cex.xlab, xpd=NA)
+        text(0.5, ycoords, labels=labels, adj=c(1, 0), cex=cex.xlab, xpd=NA, font=fonts)
 
         plt <- par("plt")
         plt[1] <- max(0, plt[1] - max(strwidth(uniquegenes, units="figure", cex=cex.xlab)))
