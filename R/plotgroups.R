@@ -809,10 +809,10 @@ plotgroups <- function(
         }
 
         if (!is.null(extrafun.before[[cplot]]))
-            extrafun.before[[cplot]](data[[cplot]], xcoords, stats, colors, features, barwidth)
+            extrafun.before[[cplot]](data=data[[cplot]], at=xcoords, stats=stats, colors=colors, features=features, barwidth=barwidth)
         plotfunret <- do.call(plot.type[[cplot]]$plot, c(list(data=data[[cplot]], at=xcoords, stats=allstats[[cplot]], colors=colors, features=features[[cplot]], barwidth=barwidth), plot.fun.pars[[cplot]]))
         if (!is.null(extrafun.after[[cplot]]))
-            extrafun.after[[cplot]](data[[cplot]], xcoords, stats, colors, features, barwidth)
+            extrafun.after[[cplot]](data=data[[cplot]], at=xcoords, stats=stats, colors=colors, features=features, barwidth=barwidth)
 
         if (log[cplot] && haveMagicAxis) {
             maglab.old <- magicaxis::maglab
