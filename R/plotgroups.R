@@ -440,8 +440,6 @@ plotgroups <- function(
         pars <- list.merge(pars, dots)
     do.call(par, pars)
 
-    if (grepl('cairo', names(dev.cur()), ignore.case=TRUE))
-        plot.new() # have to do this here, otherwise strwidth on cairo devices will crash
     lwd.base <- par("lwd")
     if (is.null(legend.lwd))
         legend.lwd <- lwd.base
