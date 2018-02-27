@@ -13,8 +13,6 @@
 \item{colors}{colors for plotting}
 \item{features}{the features to plot. }
 \item{barwidth}{width of the individual bars/boxes etc. as fraction of 1}
-\item{bxppars}{additional parameters passed to \code{\link[graphics]{boxplot}} as
-       sig\code{pars} parameter}
 \item{swarm}{whether to overplot the boxplot with a beeswarm plot}
 \item{swarmcols}{color of the beeswarm points}
 \item{beeswarmpars}{additional parameters passed to \code{\link{plotgroups.beeswarm}}}
@@ -28,16 +26,16 @@
                        default lwd and \code{meancol} defaults to \code{"red"}}
                  \item{sdwhisklty, sdwhisklwd, sdwhiskcol}{Whisker line type(default:
                        \code{"solid"}), width, and color for standard deviation whiskers.}
-                 \item{sdstaplelty, sdstaplelwd, sdstaplecol}{Staple (end of whisker) line type,
-                       width, and color for standard deviation whiskers}
+                 \item{sdstaplelty, sdstaplelwd, sdstaplecol, sdstaplewex}{Staple (end of whisker) line type,
+                       width, color (default: black), and length of standard deviation whiskers}
                  \item{semwhisklty, semwhisklwd, semwhiskcol}{Whisker line type(default:
                        \code{"solid"}), width, and color (default: \code{"#EDA217"})
-                       for standard error of the mean whiskers.}
-                 \item{semstaplelty, semstaplelwd, semstaplecol}{Staple (end of whisker) line type,
-                       width, and color (default: \code{"#090E97"}) for standard error
+                       of standard error of the mean whiskers.}
+                 \item{semstaplelty, semstaplelwd, semstaplecol, semstaplewex}{Staple (end of whisker) line type,
+                       width, color (default: \code{"#090E97"}), and length of standard error
                        of the mean whiskers}
-                 \item{cistaplelty, cistaplelwd, cistaplecol}{Staple (end of whisker) line type,
-                       width, and color (default: \code{"#EDA217"}) for confidence interval
+                 \item{cistaplelty, cistaplelwd, cistaplecol, cistaplewex}{Staple (end of whisker) line type,
+                       width, color (default: \code{"#EDA217"}), and length of confidence interval
                        whiskers}}}
 }}
 \usage{

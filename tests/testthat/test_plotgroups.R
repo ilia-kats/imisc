@@ -144,7 +144,7 @@ test_that('custom significance text', {
 
 test_that('boxplot arguments', {
     expect_doppelganger('boxplot arguments', function() {
-        plotgroups(list(data, rev(data), data), names, colors, legend.text, plot.type=plotgroups.boxplot, ylab=ylab, features=list(c('median', 'box'), c('median', 'mean', 'ci', 'box', 'iqr', 'sem', 'sd'), c('median', 'box', 'iqr')), plot.fun.pars=list(list(notch=FALSE, medpch=19, medcol='red'), list(meanpch=19, semwhisklty=1, semstaplecol='orange', border='darkgreen'), list(bxppars=list(whisklty=1, staplelty=1))))
+        plotgroups(list(data, rev(data), data), names, colors, legend.text, plot.type=plotgroups.boxplot, ylab=ylab, features=list(c('median', 'box'), c('median', 'mean', 'ci', 'box', 'iqr', 'sem', 'sd'), c('median', 'box', 'iqr')), plot.fun.pars=list(list(notch=FALSE, medpch=19, medcol='red'), list(meanpch=19, semwhisklty=1, semstaplecol='orange', border='darkgreen'), list(whisklty=1, staplelty=1)))
     })
 })
 
