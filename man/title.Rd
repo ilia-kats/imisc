@@ -29,7 +29,7 @@ if the option is not set, \code{par('mgp')[1]}.}
 \item{ylab.line}{Placement of the Y axis label in lines. Defaults to \code{getOption('imisc.mgp.xlab')} or,
 if the option is not set, \code{par('mgp')[1]}.}
 
-\item{use.default.line}{Use \code{\link[graphics]{title}} defaults instead of code{getOption('imisc.mgp')},
+\item{use.default.line}{Use \code{\link[graphics]{title}} defaults instead of \code{getOption('imisc.mgp')},
 even if the options are set.}
 
 \item{...}{Additional parameters passed to \code{\link[graphics]{title}}}
