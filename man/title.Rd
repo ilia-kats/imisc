@@ -39,4 +39,3 @@ This function can be used to add labels to a plot. Its main difference to \code{
 is that it allows to specify a different drawing position for each annotation. The defaults are the same
 as for \code{\link[graphics]{title}}, but can be changed by a call to \code{\link[base]{options}}.
 }
-

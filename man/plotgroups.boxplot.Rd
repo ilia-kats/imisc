@@ -52,9 +52,8 @@ This is intended to be called from \code{\link{plotgroups}}.
 
 \code{\link[graphics]{boxplot}}
 
-Other plotgroups.plotting.functions: \code{\link{plotgroups.barplot}},
+Other plotgroups plotting functions: \code{\link{plotgroups.barplot}},
   \code{\link{plotgroups.beeswarm}},
   \code{\link{plotgroups.vioplot}}
 }
 \keyword{datasets}
-

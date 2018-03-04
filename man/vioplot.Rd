@@ -60,12 +60,6 @@ vioplot(x, col="tomato", horizontal=TRUE, at=-4, add=TRUE,lty=2, rectCol="gray")
 vioplot(y, col="cyan", horizontal=FALSE, at=-4, add=TRUE,lty=2)
 
 }
-\author{
-Daniel Adler \email{dadler@uni-goettingen.de},
-        Romain Francois \email{francoisromain@free.fr} ; \url{http://francoisromain.free.fr} :
-                        horizontal violins and additional graphical parameters,
-        Ilia Kats \email{ilia-kats@gmx.net}
-}
 \references{
 Hintze, J. L. and R. D. Nelson (1998).  \emph{Violin plots: a box plot-density trace
             synergism.}  The American Statistician, 52(2):181-4.
@@ -73,5 +67,10 @@ Hintze, J. L. and R. D. Nelson (1998).  \emph{Violin plots: a box plot-density t
 \seealso{
 \code{\link{boxplot}}, \code{\link[sm]{sm.density}}
 }
+\author{
+Daniel Adler \email{dadler@uni-goettingen.de},
+        Romain Francois \email{francoisromain@free.fr} ; \url{http://francoisromain.free.fr} :
+                        horizontal violins and additional graphical parameters,
+        Ilia Kats \email{ilia-kats@gmx.net}
+}
 \keyword{hplot}
-

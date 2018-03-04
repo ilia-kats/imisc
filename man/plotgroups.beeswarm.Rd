@@ -32,9 +32,8 @@ This is intended to be called from \code{\link{plotgroups}}. Requires the \code{
 
 \code{\link[beeswarm]{beeswarm}}
 
-Other plotgroups.plotting.functions: \code{\link{plotgroups.barplot}},
+Other plotgroups plotting functions: \code{\link{plotgroups.barplot}},
   \code{\link{plotgroups.boxplot}},
   \code{\link{plotgroups.vioplot}}
 }
 \keyword{datasets}
-

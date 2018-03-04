@@ -34,9 +34,8 @@ This is intended to be called from \code{\link{plotgroups}}. Requires the \code{
 
 \code{\link[vioplot]{vioplot}}
 
-Other plotgroups.plotting.functions: \code{\link{plotgroups.barplot}},
+Other plotgroups plotting functions: \code{\link{plotgroups.barplot}},
   \code{\link{plotgroups.beeswarm}},
   \code{\link{plotgroups.boxplot}}
 }
 \keyword{datasets}
-

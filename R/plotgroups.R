@@ -247,7 +247,7 @@ plotgroups.ci <- function(data, mean, se, ndata, conf.level=0.95) {
 #'                  \item{stats}{summary statistics of the data.}
 #'                  \item{features}{Character vector of features actually plotted.}
 #'                  \item{plotfun}{Return value of \code{plot.type$plot}}
-#'                  \item{xcoords}{X coordinates of the data.}
+#'                  \item{at}{X coordinates of the data.}
 #'                  \item{annotation.height}{Height of the annotation in inches.}
 #'                  \item{annotation.width}{Width of the annotation in inches. If
 #'                      \code{names.style='combinatorial'} this is the width of the left margin.}
@@ -875,6 +875,6 @@ plotgroups <- function(
         }
         allplotfunrets <- plotfunret
     }
-    toreturn <- list(stats=allstats, features=features, plotfun=allplotfunrets, signiftest=allsigniftestrets, plot.height=par('pin')[2],  annotation.height=legend.height, annotation.width=legend.width, legendmargin=legendmargin)
+    toreturn <- list(stats=allstats, features=features, plotfun=allplotfunrets, signiftest=allsigniftestrets, plot.height=par('pin')[2],  annotation.height=legend.height, annotation.width=legend.width, legendmargin=legendmargin, at=xcoords)
     invisible(toreturn)
 }

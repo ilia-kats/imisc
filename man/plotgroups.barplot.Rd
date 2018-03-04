@@ -28,9 +28,8 @@ This is intended to be called from \code{\link{plotgroups}}.
 \seealso{
 \code{\link{plotgroups}}
 
-Other plotgroups.plotting.functions: \code{\link{plotgroups.beeswarm}},
+Other plotgroups plotting functions: \code{\link{plotgroups.beeswarm}},
   \code{\link{plotgroups.boxplot}},
   \code{\link{plotgroups.vioplot}}
 }
 \keyword{datasets}
-

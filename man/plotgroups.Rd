@@ -201,7 +201,7 @@ list with the following components:
                  \item{stats}{summary statistics of the data.}
                  \item{features}{Character vector of features actually plotted.}
                  \item{plotfun}{Return value of \code{plot.type$plot}}
-                 \item{xcoords}{X coordinates of the data.}
+                 \item{at}{X coordinates of the data.}
                  \item{annotation.height}{Height of the annotation in inches.}
                  \item{annotation.width}{Width of the annotation in inches. If
                      \code{names.style='combinatorial'} this is the width of the left margin.}
@@ -320,4 +320,3 @@ plotgroups(list(data, rev(data)), names, colors, legend.text,names.style='combin
            c("median", "box")), plot.type=list(plotgroups.boxplot, plotgroups.beeswarm),
            signif.test=list(NULL,list(c(1,3), c(2,5), c(5,8), c(3,10))))
 }
-
