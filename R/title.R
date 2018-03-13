@@ -8,13 +8,13 @@
 #' @param sub Plot subtitle.
 #' @param xlab X axis label.
 #' @param ylab Y axis label.
-#' @param main.line Placement of the main title in lines. Defaults to \code{getOption('imisc.mgp.main')} or,
+#' @param main.line The margin line for the main title. Defaults to \code{getOption('imisc.mgp.main')} or,
 #'                  if the option is not set, 3.
-#' @param sub.line Placement of the main title in lines. Defaults to \code{getOption('imisc.mgp.sub')} or,
+#' @param sub.line The margin line for the sub-title. Defaults to \code{getOption('imisc.mgp.sub')} or,
 #'                  if the option is not set, \code{par('mgp')[1] + 1}.
-#' @param xlab.line Placement of the X axis label in lines. Defaults to \code{getOption('imisc.mgp.xlab')} or,
+#' @param xlab.line The margin line for the X axis label. Defaults to \code{getOption('imisc.mgp.xlab')} or,
 #'                  if the option is not set, \code{par('mgp')[1]}.
-#' @param ylab.line Placement of the Y axis label in lines. Defaults to \code{getOption('imisc.mgp.xlab')} or,
+#' @param ylab.line The margin line for the Y axis label. Defaults to \code{getOption('imisc.mgp.xlab')} or,
 #'                  if the option is not set, \code{par('mgp')[1]}.
 #' @param use.default.line Use \code{\link[graphics]{title}} defaults instead of \code{getOption('imisc.mgp')},
 #'                  even if the options are set.

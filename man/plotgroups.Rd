@@ -14,7 +14,7 @@ plotgroups(data, names, colors = NULL, legend.text = NULL,
   ci.fun = plotgroups.ci, cex.xlab = 1, ylim = NULL,
   legendmargin = NULL, plot.type = plotgroups.boxplot,
   plot.fun.pars = list(), barwidth = 0.8, main = NULL, ylab = NULL,
-  signif.test = NULL, signif.test.fun = t.test,
+  ylab.line = NULL, signif.test = NULL, signif.test.fun = t.test,
   signif.test.text = plotgroups.pval, signif.test.col = "black",
   signif.test.lwd = legend.lwd, signif.test.pars = legend.pars,
   extrafun.before = NULL, extrafun.after = NULL, ...)
@@ -159,6 +159,8 @@ Can be a list of lists, in which case the elements will apply to the correspondi
 \item{main}{main title}
 
 \item{ylab}{Y axis label. Will be recycled to the number of plots.}
+
+\item{ylab.line}{The margin line for the Y axis label.}
 
 \item{signif.test}{list of 2-element integer vectors giving the elements of \code{data} to be
 tested for significant differences. Can be a list of lists, in which case each element

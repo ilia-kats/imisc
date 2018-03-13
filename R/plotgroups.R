@@ -225,6 +225,7 @@ plotgroups.pval <- function(p) {
 #' @param barwidth width of the individual bars/boxes etc. as fraction of 1
 #' @param main main title
 #' @param ylab Y axis label. Will be recycled to the number of plots.
+#' @param ylab.line The margin line for the Y axis label. 
 #' @param signif.test list of 2-element integer vectors giving the elements of \code{data} to be
 #'        tested for significant differences. Can be a list of lists, in which case each element
 #'        will apply to the corresponding plot if multiple data sets are plotted.
@@ -367,6 +368,7 @@ plotgroups <- function(
                         barwidth=0.8,
                         main=NULL,
                         ylab=NULL,
+                        ylab.line=NULL,
                         signif.test=NULL,
                         signif.test.fun=t.test,
                         signif.test.text=plotgroups.pval,
@@ -843,7 +845,7 @@ plotgroups <- function(
             do.call(axis, list.merge(pars, list(side=2, at=ticks, lwd=par('lwd'), lwd.ticks=par('lwd'))))
         }
 
-        title(ylab=ylab[cplot])
+        title(ylab=ylab[cplot], ylab.line=ylab.line)
         do.call(box, pars)
 
         if (log[cplot]) {

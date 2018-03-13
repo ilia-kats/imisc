@@ -17,16 +17,16 @@ title(main = NULL, sub = NULL, xlab = NULL, ylab = NULL,
 
 \item{ylab}{Y axis label.}
 
-\item{main.line}{Placement of the main title in lines. Defaults to \code{getOption('imisc.mgp.main')} or,
+\item{main.line}{The margin line for the main title. Defaults to \code{getOption('imisc.mgp.main')} or,
 if the option is not set, 3.}
 
-\item{sub.line}{Placement of the main title in lines. Defaults to \code{getOption('imisc.mgp.sub')} or,
+\item{sub.line}{The margin line for the sub-title. Defaults to \code{getOption('imisc.mgp.sub')} or,
 if the option is not set, \code{par('mgp')[1] + 1}.}
 
-\item{xlab.line}{Placement of the X axis label in lines. Defaults to \code{getOption('imisc.mgp.xlab')} or,
+\item{xlab.line}{The margin line for the X axis label. Defaults to \code{getOption('imisc.mgp.xlab')} or,
 if the option is not set, \code{par('mgp')[1]}.}
 
-\item{ylab.line}{Placement of the Y axis label in lines. Defaults to \code{getOption('imisc.mgp.xlab')} or,
+\item{ylab.line}{The margin line for the Y axis label. Defaults to \code{getOption('imisc.mgp.xlab')} or,
 if the option is not set, \code{par('mgp')[1]}.}
 
 \item{use.default.line}{Use \code{\link[graphics]{title}} defaults instead of \code{getOption('imisc.mgp')},
