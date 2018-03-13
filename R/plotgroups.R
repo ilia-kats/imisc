@@ -64,6 +64,14 @@ plotgroups.ci <- function(data, mean, se, ndata, conf.level=0.95) {
     c(mean - Q * se, mean + Q * se)
 }
 
+plotgroups.pval <- function(p) {
+    if (p < .Machine$double.eps) {
+        sprintf('p < %.3g', .Machine$double.eps)#paste0("p<", formatC(.Machine$double.eps, digits=3, format="g"))
+    } else {
+        sprintf('p = %.3g', p)#paste0('p=', formatC(p, digits=3, format="g"))
+    }
+}
+
 #' Plot several groups of repeated observations.
 #'
 #' Plot several groups of repeated observations, e.g. abundance/half-life of several
@@ -361,7 +369,7 @@ plotgroups <- function(
                         ylab=NULL,
                         signif.test=NULL,
                         signif.test.fun=t.test,
-                        signif.test.text=function(p)paste0("p=", formatC(p, digits=3, format="g")),
+                        signif.test.text=plotgroups.pval,
                         signif.test.col="black",
                         signif.test.lwd=legend.lwd,
                         signif.test.pars=legend.pars,
@@ -867,7 +875,11 @@ plotgroups <- function(
                     mid <- (end - begin) / 2 + begin
                     base <- signifbase + signiflines[i] * lineheight
                     lines(c(begin, begin, end, end), c(base - signifheight, base, base, base - signifheight), lwd=signif.test.lwd[[cplot]], col=signif.test.col[[cplot]])
-                    do.call(text, c(list(x=mid, y=base + 0.2 * lineheight, labels=label, adj=c(0.5, 0), col=signif.test.col[[cplot]]), signif.test.pars[[cplot]]))
+                    
+                    tpars <- list(x=mid, y=base + 0.2 * lineheight, labels=label, adj=c(0.5, 0), col=signif.test.col[[cplot]])
+                    if (!is.null(signif.test.pars[[cplot]]) && length(signif.test.pars[[cplot]]))
+                        tpars <- list.merge(tpars, signif.test.pars[[cplot]])
+                    do.call(text, tpars)
                 }
                 signif.test.ret[[i]]$label <- label
             }

@@ -15,10 +15,9 @@ plotgroups(data, names, colors = NULL, legend.text = NULL,
   legendmargin = NULL, plot.type = plotgroups.boxplot,
   plot.fun.pars = list(), barwidth = 0.8, main = NULL, ylab = NULL,
   signif.test = NULL, signif.test.fun = t.test,
-  signif.test.text = function(p) paste0("p=", formatC(p, digits = 3, format =
-  "g")), signif.test.col = "black", signif.test.lwd = legend.lwd,
-  signif.test.pars = legend.pars, extrafun.before = NULL,
-  extrafun.after = NULL, ...)
+  signif.test.text = plotgroups.pval, signif.test.col = "black",
+  signif.test.lwd = legend.lwd, signif.test.pars = legend.pars,
+  extrafun.before = NULL, extrafun.after = NULL, ...)
 }
 \arguments{
 \item{data}{list, each element is a vector of replicates for one combination of parameters, or
