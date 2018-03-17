@@ -56,7 +56,7 @@ plotgroups.ci <- function(data, mean, se, ndata, conf.level=0.95) {
     if (missing(data) && (missing(mean) || missing(se) || missing(ndata)))
         stop("need either the data set or mean and standard error estimates", call.=TRUE)
     if (!missing(data)) {
-        mean <- mean(data)
+        mean <- base::mean(data)
         ndata <- length(data)
         se <- sd(data) / sqrt(ndata)
     }
