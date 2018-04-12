@@ -56,7 +56,7 @@ plotgroups.ci <- function(data, mean, se, ndata, conf.level=0.95) {
     if (missing(data) && (missing(mean) || missing(se) || missing(ndata)))
         stop("need either the data set or mean and standard error estimates", call.=TRUE)
     if (!missing(data)) {
-        mean <- mean(data)
+        mean <- base::mean(data)
         ndata <- length(data)
         se <- sd(data) / sqrt(ndata)
     }
@@ -439,15 +439,25 @@ plotgroups <- function(
     xcoords <- 1:ngroups + rep(cumsum(c(0, rep(groups.spacing, times=length(grouplength) - 1))), times=grouplength)
     xlim <- c(0.5 - 0.5 * groups.spacing, max(xcoords) + 0.5 + 0.5 * groups.spacing)
 
-    mar <- par('mar')
-    oma <- par('oma')
+    pars <- list(las=1, mgp=c(2, 0.5, 0), ljoin="mitre", lend="square")
+    if (length(dots) > 0)
+        pars <- list.merge(pars, dots)
+
+    mar <- pars$mar
+    if (is.null(mar)) {
+        mar <- par('mar')
+    }
+    oma <- pars$oma
+    if (is.null(oma)) {
+        oma <- par('oma')
+    }
     if (!is.null(main))
         mar[3] <- oma[3] + mar[3]
     oma[3] <- mar[3]
     mar[c(1, 3)] <- 0
-    pars <- list(mar=mar, oma=oma, las=1, mgp=c(2, 0.5, 0), ljoin="mitre", lend="square")
-    if (length(dots) > 0)
-        pars <- list.merge(pars, dots)
+    pars$mar <- mar
+    pars$oma <- oma
+
     do.call(par, pars)
 
     lwd.base <- par("lwd")
